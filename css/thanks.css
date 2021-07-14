@@ -1,7 +1,8 @@
 /* MONTSERRAT FONTS */
+
 @font-face {
-	font-family: montserratReg;
-	src: url(../fonts/Montserrat/Montserrat-Regular.ttf);
+	font-family: montserratBlack;
+	src: url(../fonts/Montserrat/Montserrat-Black.ttf);
 }
 
 @font-face {
@@ -20,8 +21,8 @@
 }
 
 @font-face {
-	font-family: montserratBlack;
-	src: url(../fonts/Montserrat/Montserrat-Black.ttf);
+	font-family: montserratReg;
+	src: url(../fonts/Montserrat/Montserrat-Regular.ttf);
 }
 
 /* PLAYFAIR FONTS */
@@ -42,7 +43,7 @@
 }
 
 @font-face {
-	font-family: playfairSemiBoldItalic;
+	font-family: playfairBoldItalic;
 	src: url(../fonts/Playfair/semiboldi.ttf);
 }
 
@@ -87,33 +88,34 @@
 
 * {
 	margin: 0;
-}
-
-body {
-	background-color: #E3E3E3;
+	padding: 0;
 }
 
 a {
 	text-decoration-line: none;
 	text-decoration: none;
+	text-decoration-color: none;
 	text-decoration-style: none;
 }
 
 /* NAVIGATION BAR */
 
 nav {
-	font-family: playfairItalic;
-	padding-top: 1vw;
-	text-align: center;
 	color: white;
+	font-family: playfairItalic;
+	padding-top: 1rem;
+	text-align: center;
 	animation-name: fadeInTop;
 	animation-duration: 2s;
 	animation-iteration-count: 1;
+	text-align: center;
+	color: white;
+	z-index: 1;
 }
 
 nav a {
-	padding: 4vw;
-	font-size: 3vw;
+	padding: 3.5rem;
+	font-size: 30px;
 	color: white;
 	transition: 1s;
 }
@@ -121,7 +123,6 @@ nav a {
 nav a:hover {
 	font-style: italic;
 	text-decoration-line: overline;
-	color: #e3e3e3;
 }
 
 .active {
@@ -130,136 +131,66 @@ nav a:hover {
 
 @keyframes fadeInTop {
 	0% {
-		transform: translateY(-70px);
+		transform: translateY(-60px);
 	}
 
 	30% {
-		transform: translateY(-70px);
+		transform: translateY(-60px);
 	}
 
 	100% {
 		transform: translateY(0px);
 	}
 }
-
 
 /* HOME DIV */
 
 .containerDIV {
+	width: 100%;
+	height: 41.1rem;
 	background: linear-gradient(#CFB4A1, #825D4B);
+	padding: 0 0 6rem 0;
 }
 
-.homeDIV {
-
-}
-
-.homeDIV h1 {
-	padding-top: 6vh;
+.containerDIV h1 {
+	padding-top: 5rem;
 	font-family: bebas;
-	font-size: 16vw;
+	font-size: 200px;
+	line-height: 0.8;
+	transition: 0.5s;
+	animation-name: fade;
+	animation-duration: 3s;
+	animation-iteration-count: 1;
+	text-align: center;
+	color: #2F2520;
+	margin-top: 5rem;
+}
+
+.containerDIV h2 {
+	font-family: playfairItalic;
+	font-size: 100px;
 	line-height: 0.8;
 	transition: 0.5s;
 	text-align: center;
-	color: #E3E3E3;
-	animation-name: moveText;
-	animation-duration: 5s;
-	animation-iteration-count: 1;
-}
-
-.homeDIV h2 {
-	padding-bottom: 12vh;
-	font-family: playfairItalic;
-	font-size: 5vw;
-	line-height: 0;
-	transition: 0.5s;
-	text-align: center;
 	color: white;
-	animation-name: fadeInBot;
+	z-index: 1;
+	animation-name: fade;
 	animation-duration: 3s;
 	animation-iteration-count: 1;
 }
 
-@keyframes moveText {
-	0% {
-		transform: scale(0);
-		opacity: 0;
-	}
-
-	100% {
-		transform: scale(1);
-		opacity: 1;
-	}
-}
-
-@keyframes fadeInBot {
-	0% {
-		transform: translateY(150px);
-		color: #e3e3e3;
-	}
-
-	30% {
-		transform: translateY(150px);
-		color: #e3e3e3;
-	}
-
-	50% {
-		color: #e3e3e3;
-	}
-
-	100% {
-		transform: translateY(0px);
-		color: white;
-	}
-}
-
-
-/* QUOTE DIV */
-
-.quoteDIV {
-	background-color: #E3E3E3;
-	text-align: center;
-	padding: 5vh;
-	bottom: 0;
-
-}
-
-.quoteDIV h1 {
+.containerDIV h3 {
 	font-family: playfairItalic;
-	color: #2F2520;
-	font-size: 2.5vw;
-	animation-name: fade;
-	animation-duration: 5s;
-	animation-iteration-count: 1;
-}
-
-.quoteDIV h2 {
-	font-family: bebas;
-	color: #89644D;
-	font-size: 3vw;
-	line-height: 1;
-	animation-name: fade;
-	animation-duration: 5s;
-	animation-iteration-count: 1;
-}
-
-.quoteDIV h3 {
-	font-family: playfairReg;
-	color: #2F2520;
-	font-size: 2vw;
-	line-height: 1;
-	animation-name: fade;
-	animation-duration: 5s;
-	animation-iteration-count: 1;
-}
-
-.quoteDIV h3 a {
-	font-family: playfairItalic;
-	color: #2F2520;
+	font-size: 30px;
+	line-height: 2;
 	transition: 0.5s;
-}
-
-.quoteDIV h3 a:hover {
-	color: #89644D;
+	text-align: center;
+	color: #e3e3e3;
+	z-index: 1;
+	margin-top: 5rem;
+	animation-name: fade;
+	animation-duration: 6s;
+	animation-iteration-count: 1;
 }
 
 @keyframes fade {
@@ -276,6 +207,32 @@ nav a:hover {
 	}
 }
 
+/* QUOTE DIV */
+
+.footerDIV {
+	background-color: #E3E3E3;
+	text-align: center;
+	padding: 2rem;
+	bottom: 0;
+	margin-bottom: -1rem;
+}
+
+.footerDIV h3 {
+	font-family: playfairReg;
+	color: #89644D;
+	font-size: 20px;
+	line-height: 1;
+}
+
+.footerDIV h3 a {
+	font-family: playfairItalic;
+	color: #89644D;
+	transition: 0.5s;
+}
+
+.footerDIV h3 a:hover {
+	color: #2F2520;
+}
 
 /* LOADER DIV */
 
@@ -346,7 +303,7 @@ nav a:hover {
 }
 
 .page:nth-of-type(1) {
-	animation-delay: 0.05s;
+  animation-delay: 0.05s;
 }
 
 .page:nth-of-type(2) {
@@ -426,6 +383,8 @@ nav a:hover {
     z-index: 999;
   }
 }
+
+
 
 
 
