@@ -280,7 +280,7 @@ nav a:hover {
 }
 
 .sideDIVs h1 {
-	text-align: center;
+	text-align: right;
 	font-family: bebas;
 	color: #89644D;
 	font-size: 12vw;
@@ -330,6 +330,7 @@ nav a:hover {
 }
 
 .resumecv a:hover {
+	text-decoration-line: none;
 	background-color: #89644D;
 	border: 2px solid #89644D;
 	color: white;
@@ -382,6 +383,8 @@ nav a:hover {
 
 .miDIV {
 	float: right;
+	margin: 0;
+	padding: 0;
 }
 }
 
@@ -425,7 +428,7 @@ nav a:hover {
 	}
 	.circleUnfilled {
 	border-radius: 100%;
-	padding: 1rem;
+	padding: 1.5rem;
 	color: white;
 	background-color: white;
 	width: 5px;
@@ -436,7 +439,7 @@ nav a:hover {
 
 .circleFilled {
 	border-radius: 100%;
-	padding: 1rem;
+	padding: 1.5rem;
 	color: #89644D;;
 	background-color: #89644D;
 	width: 5px;
