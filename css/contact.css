@@ -88,38 +88,33 @@
 
 * {
 	margin: 0;
-	padding: 0;
+}
+
+body {
+	background-color: #E3E3E3;
 }
 
 a {
 	text-decoration-line: none;
 	text-decoration: none;
-	text-decoration-color: none;
 	text-decoration-style: none;
-}
-
-.active {
-	text-decoration-line: overline;
 }
 
 /* NAVIGATION BAR */
 
 nav {
-	color: white;
 	font-family: playfairItalic;
-	padding-top: 1rem;
+	padding-top: 1vw;
 	text-align: center;
+	color: white;
 	animation-name: fadeInTop;
 	animation-duration: 2s;
 	animation-iteration-count: 1;
-	text-align: center;
-	color: white;
-	z-index: 1;
 }
 
 nav a {
-	padding: 3rem;
-	font-size: 30px;
+	padding: 3vw;
+	font-size: 2.5vw;
 	color: white;
 	transition: 1s;
 }
@@ -127,6 +122,7 @@ nav a {
 nav a:hover {
 	font-style: italic;
 	text-decoration-line: overline;
+	color: #e3e3e3;
 }
 
 .active {
@@ -135,7 +131,7 @@ nav a:hover {
 
 @keyframes fadeInTop {
 	0% {
-		transform: translateY(-60px);
+		transform: translateY(-70px);
 	}
 
 	100% {
@@ -143,23 +139,6 @@ nav a:hover {
 	}
 }
 
-@media only screen and (min-width: 800px) and (max-width: 1350px) {
-nav a {
-	padding: 2rem;
-	font-size: 25px;
-}
-}
-
-@media only screen and (max-width: 1000px) {
-nav {
-	width: 100%;
-	padding-bottom: 1rem;
-}
-nav a {
-	padding: 2rem;
-	font-size: 20px;
-}
-}
 /* MAIN DIV */
 
 .parentDIV {
@@ -180,29 +159,13 @@ nav a {
 	width: 75%;
 }
 
-.mainDIV h1 {
-	font-family: bebas;
-	font-size: 200px;
-	line-height: 0.8;
-	margin-top: 20%;
-}
-
-.mainDIV h2 {
-	font-family: playfairItalic;
-	font-size: 65px;
-	line-height: 0.8;
-	color: white;
-}
-
 .sideDIV {
 	display: flex;
 	flex-direction: column;
-	float: right;
 	height: 100%;
-	width: 550px;
 }
 
-@media only screen and (max-width: 1000px) {
+@media only screen and (max-width: 750px) {
 .containerDIV {
 	display: block;
 	flex-direction: column;
@@ -213,16 +176,6 @@ nav a {
 	color: #E3E3E3;
 	width: 100%;
 	padding-left: 0;
-}
-
-.mainDIV h1 {
-	margin-left: 3rem;
-	font-size: 150px;
-}
-
-.mainDIV h2 {
-	margin-left: 3rem;
-	font-size: 50px;
 }
 
 .sideDIV {
@@ -236,14 +189,21 @@ nav a {
 .contactDIV {
 	padding-bottom: 3rem ;
 	text-align: center;
-	margin: -5rem 0 0 -5rem;
 }
 
 .contactDIV h1 {
+	font-family: bebas;
+	font-size: 20vw;
+	line-height: 0;
+	margin: 20% 2vw 2vw 2vw;
 	color: white;
 }
 
 .contactDIV h2 {
+	font-family: playfairItalic;
+	font-size: 7vw;
+	line-height: 2;
+	color: white;
 	color: #E3E3E3;
 	margin-bottom: 2rem;
 }
@@ -253,36 +213,37 @@ nav a {
 }
 
 .contactDIV input {
-	border-radius: 50px;
+	padding: 2vh;
+	font-size: 3vh;
+	border-radius: 20px;
 	border: none;
-	padding: 2rem;
-	font-size: 2rem;
 	margin: 0.5rem;
-	width: 50%;
+	width: 75%;
 	font-family: montserratBold;
 	color: #2F2520;
 }
 
 .contactDIV textarea {
-	border-radius: 50px;
-	padding: 2rem;
-	font-size: 1.5rem;
-	margin: 0.5rem;
-	border: none;
-	width: 50%;
-	height: 10rem;
 	font-family: playfairItalic;
 	color: #2F2520;
+	padding: 2vh;
+	font-size: 3vh;
+	border-radius: 20px;
+	border: none;
+	margin: 0.5rem;
+	width: 75%;
+	height: 30vh;
+	
 }
 
 .contactDIV button {
-	border-radius: 50px;
-	font-size: 1.5rem;
+	font-family: playfairBoldItalic;
+	font-size: 2.5vw;
+	border-radius: 100%;
 	margin: 0.5rem;
 	border: none;
-	width: 5rem;
-	height: 5rem;
-	font-family: playfairBoldItalic;
+	width: 8vw;
+	height: 8vw;
 	color: #2F2520;
 	transition: 0.5s;
 }
@@ -296,22 +257,14 @@ nav a {
 
 .socialsDIV {
 	background-color: #E3E3E3;
-	height: 50rem;
 	text-align: center;
-	padding-top: 2rem;
-}
-
-.socialsDIV2 {
-	background-color: #2F2520;
-	text-align: center;
-	color: white;
-	padding: 4rem 2rem 4rem 2rem;
+	padding: 2rem 0 5rem 0;
 }
 
 .socialsDIV h1 {
 	font-family: playfairItalic;
 	color: #2F2520;
-	font-size: 150px;
+	font-size: 15vw;
 	line-height: 1;
 	display: inline;
 }
@@ -319,25 +272,10 @@ nav a {
 .socialsDIV h2 {
 	font-family: bebas;
 	color: #89644D;
-	font-size: 100px;
+	font-size: 10vw;
 	margin: 0;
 	line-height: 1;
 	display: inline;
-}
-
-.socialsDIV img {
-	width: 50px;
-	height: 50px;
-	margin: 2rem 0 0 0 ;
-	padding: 0.3rem;
-	background:radial-gradient(white, #CFB4A1, #89644D, black);
-	border-radius: 100%;
-	transition: 0.5s;
-}
-
-.socialsDIV img:hover{
-	animation-name: moveIMG;
-	animation-duration: 3s;
 }
 
 .indivSocials {
@@ -347,8 +285,7 @@ nav a {
 
 .indivSocials a {
 	text-align: center;
-	
-	font-size: 50px;
+	font-size: 5vw;
 	font-family: playfairBoldItalic;
 	background-color: white;
 	color: #2F2520;
@@ -368,16 +305,28 @@ nav a {
 	}
 }
 
-pre {
-	text-align: left;
-	margin: 0.5rem;
-	font-size: 15px;
-}
+/* QUICK LINKS */
 
 #quickLinks {
 	text-align: center;
 	font-family: bebas;
-	font-size: 100px;
+	font-size: 10vh;
+	white-space: nowrap;
+}
+
+.socialsDIV2 {
+	background-color: #2F2520;
+	text-align: center;
+	color: white;
+	white-space: nowrap;
+	padding-bottom: 3rem;
+}
+
+pre {
+	text-align: center;
+	margin: 0 2rem 0.5rem 2rem;
+	font-size: 2vw;
+	width: auto;
 }
 
 /* QUOTE DIV */
@@ -385,7 +334,7 @@ pre {
 .quoteDIV {
 	background-color: #CFB4A1;
 	text-align: center;
-	padding: 3.3rem;
+	padding: 5vh;
 	width: auto;
 
 }
@@ -420,7 +369,7 @@ pre {
 	color: #89644D;
 }
 
-@media only screen and (max-width: 1000px) {
+@media only screen and (max-width: 750px)s {
 .quoteDIV h1 {
 	font-family: playfairItalic;
 	color: #2F2520;
