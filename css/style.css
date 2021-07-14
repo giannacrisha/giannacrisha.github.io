@@ -149,14 +149,10 @@ nav a:hover {
 	background: linear-gradient(#CFB4A1, #825D4B);
 }
 
-.homeDIV {
-
-}
-
 .homeDIV h1 {
-	padding-top: 6vh;
+	padding: 8vh 0 12vh 0;
 	font-family: bebas;
-	font-size: 16vw;
+	font-size: 15vw;
 	line-height: 0.8;
 	transition: 0.5s;
 	text-align: center;
@@ -166,18 +162,6 @@ nav a:hover {
 	animation-iteration-count: 1;
 }
 
-.homeDIV h2 {
-	padding-bottom: 12vh;
-	font-family: playfairItalic;
-	font-size: 5vw;
-	line-height: 0;
-	transition: 0.5s;
-	text-align: center;
-	color: white;
-	animation-name: fadeInBot;
-	animation-duration: 3s;
-	animation-iteration-count: 1;
-}
 
 @keyframes moveText {
 	0% {
@@ -193,12 +177,12 @@ nav a:hover {
 
 @keyframes fadeInBot {
 	0% {
-		transform: translateY(150px);
+		transform: translateY(160px);
 		color: #e3e3e3;
 	}
 
 	30% {
-		transform: translateY(150px);
+		transform: translateY(160px);
 		color: #e3e3e3;
 	}
 
@@ -226,7 +210,7 @@ nav a:hover {
 .quoteDIV h1 {
 	font-family: playfairItalic;
 	color: #2F2520;
-	font-size: 2.5vw;
+	font-size: 2vw;
 	animation-name: fade;
 	animation-duration: 5s;
 	animation-iteration-count: 1;
@@ -235,7 +219,7 @@ nav a:hover {
 .quoteDIV h2 {
 	font-family: bebas;
 	color: #89644D;
-	font-size: 3vw;
+	font-size: 2.5vw;
 	line-height: 1;
 	animation-name: fade;
 	animation-duration: 5s;
@@ -245,7 +229,7 @@ nav a:hover {
 .quoteDIV h3 {
 	font-family: playfairReg;
 	color: #2F2520;
-	font-size: 2vw;
+	font-size: 1.5vw;
 	line-height: 1;
 	animation-name: fade;
 	animation-duration: 5s;
@@ -260,6 +244,7 @@ nav a:hover {
 
 .quoteDIV h3 a:hover {
 	color: #89644D;
+	text-decoration-line:none;
 }
 
 @keyframes fade {
