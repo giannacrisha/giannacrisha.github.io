@@ -336,6 +336,10 @@ nav a:hover {
 	color: white;
 }
 
+.skillsmiParentDIV h2 {
+	padding-top: 2rem;
+}
+
 @media only screen and (max-width: 850px) {
 
 .sideDIV {
@@ -358,7 +362,7 @@ nav a:hover {
 	text-align: left;
 	color: #2F2520;
 	font-size: 3vw;
-	margin: 5rem 2.5rem 0 8rem;
+	margin: 5rem 2.5rem 0 5rem;
 }
 
 .sideDIVs h3 {
@@ -373,18 +377,17 @@ nav a:hover {
 .sideDIVs h3 a:hover {
 	color: #2F2520;
 }
-
-.skillsmiParentDIV {
-	padding-bottom: 10rem;
-	display: flex;
-	flex-direction: row;
-	
+#skillsDIV {
+	grid-area: skills;
 }
 
-.miDIV {
-	float: right;
-	margin: 0;
-	padding: 0;
+#miDIV {
+	grid-area: mi;
+}
+.skillsmiParentDIV {
+	padding-bottom: 10rem;
+	display: grid;
+	grid-template-areas: "skills mi";
 }
 }
 
@@ -422,8 +425,8 @@ nav a:hover {
 
 	.rating {
 		display: block;
-		margin-left: 10rem;
-		margin-top: 0.8rem;
+		margin-left: 5rem;
+		margin-top: 1rem;
 		float: none;
 	}
 	.circleUnfilled {
@@ -434,7 +437,7 @@ nav a:hover {
 	width: 5px;
 	height: 5px;
 	float: left;
-	margin-right: 1rem;
+	margin-right: 1vw;
 }
 
 .circleFilled {
@@ -445,7 +448,7 @@ nav a:hover {
 	width: 5px;
 	height: 5px;
 	float: left;
-	margin-right: 1rem;
+	margin-right: 1vw;
 }
 }
 
