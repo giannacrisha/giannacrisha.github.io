@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Projects &middot; Gianna Crisha</title>
+	<link rel="stylesheet" type="text/css" href="css/project.css">
+</head>
+<body>
+	<div class="containerDIV">
+		<div class="mainDIV">
+			<nav>
+				<a href="index.html">Home</a>
+				<a href="about.html">About</a>
+				<a class="active" href="#">Projects</a>
+				<a href="contact.html">Contact</a>
+			</nav>
+				
+			<div class="infoContainer">
+				<h1>PROJECTS</h1>
+				<div id="select">
+					<h2>Select a project</h2><br>
+					<h3>Click on a project to view its description and other details. Click on it again to exit or click on another project to view another project.</h3><br><br>
+					<h3>All of these projects are created from scratch with HTML, CSS, and a little bit of Javascript. For more information, you can reach out to me by going to the Contact tab and sending me an email through the contact form. You can also reach out to me on my social media accounts. I look forward to collaborating with you!</h3><br><br>
+				</div>
+				
+				<div class="infoDIV" id="chemDIV">
+					<h2>
+						<a href="https://github.com/giannacrisha/chemistry" target="_blank">
+						Chemistry Website</a>
+					</h2>
+					<a href="https://giannacrisha.github.io/chemistry/" target="_blank">
+						<img src="pics/chem.png"></a>
+					<h3>This website contains a responsive Periodic Table of Elements, and many more features to come. Chemistry topics ranging from General Chemistry to Biochemistry can be found here. This website is currently a work-in-progress.
+					</h3>
+
+					<h3>To know more about this website, click on the title to view its repository. View the website by clicking on the preview above.</h3>
+				</div>
+
+				<div class="infoDIV" id="physDIV">
+					<h2>
+						<a href="https://github.com/giannacrisha/physics" target="_blank">Physics Website</a>
+					</h2>
+					<a href="https://giannacrisha.github.io/physics/" target="_blank">
+					<img src="pics/phys.png"></a>
+					<h3>This website contains a responsive International System of Units, and many more features to come. Physics topics ranging from General Physics to Modern Physics can be found here. This website is currently a work-in-progress.
+					</h3>
+
+					<h3>To know more about this website, click on the title to view its repository. View the website by clicking on the preview above.</h3>
+				</div>
+
+				<div class="infoDIV" id="rwdDIV">
+					<h2>
+						<a href="https://github.com/giannacrisha/rwd" target="_blank">Responsive Web Design</a>
+					</h2>
+					<a href="https://giannacrisha.github.io/rwd/" target="_blank">
+					<img src="pics/rwd.png"></a>
+					<h3>This website is a compilation of Responsive Design Projects for freeCodeCamp's Responsive Web Design <a href="https://www.freecodecamp.org/certification/giannacrisha/responsive-web-design" target="_blank">Certificate</a>. This website has a tribute page, a survey form, a mock portfolio, and a documentation page. This website is currently a work-in-progress.
+					</h3>
+
+					<h3>To know more about this website, click on the title to view its repository. View the website by clicking on the preview above.</h3>
+				</div>
+
+				<div class="infoDIV" id="docsDIV">
+					<h2>
+						<a href="https://github.com/giannacrisha/docs" target="_blank">Documentation</a>
+					</h2>
+					<a href="https://giannacrisha.github.io/docs/" target="_blank">
+					<img src="pics/docs.png"></a>
+					<h3>This website is a technical documentation page that has documentation for HTML, CSS, JavaScript, Python, PHP, and Swift. This website is currently a work-in-progress.
+					</h3>
+
+					<h3>To know more about this website, click on the title to view its repository. View the website by clicking on the preview above.</h3>
+				</div>
+			</div>
+
+		</div>
+		<div class="sideDIV">
+			<div class="projectsDIV">
+				<div onclick="hideChem()"><img src="pics/chem.png"></div>
+				<div onclick="hidePhys()"><img src="pics/phys.png"></div>
+				<div onclick="hideRWD()"><img src="pics/rwd.png"></div>
+				<div onclick="hideDocs()"><img src="pics/docs.png"></div>
+				<div>
+					<a href="https://github.com/giannacrisha?tab=repositories" target="_blank">
+					<img src="pics/others.png"></a></div>
+			</div>
+		</div>
+
+		<script type="text/javascript" src="script.js"></script>
+
+	</div>
+
+	<div class="quoteDIV">
+		<h1>“Any human anywhere will blossom in a hundred unexpected talents <br>and capacities simply by being given the opportunity to do so.”</h1>
+		<h2>Herta Müller</h2><br>
+
+		<h3>Copyright &copy; 2021 by 
+		<a href="https://github.com/giannacrisha" id="gitlink">Gianna Saludo</a></h3>
+	</div>
+
+	<div class="loaderDIV">
+		<div class="book">
+			<span class="page turn"></span>
+			<span class="page turn"></span>
+		    <span class="page turn"></span>
+		    <span class="page turn"></span>
+		    <span class="page turn"></span>
+		    <span class="page turn"></span>
+		    <span class="cover"></span>
+		    <span class="page"></span>
+		    <span class="cover turn"></span>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+		let loaderDIV = document.querySelector(".loaderDIV");
+		window.addEventListener('load', function(){
+			loaderDIV.style.display = 'none';
+		});
+	</script>
+</body>s
+</html>
