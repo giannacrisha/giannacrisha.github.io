@@ -147,22 +147,17 @@ nav a:hover {
 /* HOME DIV */
 
 .containerDIV {
-	display: flex;
-	flex-direction: row;
-	width: 100%;
-	height: 100%;
 	background: linear-gradient(#CFB4A1, #825D4B);
 }
 
 .homeDIV {
-	width: 100%;
-	padding: 0 0 6rem 0;
+
 }
 
 .homeDIV h1 {
-	padding-top: 5rem;
+	padding-top: 6vh;
 	font-family: bebas;
-	font-size: 200px;
+	font-size: 16vw;
 	line-height: 0.8;
 	transition: 0.5s;
 	text-align: center;
@@ -173,9 +168,10 @@ nav a:hover {
 }
 
 .homeDIV h2 {
+	padding-bottom: 12vh;
 	font-family: playfairItalic;
-	font-size: 70px;
-	line-height: 0.8;
+	font-size: 5vw;
+	line-height: 0;
 	transition: 0.5s;
 	text-align: center;
 	color: white;
@@ -198,12 +194,12 @@ nav a:hover {
 
 @keyframes fadeInBot {
 	0% {
-		transform: translateY(170px);
+		transform: translateY(150px);
 		color: #e3e3e3;
 	}
 
 	30% {
-		transform: translateY(170px);
+		transform: translateY(150px);
 		color: #e3e3e3;
 	}
 
@@ -223,7 +219,7 @@ nav a:hover {
 .quoteDIV {
 	background-color: #E3E3E3;
 	text-align: center;
-	padding: 5rem;
+	padding: 5vh;
 	bottom: 0;
 
 }
@@ -231,7 +227,7 @@ nav a:hover {
 .quoteDIV h1 {
 	font-family: playfairItalic;
 	color: #2F2520;
-	font-size: 30px;
+	font-size: 2.5vw;
 	animation-name: fade;
 	animation-duration: 5s;
 	animation-iteration-count: 1;
@@ -240,7 +236,7 @@ nav a:hover {
 .quoteDIV h2 {
 	font-family: bebas;
 	color: #89644D;
-	font-size: 40px;
+	font-size: 3vw;
 	line-height: 2;
 	animation-name: fade;
 	animation-duration: 5s;
@@ -250,7 +246,7 @@ nav a:hover {
 .quoteDIV h3 {
 	font-family: playfairReg;
 	color: #2F2520;
-	font-size: 20px;
+	font-size: 2vw;
 	line-height: 1;
 	animation-name: fade;
 	animation-duration: 5s;
