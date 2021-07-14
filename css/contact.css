@@ -172,10 +172,7 @@ nav a:hover {
 }
 
 .mainDIV {
-	background: linear-gradient(#CFB4A1, #825D4B);
-	color: #E3E3E3;
 	width: 100%;
-	padding-left: 0;
 }
 
 .sideDIV {
@@ -215,7 +212,7 @@ nav a:hover {
 .contactDIV input {
 	padding: 2vh;
 	font-size: 3vh;
-	border-radius: 20px;
+	border-radius: 50px;
 	border: none;
 	margin: 0.5rem;
 	width: 75%;
@@ -228,7 +225,7 @@ nav a:hover {
 	color: #2F2520;
 	padding: 2vh;
 	font-size: 3vh;
-	border-radius: 20px;
+	border-radius: 50px;
 	border: none;
 	margin: 0.5rem;
 	width: 75%;
@@ -285,7 +282,7 @@ nav a:hover {
 
 .indivSocials a {
 	text-align: center;
-	font-size: 5vw;
+	font-size: 4vw;
 	font-family: playfairBoldItalic;
 	background-color: white;
 	color: #2F2520;
@@ -324,9 +321,12 @@ nav a:hover {
 
 pre {
 	text-align: center;
-	margin: 0 2rem 0.5rem 2rem;
-	font-size: 2vw;
+	margin: 0 1rem 0.5rem 1rem;
+	font-size: 2.2vw;
 	width: auto;
+	border: none;
+	color: white;
+	background-color: #2F2520;
 }
 
 /* QUOTE DIV */
@@ -342,20 +342,20 @@ pre {
 .quoteDIV h1 {
 	font-family: playfairItalic;
 	color: #2F2520;
-	font-size: 30px;
+	font-size: 2.5vw;
 }
 
 .quoteDIV h2 {
 	font-family: bebas;
 	color: #89644D;
-	font-size: 40px;
-	line-height: 2;
+	font-size: 3vw;
+	line-height: 1;
 }
 
 .quoteDIV h3 {
 	font-family: playfairReg;
 	color: white;
-	font-size: 20px;
+	font-size: 2vw;
 	line-height: 1;
 }
 
