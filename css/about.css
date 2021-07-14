@@ -132,7 +132,7 @@ nav a {
 nav a:hover {
 	font-style: italic;
 	text-decoration-line: overline;
-	color: #e3e3e3;
+	color: #CFB4A1;
 }
 
 .active {
@@ -164,7 +164,7 @@ nav a:hover {
 }
 
 .mainDIV {
-	background: linear-gradient(#CFB4A1, #825D4B);
+	background-color: #2F2520;
 	width: auto;
 	height: auto;
 }
@@ -189,13 +189,13 @@ nav a:hover {
 	font-size: 10vw;
 	color: white;
 	line-height: 0.5;
-	margin: 15rem 6rem 0 0;
+	margin: 10rem 6rem 0 0;
 }
 
 .aboutDIV h2 {
 	font-family: playfairItalic;
 	font-size: 5vw;
-	color: #E3E3E3;
+	color: #CFB4A1;
 	line-height: 0.8;
 }
 .aboutDIV h3 {
@@ -209,7 +209,7 @@ nav a:hover {
 }
 
 .aboutDIV h4 {
-	color: #CFB4A1;
+	color: #e3e3e3;
 	font-family: playfairBoldItalic;
 	text-indent: 0.5in;
 	text-align: justify;
@@ -281,9 +281,9 @@ nav a:hover {
 .sideDIVs h1 {
 	text-align: right;
 	font-family: bebas;
-	color: #89644D;
+	color: #2F2520;
 	font-size: 12vw;
-	margin: 10rem 0 -5rem 0;
+	margin: 5rem 2rem -7rem 0;
 }
 
 .sideDIVs h2 {
@@ -297,19 +297,19 @@ nav a:hover {
 .sideDIVs h3 {
 	text-align: justify;
 	font-family: montserratReg;
-	color: #89644D;
+	color: #2F2520;
 	font-size: 1.5vw;
 	margin-top: 10rem;
 	padding: 1rem 1rem 3rem 1rem;
 }
 
 .sideDIVs h3 a {
-	color: #89644D;
+	color: #2F2520;
 	transition: 0.5s;
 }
 
 .sideDIVs h3 a:hover {
-	color: #2F2520;
+	color: #89644D;
 }
 
 .resumecv {
@@ -319,19 +319,17 @@ nav a:hover {
 
 .resumecv a {	
 	border-radius: 50px;
-	border: 2px solid #CFB4A1;
 	padding: 1rem;
 	background-color: white;
 	font-family: playfairBoldItalic;
-	color: #CFB4A1;
+	color: #2F2520;
 	font-size: 20px;
 	transition: 0.5s;
 }
 
 .resumecv a:hover {
 	text-decoration-line: none;
-	background-color: #89644D;
-	border: 2px solid #89644D;
+	background-color: #2F2520;
 	color: white;
 }
 
@@ -401,7 +399,6 @@ nav a:hover {
 .circleUnfilled {
 	border-radius: 100%;
 	padding: 1.5rem;
-	color: white;
 	background-color: white;
 	width: 5px;
 	height: 5px;
@@ -412,7 +409,6 @@ nav a:hover {
 .circleFilled {
 	border-radius: 100%;
 	padding: 1.5rem;
-	color: #89644D;;
 	background-color: #89644D;
 	width: 5px;
 	height: 5px;
@@ -453,20 +449,20 @@ nav a:hover {
 
 /* QUOTE DIV */
 .quoteDIV {
-	background-color: #CFB4A1;
+	background-color: #89644D;
 	text-align: center;
 	padding: 5vh;
 }
 
 .quoteDIV h1 {
 	font-family: playfairItalic;
-	color: #2F2520;
+	color: white;
 	font-size: 2.5vw;
 }
 
 .quoteDIV h2 {
 	font-family: bebas;
-	color: #89644D;
+	color: #2F2520;
 	font-size: 3vw;
 	line-height: 1;
 }
@@ -485,7 +481,7 @@ nav a:hover {
 }
 
 .quoteDIV h3 a:hover {
-	color: #89644D;
+	color: #e3e3e3;
 	text-decoration-line: none;
 }
 

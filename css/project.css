@@ -149,7 +149,7 @@ nav a:hover {
 	flex-direction: row;
 }
 .mainDIV {
-	background: linear-gradient(#CFB4A1, #825D4B);
+	background-color: #825D4B;
 	color: #E3E3E3;
 	width: 100%;
 }
@@ -165,7 +165,9 @@ nav a:hover {
 	font-family: playfairItalic;
 	font-size: 6vw;
 	line-height: 1;
-	color: #2F2520;
+	color: #CFB4A1;
+	text-shadow: 2px 2px #2F2520;
+
 }
 
 .sideDIV {
@@ -210,14 +212,13 @@ nav a:hover {
 	padding: 1rem;
 	margin: 0 5rem 3rem 5rem;
 }
-.infoDIV h1 {
-	color: white;
 
-}
 .infoDIV h2 a{
-	color: #2F2520;
+	color: #CFB4A1;
+	text-shadow: 2px 2px #2F2520;
 	transition: 0.5s;
 }
+
 .infoDIV h2 a:hover {
 	color: #e3e3e3;
 	text-decoration-line: none;
@@ -250,50 +251,6 @@ nav a:hover {
 }
 
 @media only screen and (max-width: 950px) {
-.infoContainer {
-	padding-bottom: 2rem ;
-	font-size: 20px;
-	overflow: scroll;
-	margin: 0;
-	padding: 0;
-}
-
-.infoDIV {
-	display: none;
-	padding: 1rem;
-}
-
-.infoDIV h1 {
-	color: white;
-}
-
-.infoDIV h2 a{
-	color: #2F2520;
-	transition: 0.5s;
-}
-
-.infoDIV h2 a:hover {
-	color: #e3e3e3;
-}
-
-.infoDIV h3 {
-	color: white;
-	font-family: montserratReg;
-	line-height: 2;
-	text-align: justify;
-	margin: 0 2rem 0 2rem;
-	font-size: 15px;
-	overflow: scroll;
-}
-
-.infoDIV h3 a {
-	color: #E3E3E3;
-	transition: 0.5;
-}
-
-.infoDIV h3 a:hover {
-	color: white;
-}
 
 .infoDIV img {
 	height: 200px;
