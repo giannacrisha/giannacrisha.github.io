@@ -91,7 +91,7 @@
 }
 
 body {
-	background-color: #E3E3E3;
+	background-color: #2F2520;
 }
 
 a {
@@ -163,6 +163,7 @@ nav a:hover {
 	display: flex;
 	flex-direction: column;
 	height: 100%;
+	background-color: #2F2520;
 }
 
 @media only screen and (max-width: 750px) {
@@ -184,7 +185,6 @@ nav a:hover {
 /* CONTACT DIV */
 
 .contactDIV {
-	padding-bottom: 3rem ;
 	text-align: center;
 }
 
@@ -192,7 +192,7 @@ nav a:hover {
 	font-family: bebas;
 	font-size: 20vw;
 	line-height: 0;
-	margin: 20% 2vw 2vw 2vw;
+	margin: 20vw 2vw 2vw 2vw;
 	color: white;
 }
 
@@ -206,24 +206,24 @@ nav a:hover {
 }
 
 .contactDIV form {
-	margin-bottom: 5rem;
+	padding-bottom: 5rem;
 }
 
 .contactDIV input {
-	padding: 2vh;
+	padding: 2vh 3vh 2vh 3vh;
 	font-size: 3vh;
 	border-radius: 50px;
 	border: none;
 	margin: 0.5rem;
 	width: 75%;
-	font-family: montserratBold;
+	font-family: playfairItalic;
 	color: #2F2520;
 }
 
 .contactDIV textarea {
 	font-family: playfairItalic;
 	color: #2F2520;
-	padding: 2vh;
+	padding: 3vh;
 	font-size: 3vh;
 	border-radius: 50px;
 	border: none;
@@ -234,15 +234,17 @@ nav a:hover {
 }
 
 .contactDIV button {
-	font-family: playfairBoldItalic;
-	font-size: 2.5vw;
+	font-family: bebas;
+	font-size: 3rem;
 	border-radius: 100%;
 	margin: 0.5rem;
 	border: none;
-	width: 8vw;
-	height: 8vw;
+	width: 7rem;
+	height: 7rem;
 	color: #2F2520;
 	transition: 0.5s;
+	text-align: center;
+	padding-top: 1rem ;
 }
 
 .contactDIV button:hover {
@@ -282,13 +284,14 @@ nav a:hover {
 
 .indivSocials a {
 	text-align: center;
-	font-size: 4vw;
+	font-size: 3vw;
 	font-family: playfairBoldItalic;
 	background-color: white;
 	color: #2F2520;
 	border-radius: 50px;
 	padding: 1rem 3rem 1rem 3rem;
 	transition: 0.3s;
+	text-decoration-line: none;
 }
 
 .indivSocials a:hover {

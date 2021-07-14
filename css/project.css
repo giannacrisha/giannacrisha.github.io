@@ -141,39 +141,6 @@ nav a:hover {
 	}
 }
 
-@media only screen and (max-width: 950px) {
-nav {
-	position: absolute;
-	animation-name: navBG;
-	animation-duration: 2;
-	animation-fill-mode: forwards;
-	text-align: center;
-	width: 100%;
-	padding-bottom: 1rem;
-}
-nav a {
-	padding: 1rem;
-	font-size: 25px;
-}
-
-@keyframes navBG {
-	0% {
-		transform: translateY(-60px);
-	}
-
-	30% {
-		opacity: 0;
-		transform: translateY(-60px);
-	}
-
-	100% {
-		opacity: 1;
-		background-color: #2F2520;
-		transform: translateY(0px);
-	}
-}
-}
-
 /* MAIN DIV */
 
 .containerDIV {
@@ -190,7 +157,7 @@ nav a {
 	font-family: bebas;
 	font-size: 20vw;
 	line-height: 0.3;
-	margin-top: 5rem;
+	margin-top: 10vw;
 
 }
 .mainDIV h2 {
@@ -217,26 +184,21 @@ nav a {
 }
 
 .mainDIV h1 {
+	margin-top: 1rem;
 	font-family: bebas;
-	font-size: 100px;
+	font-size: 15vw;
 	line-height: 0.8;
-	margin-top: 20%;
 	text-align: left;
-	margin-left: 7rem;
+	margin-left: 2rem;
 }
 
 .mainDIV h2 {
 	font-family: playfairItalic;
-	font-size: 45px;
+	font-size: 6vw;
 	line-height: 0.5;
 	color: white;
 	text-align: left;
-	margin-left: 6rem;
-}
-
-
-.mainDIV h3 {
-	padding-left: 5rem;
+	margin-left: 2rem;
 }
 
 }
@@ -244,6 +206,7 @@ nav a {
 
 #select {
 	text-align: center;
+	margin-bottom: 3rem;
 }
 #select h2 {
 	color: #E3E3E3;
@@ -256,40 +219,26 @@ nav a {
 	font-family: montserratReg;
 	line-height: 2;
 	text-align: justify;
-	margin: 0 5rem 0 5rem;
+	margin: 0 2rem 0 2rem;
 	text-indent: 1in;
-	font-size: 25px;
-	font-size: 20px;
+	font-size: 2vw;
 }
 
 #select h3 a {
 	color: white;
 }
 
-@media only screen and (max-width: 950px) {
-
-#select h3 {
-	line-height: 2;;
-	margin: 0 2rem 0 2rem;
-	text-indent: 1in;
-	font-size: 15px;
-}
-
-}
-
 /* PROJECT INFO DIV */
 
 .infoContainer {
-	padding-bottom: 3rem ;
 	text-align: center;
 	margin-top: 5rem;
 	color: white;
-	overflow: scroll;
 }
 .infoDIV {
 	display: none;
 	padding: 1rem;
-	overflow: scroll;
+	margin-bottom: 3rem;
 }
 .infoDIV h1 {
 	color: white;
@@ -307,9 +256,9 @@ nav a {
 	font-family: montserratReg;
 	line-height: 2;
 	text-align: justify;
-	margin: 2rem 5rem 0 5rem;
+	margin: 2rem 2rem 0 2rem;
 	text-indent: 1in;
-	font-size: 1.5vw;
+	font-size: 2vw;
 }
 .infoDIV h3 a {
 	color: #E3E3E3;
@@ -327,15 +276,15 @@ nav a {
 @media only screen and (max-width: 950px) {
 .infoContainer {
 	padding-bottom: 2rem ;
-	height: 40rem;
 	font-size: 20px;
 	overflow: scroll;
+	margin: 0;
+	padding: 0;
 }
 
 .infoDIV {
 	display: none;
 	padding: 1rem;
-	overflow: scroll;
 }
 
 .infoDIV h1 {
@@ -395,10 +344,31 @@ nav a {
 }
 
 @media only screen and (max-width: 950px) {
+	.p1 {
+		grid-area: p1;
+	}
+	.p2 {
+		grid-area: p2;
+	}
+	.p3 {
+		grid-area: p3;
+	}
+	.p4 {
+		grid-area: p4;
+	}
+
+	.p5 {
+		grid-area: p5;
+	}
+
 	.projectsDIV {
-	text-align: center;
+		width: 100%;
 	background-color: black;
-	margin: 0 -1.5rem 0 0;
+	display: grid;
+	grid-template-areas:
+	"p1 p2"
+	"p3 p4"
+	"p5 p5";
 }
 }
 
