@@ -116,13 +116,13 @@ nav a {
 	padding: 3vw;
 	font-size: 2.5vw;
 	color: white;
-	transition: 1s;
+	transition: 0.3s;
 }
 
 nav a:hover {
 	font-style: italic;
 	text-decoration-line: overline;
-	color: #e3e3e3;
+	color: #2F2520;
 }
 
 .active {

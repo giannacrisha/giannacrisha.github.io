@@ -196,6 +196,13 @@ nav a:hover {
 	}
 }
 
+/*DARK MODE*/
+
+.dark-mode {
+	background-color: #2F2520;
+	color: white;
+}
+
 
 /* QUOTE DIV */
 

@@ -163,7 +163,7 @@ nav a:hover {
 }
 .mainDIV h2 {
 	font-family: playfairItalic;
-	font-size: 6vw;
+	font-size: 5vw;
 	line-height: 1;
 	color: #CFB4A1;
 	text-shadow: 2px 2px #2F2520;
@@ -210,7 +210,7 @@ nav a:hover {
 .infoDIV {
 	display: none;
 	padding: 1rem;
-	margin: 0 5rem 3rem 5rem;
+	margin: 0 3rem 3rem 3rem;
 }
 
 .infoDIV h2 a{
