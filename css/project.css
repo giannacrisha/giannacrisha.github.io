@@ -177,7 +177,7 @@ nav a:hover {
 	height: auto;
 }
 
-@media only screen and (max-width: 950px) {
+@media only screen and (max-width: 1080px) {
 .containerDIV {
 	flex-direction: column;
 }
@@ -250,7 +250,7 @@ nav a:hover {
 	transform: scale(1.05);
 }
 
-@media only screen and (max-width: 950px) {
+@media only screen and (max-width: 1080px) {
 
 .infoDIV img {
 	height: 200px;
@@ -274,7 +274,7 @@ nav a:hover {
 	opacity: 1;
 }
 
-@media only screen and (max-width: 950px) {
+@media only screen and (max-width: 1080px) {
 	.p1 {
 		grid-area: p1;
 	}

@@ -169,7 +169,7 @@ nav a:hover {
 	height: auto;
 }
 
-@media only screen and (max-width: 850px) {
+@media only screen and (max-width: 1080px) {
 
 .containerDIV {
 	flex-direction: column;
@@ -227,7 +227,7 @@ nav a:hover {
 	font-size: 3vw;
 }
 
-@media only screen and (max-width: 850px) {
+@media only screen and (max-width: 1080px) {
 
 .aboutDIV {
 	padding-bottom: 3rem;
@@ -342,7 +342,7 @@ nav a:hover {
 	padding-top: 2rem;
 }
 
-@media only screen and (max-width: 850px) {
+@media only screen and (max-width: 1080px) {
 
 .sideDIV {
 	width: 100%;
@@ -421,7 +421,7 @@ nav a:hover {
 	margin-top: 0.5rem;
 }
 
-@media only screen and (max-width: 850px) {
+@media only screen and (max-width: 1080px) {
 
 	.rating {
 		display: block;

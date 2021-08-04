@@ -166,7 +166,7 @@ nav a:hover {
 	background-color: #2F2520;
 }
 
-@media only screen and (max-width: 750px) {
+@media only screen and (max-width: 1080px) {
 .containerDIV {
 	display: block;
 	flex-direction: column;
@@ -372,7 +372,7 @@ pre {
 	color: #89644D;
 }
 
-@media only screen and (max-width: 750px)s {
+@media only screen and (max-width: 1080px)s {
 .quoteDIV h1 {
 	font-family: playfairItalic;
 	color: #2F2520;
