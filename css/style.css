@@ -21,11 +21,17 @@ h1 {
   font-optical-sizing: auto;
   font-weight: 1000;
   font-style: normal;
-  margin-bottom: 0.5vw;
+  font-size: 7rem;
 }
 
 p {
 	margin-bottom: 2vw;
+	line-height: 1.5;
+	font-size: 0.8rem;
+}
+
+ul {
+	font-size: 0.8rem;
 	line-height: 1.5;
 }
 
@@ -57,7 +63,7 @@ p {
   font-style: normal;
   padding: 4vw 4vw 0 10vw;
   text-decoration: none;
-  font-size: 8rem;
+  font-size: 6rem;
   color: #202020;
   display: block;
   transition: 0.3s;
@@ -67,6 +73,9 @@ p {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   font-weight: 900;
+  stroke: 1em;
+  -webkit-text-stroke-width: 0.2rem;
+  -webkit-text-stroke-color: #202020;
 }
 .sidenav .closebtn {
   position: absolute;
@@ -132,21 +141,21 @@ p {
 /* ABOUT DIV */
 .about-div {
 	background-color: white;
-	margin: 1vw;
+	margin: 10vw;
 	height: auto;
 }
 .bionote-container {
 	padding: 1vw;
+	text-align: center;
 }
 #bionote-pic {
 	width: 50vw;
-	float: left;
-	margin: 2vw 6vw 2vw 4vw;
+	margin: 2vw;
 	max-width: 490px;
 }
 #bionote {
 	text-indent: 1rem;
-	font-size: 1rem;
+	font-size: 0.8rem;
 	margin: 1rem;
 	text-align: justify;
 }
@@ -159,30 +168,30 @@ p {
 }
 .services-div h1 {
 	color: #4E3F76;
-	background: linear-gradient(to right, #E1B940, #FFEEA3, #E1B940);
-	text-shadow: #fff 0 0 0.5rem;
-	padding: 1rem 0.5rem 0.5rem 0.5rem;
-	margin-bottom: 1rem;
+  background: linear-gradient(to right, #E1B940, #FFEEA3, #E1B940);
+  text-shadow: #fff 0 0 0.5rem;
+  padding: 1rem 0.5rem 0.5rem 0.5rem;
+  font-size: 7rem;
 }
 .services-grid {
   display: inline-grid;
   grid-template-columns: auto auto auto;
-  margin-bottom: 1rem;
+  margin: 3vw;
 }
 
 /*create a media query for the services div.
 make it have two columns on larger devices.*/
 
 .cell {
-	font-size: 2vw;
-	color: #4E3F76;
+	font-size: 1.29rem;
+  color: #4E3F76;
   font-weight: 700;
-  height: auto;
   width: auto;
-  margin: 1.3vw;
-  padding: 1vw 1.5vw;
+  margin: 1.5vw;
+  padding: 1vw;
   background-color: white;
   border-radius: 50px;
+  overflow: hidden;
 }
 
 .cell:hover {
@@ -209,10 +218,12 @@ make it have two columns on larger devices.*/
 	color: white;
 	text-shadow: #202020 0 0 0.5rem;
 	margin: 1vw;
+	font-size: 7rem;
 }
 .cert-div ul {
 	list-style: square;
 	margin-bottom: 3vw;
+	font-weight: 800;
 }
 .slideshow-container {
 	padding: 0 1vw 1vw 1vw;
@@ -265,17 +276,21 @@ make it have two columns on larger devices.*/
 /* CALENDLY DIV */
 .calendly-div {
 	background: #fff;
-	padding: 8vw 9vw 9vw 9vw;
 }
 .calendly-div h1 {
 	color: #202020;
 	text-shadow: #BCADE3 0 0 0.5rem;
+	margin: 8vw 8vw 0 8vw;
 }
 .calendly-badge-widget {
 	font-family: "Bricolage Grotesque", sans-serif;
   font-optical-sizing: auto;
   font-variation-settings: "wdth" 100;
   font-size: 10rem;
+}
+
+.calendly-div p {
+	margin: 2vw 0 2vw 8vw;
 }
 
 /* BLOG DIV */
