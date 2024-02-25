@@ -293,7 +293,6 @@ make it have two columns on larger devices.*/
 	font-family: "Bricolage Grotesque", sans-serif;
   font-optical-sizing: auto;
   font-variation-settings: "wdth" 100;
-  font-size: 10rem;
 }
 
 .calendly-div p {
@@ -415,8 +414,6 @@ make it have two columns on larger devices.*/
 	width: 70%;
 	height: auto;
 	padding: 3vw;
-}
-.form-div form {
 }
 
 .form-div input {
@@ -646,7 +643,7 @@ make it have two columns on larger devices.*/
 		font-size: 8rem;
 	}
 	.home-div {
-		padding: 12vh 0 27vh 0;
+		padding: 10vh 0 29vh 0;
 	}
 	.about-div {
 		margin: 8vw;
@@ -666,6 +663,16 @@ make it have two columns on larger devices.*/
 	}
 	#blog-description {
 		font-size: 1.5rem;
+	}
+	.calendly-badge-widget .calendly-badge-content {
+		padding: 1.5vw 3vw !important;
+	}
+	.sidenav a {
+		font-size: 5rem;
+		padding: 2vw 2vw 0 10vw;
+	}
+	.sidenav .closebtn {
+		font-size: 8rem;
 	}
 }
 
