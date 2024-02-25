@@ -97,13 +97,17 @@ ul {
 
 }
 .home-div {
-	padding: 26vh 0 42vh 0;
+/*	padding: 26vh 0 42vh 0;*/
+height: 90vh;
+display: flex;
+align-items: center;
+justify-content: center;
+padding-bottom: 10vh;
 }
 .home-div h1 {
-	font-size: 10rem;
+	font-size: 15vw;
 	line-height: 1;
 	transition: 0.5s;
-	margin-top: 5vw;
 	text-align: center;
 	animation-name: moveText;
 	animation-duration: 5s;
@@ -170,14 +174,13 @@ ul {
 .services-div {
   background-color: #202020;
   text-align: center;
-  font-size: 1.5rem;
 }
 .services-div h1 {
 	color: #4E3F76;
   background: linear-gradient(to right, #E1B940, #FFEEA3, #E1B940);
   text-shadow: #fff 0 0 0.5rem;
   padding: 1rem 0.5rem 0.5rem 0.5rem;
-  font-size: 7rem;
+  font-size: 7vw;
 }
 .services-grid {
   display: inline-grid;
@@ -189,7 +192,7 @@ ul {
 make it have two columns on larger devices.*/
 
 .cell {
-	font-size: 1.29rem;
+	font-size: 2vw;
   color: #4E3F76;
   font-weight: 700;
   width: auto;
@@ -281,12 +284,12 @@ make it have two columns on larger devices.*/
 
 /* CALENDLY DIV */
 .calendly-div {
-	background: #fff;
+	background: #FAFBFC;
+	padding: 10vw;
 }
 .calendly-div h1 {
 	color: #202020;
 	text-shadow: #BCADE3 0 0 0.5rem;
-	margin: 8vw 8vw 0 8vw;
 }
 
 .calendly-badge-widget {
@@ -296,7 +299,7 @@ make it have two columns on larger devices.*/
 }
 
 .calendly-div p {
-	margin: 2vw 0 2vw 8vw;
+text-align: right;
 }
 
 /* BLOG DIV */
@@ -631,7 +634,7 @@ make it have two columns on larger devices.*/
 /* MEDIA QUERY */
 @media only screen and (min-width: 992px) {
 	body {
-		font-size: 1.5rem;
+		font-size: 1rem;
 	}
 	p {
 		font-size: 1.5rem;
@@ -642,16 +645,14 @@ make it have two columns on larger devices.*/
 	#nav-icon{
 		font-size: 8rem;
 	}
+	.home-div h1 {
+		font-size: 8vw;
+	}
 	.home-div {
-		padding: 10vh 0 29vh 0;
+		padding: 5vw 0 16vw 0;
 	}
 	.about-div {
 		margin: 8vw;
-	}
-	#bionote p {
-	text-indent: 1rem;
-	margin: 1rem;
-	text-align: justify;
 	}
 	#bionote-pic {
 	max-width: 25%;
@@ -663,9 +664,6 @@ make it have two columns on larger devices.*/
 	}
 	#blog-description {
 		font-size: 1.5rem;
-	}
-	.calendly-badge-widget .calendly-badge-content {
-		padding: 1.5vw 3vw !important;
 	}
 	.sidenav a {
 		font-size: 5rem;
