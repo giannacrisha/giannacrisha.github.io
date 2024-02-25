@@ -349,6 +349,28 @@ make it have two columns on larger devices.*/
 		.medium-publication-feed-root-container {
 			display: none !important;
 		}
+		.grid-item-medium-publication-feed {
+			width: 50% !important;
+		}
+		.medium_publication_post_title {
+			font-size: 2rem !important;
+			line-height: 1.2 !important;
+			color: #202020 !important;
+			margin: 1vw 0 1vw 0 !important;
+		}
+		.medium_publication_post_creator {
+			font-size: 1.2rem !important;
+			margin: 2vw 0 2vw 0 !important;
+		}
+		.sk-description {
+			margin: 1vw 0 1vw 0 !important;
+			font-size: 1.5rem !important;
+		}
+		.sk-read-more-btn {
+			font-size: 1.2rem !important;
+			background-color: #202020 !important;
+			margin: 1vw 0 1vw 0 !important;
+		}
 
 .card {
 			padding: 1rem;
