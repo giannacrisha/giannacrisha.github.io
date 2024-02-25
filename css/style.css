@@ -306,6 +306,10 @@ make it have two columns on larger devices.*/
 	padding: 7vw;
 }
 
+.blog-profile {
+	margin: 1vw;
+}
+
 #blog-pic {
 	width: 25vw;
 	margin: 0 5vw 0 5vw;
@@ -336,7 +340,7 @@ make it have two columns on larger devices.*/
 }
 
 .blog-posts {
-	margin-top: 5vw;
+	margin-top: 2vw;
 }
 
 .blog-container {
