@@ -289,9 +289,6 @@ make it have two columns on larger devices.*/
 	margin: 8vw 8vw 0 8vw;
 }
 
-.calendly-inline-widget {
-	height: 1000px !important;
-}
 .calendly-badge-widget {
 	font-family: "Bricolage Grotesque", sans-serif;
   font-optical-sizing: auto;
@@ -344,7 +341,7 @@ make it have two columns on larger devices.*/
 }
 
 .blog-posts {
-	margin-top: 2vw;
+	margin-top: 8vw;
 }
 
 .blog-container {
@@ -635,23 +632,41 @@ make it have two columns on larger devices.*/
 }
 
 /* MEDIA QUERY */
-@media only screen and (min-width: 992px) {
+@media only screen and (min-width: 820px) {
+	body {
+		font-size: 1.5rem;
+	}
+	p {
+		font-size: 1.5rem;
+	}
+	ul {
+		font-size: 1.5rem;
+	}
+	#nav-icon{
+		font-size: 8rem;
+	}
+	.home-div {
+		padding: 12vh 0 27vh 0;
+	}
 	.about-div {
-	background-color: white;
-	margin: 1rem;
-}
-#bionote {
+		margin: 8vw;
+	}
+	#bionote p {
 	text-indent: 1rem;
-	font-size: 1.5rem;
 	margin: 1rem;
 	text-align: justify;
-	padding: 3rem;
-}
-#bionote-pic {
+	}
+	#bionote-pic {
 	max-width: 25%;
 	float: left;
 	margin: 1rem 2rem 1rem 3rem;
-}
+	}
+	#blog-name {
+		font-size: 3rem;
+	}
+	#blog-description {
+		font-size: 1.5rem;
+	}
 }
 
 
