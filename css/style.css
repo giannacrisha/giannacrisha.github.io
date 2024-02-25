@@ -288,6 +288,10 @@ make it have two columns on larger devices.*/
 	text-shadow: #BCADE3 0 0 0.5rem;
 	margin: 8vw 8vw 0 8vw;
 }
+
+.calendly-inline-widget {
+	height: 1000px !important;
+}
 .calendly-badge-widget {
 	font-family: "Bricolage Grotesque", sans-serif;
   font-optical-sizing: auto;
@@ -374,29 +378,6 @@ make it have two columns on larger devices.*/
 			font-size: 1.2rem !important;
 			background-color: #202020 !important;
 			margin: 1vw 0 1vw 0 !important;
-		}
-
-.card {
-			padding: 1rem;
-			font-size: 3vw;
-			background-color: #202020;
-			border-radius: 15px;
-			box-shadow: 0 1.5rem 3rem -0.75rem hsla(0, 0%, 0%, 0.25);
-			transition: 0.5s;
-		}
-
-		.card:hover {
-			color: white;
-			background-color: #4E3F76;
-		}
-
-		#cardtitle {
-			text-decoration: none;
-			color: #383838;
-		}
-		.card h2 {
-			font-weight: 900;
-			line-height: 0.1;
 		}
 
 /* GOLD DIV */
