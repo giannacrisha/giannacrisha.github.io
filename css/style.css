@@ -436,6 +436,10 @@ margin-right: 5vw;
 	margin: 3vw 0 1vw 0;
 	color: #202020;
 }
+
+#blog-profile {
+	width: 100%;
+}
 #blog-description {
 	font-size: 0.8vw;
 	color: #585858;
