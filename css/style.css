@@ -422,7 +422,7 @@ margin-right: 5vw;
 }
 
 .calendly-inline-widget, .calendly-mobile {
-	height: 80vh !important;
+	height: 600px !important;
 }
 
 /* BLOG DIV */
