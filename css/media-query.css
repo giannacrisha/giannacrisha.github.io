@@ -1,14 +1,33 @@
 
 @media only screen and (min-width: 768px) {
+	html {
+		font-size: 2vw;
+	}
+	#bionote-pic {
+		width: 30vw;
+	}
 	#blog-name {
 		font-size: 4vw;
 	}
 	#blog-description {
 		font-size: 2vw;
 	}
+	.container-div {
+		display: flex;
+	}
+	.form-div {
+		width: 70%;
+	}
+	.contact-div {
+		width: 30%;
+	}
 }
 
 @media only screen and (min-width: 992px) {
+	.home-div h1 {
+		font-size: 8vw;
+	}
+
 	.container-div{
 		display: flex;
 	}
@@ -20,6 +39,7 @@
 	}
 
 }
+
 /*@media only screen and (min-width: 992px) {
 	body {
 font-size: 1.5vw;
