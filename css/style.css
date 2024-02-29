@@ -253,11 +253,11 @@ display: none;
 	font-weight: 800;
 }
 .slides-container {
-	max-height: 600px;
 	position: relative;
 	overflow: hidden;
 	border-radius: 20px;
 	margin: 2vw;
+	aspect-ratio: 3 / 2.3;
 }
 .slides-info {
 display: none;
@@ -335,11 +335,11 @@ transition: 0.5s;
 }
 .left{
 	float:left!important;
-	margin:3vw;
+	padding:3vw;
 }
 .right{
 	float:right!important;
-	margin:3vw;
+padding:3vw;
 }
 .cert-button {
 	background-color: #202020;
