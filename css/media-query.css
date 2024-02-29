@@ -1,7 +1,15 @@
-@media only screen and (min-width: 992px) {
-/*TEXT ELEMENTS*/
+
+@media only screen and (min-width: 768px) {
+	#blog-name {
+		font-size: 4vw;
+	}
+	#blog-description {
+		font-size: 2vw;
+	}
+}
+/*@media only screen and (min-width: 992px) {
 	body {
-/*		font-size: 1.5vw;*/
+font-size: 1.5vw;
 	}
 	ul {
 		font-size: 1.5vw;
@@ -9,7 +17,7 @@
 	h1 {
 		font-size: 6vw;
 	}
-/*NAV*/
+
 	#nav-icon{
 		font-size: 8rem;
 	}
@@ -20,14 +28,14 @@
 	.sidenav .closebtn {
 		font-size: 8rem;
 	}
-/*HOME*/
+
 	.home-div h1 {
 		font-size: 8vw;
 	}
 	.home-div {
 		padding: 5vw 0 16vw 0;
 	}
-/*ABOUT	*/
+
 	.about-div {
 		display: flex;
 	}
@@ -46,7 +54,6 @@
 	.services-list {
 		display: block;
 	}
-	/*CERT*/
 .qual-div {
 	display: flex;
 }
@@ -68,7 +75,6 @@
 	.service:hover {
 		font-weight: 1000;
 	}
-/*BLOG*/
 	#blog-name {
 		font-size: 2vw;
 	}
@@ -81,7 +87,6 @@
 	}
 	.blog-profile {
 	}
-/*CERTIFICATIONS*/
 .slides-container {
 	max-height: 400px;
 	position: relative;
@@ -205,4 +210,4 @@ transition: 0.5s;
 @media only screen and (max-width: 991px) {
 	.bionote-container {
 	
-}
+}*/
