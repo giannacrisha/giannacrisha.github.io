@@ -80,7 +80,6 @@
 		font-size: 1.5vw;
 	}
 	.blog-profile {
-		max-width: 800px;
 	}
 /*CERTIFICATIONS*/
 .slides-container {
@@ -101,6 +100,9 @@ font-size: 2vw;
 cursor: pointer;
 margin-top: 1vw;
 transition: 0.5s;
+}
+.slides-info-link {
+	color: #4E3F76;
 }
 .slides-info:hover {
 	color: #202020;
