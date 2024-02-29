@@ -421,28 +421,31 @@ margin-right: 5vw;
 }
 
 /* BLOG DIV */
+.blog-container {
+	background-color: #fff;
+	border-radius: 15px;
+	overflow: hidden;
+}
 .blog-div {
 	background-color: #202020;
 	padding: 7vw;
 }
+.blog-profile {
+	margin: 2rem 2rem 0 2rem;
+}
 #blog-pic {
 	width: 25vw;
-	margin: 0 4vw;
+	margin-right: 1.5rem;
 	float: left;
 	max-width: 300px;
 }
 #blog-name {
 	font-weight: 600;
-	margin: 3vw 0 1vw 0;
 	color: #202020;
-}
-
-#blog-profile {
-	width: 100%;
+	font-size: 4vw;
 }
 #blog-description {
 	color: #585858;
-	margin: 0;
 }
 #blog-follow-btn {
 	background-color: #202020;
@@ -450,18 +453,8 @@ margin-right: 5vw;
   border-radius: 50px;
   color: white;
   padding: 1.5vw 3vw;
-  font-size: 2.5vw;
-  margin: 3vw 0 0 0;
+  font-size: 1rem;
 }
-.blog-posts {
-	margin-top: 8vw;
-}
-.blog-container {
-			padding: 1rem;
-			background-color: #fff;
-			border-radius: 15px;
-			overflow: hidden;
-		}
 .medium-publication-feed-root-container {
 			display: none !important;
 		}
@@ -485,6 +478,7 @@ margin-right: 5vw;
 			font-size: 1rem !important;
 			background-color: #202020 !important;
 			margin: 1vw 0 1vw 0 !important;
+			padding: 2vw !important;
 		}
 
 /* GOLD DIV */
@@ -531,7 +525,7 @@ margin-right: 5vw;
   font-variation-settings: "wdth" 100;
 	padding: 1vw 2vw;
 	border: none;
-	margin: 0.3rem;
+	margin: 1.5vw;
 	width: 80%;
 	color: #202020;
 	border-radius: 10px;
@@ -543,7 +537,7 @@ margin-right: 5vw;
 	padding: 1vw 2vw;
 	color: #202020;
 	border: none;
-	margin: 0.3rem;
+	margin: 1.5vw;
 	width: 80%;
 	height: 15vh;
 	border-radius: 10px;
