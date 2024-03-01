@@ -44,23 +44,26 @@
 }
 
 @media only screen and (min-width: 992px) {
+/* TEXT ELEMENTS */
+	html {
+		font-size: 1.5vw;
+	}
+	h1 {
+		font-size: 6vw;
+	}
+
+/* NAVIGATION */
 	#nav-icon {
 		font-size: 10vw;
 	}
+
+/* HOME DIV */
 	.home-div h1 {
 		font-size: 8vw;
 	}
 
-	.container-div{
-		display: flex;
-	}
-	.form-div {
-		width: 70%;
-	}
-	.contact-div {
-		width: 30%;
-	}
 
+/* ABOUT DIV */
 	.about-div {
 		display: flex;
 	}
@@ -70,8 +73,15 @@
 	margin: 1rem 2rem 1rem 3rem;
 	}
 	.bionote-container {
-		margin: 2vw;
-		width: 75%;
+		margin: 0;
+		width: 65%;
+	}
+	.academy-badge {
+		display: none;
+	}
+	.services-div {
+		width: 35%;
+		overflow: hidden;
 	}
 	.services-grid {
 		display: none;
@@ -100,7 +110,16 @@
 	.service:hover {
 		font-weight: 1000;
 	}
-	
+	.container-div{
+		display: flex;
+	}
+	.form-div {
+		width: 70%;
+	}
+	.contact-div {
+		width: 30%;
+	}
+
 }
 
 /*@media only screen and (min-width: 992px) {
@@ -110,9 +129,7 @@ font-size: 1.5vw;
 	ul {
 		font-size: 1.5vw;
 	}
-	h1 {
-		font-size: 6vw;
-	}
+	
 
 	#nav-icon{
 		font-size: 8rem;
