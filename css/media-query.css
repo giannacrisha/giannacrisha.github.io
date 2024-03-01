@@ -89,12 +89,29 @@
 	.services-list {
 		display: block;
 	}
+
+/* PORTFOLIO DIV */
+.portfolio-div {
+	border-bottom-left-radius: 0;
+	padding: 3vw;
+	width: 50%;
+	height: auto;
+}
+.project-cards {
+	font-size: 2vw;
+	padding: 2vw;
+	margin: 2vw 2vw 0 0;
+}
 .qual-div {
 	display: flex;
 }
 .cert-div {
 	padding: 3vw;
 	width: 50%;
+	height: fit-content;
+}
+.cert-button {
+font-size: 2vw;
 }
 	.services-list ul {
 		list-style-type: none;
@@ -119,6 +136,12 @@
 	.contact-div {
 		width: 30%;
 	}
+/* CALENDLY DIV */
+.calendly-container {
+	padding: 3vw;
+	border-top-right-radius: 0;
+	
+}
 
 }
 
