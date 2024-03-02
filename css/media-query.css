@@ -12,15 +12,6 @@
 	#blog-description {
 		font-size: 2vw;
 	}
-	.container-div {
-		display: flex;
-	}
-	.form-div {
-		width: 70%;
-	}
-	.contact-div {
-		width: 30%;
-	}
 	.grid-sizer-medium-publication-feed {
 		width: unset !important;
 	}
@@ -127,21 +118,25 @@ font-size: 2vw;
 	.service:hover {
 		font-weight: 1000;
 	}
-	.container-div{
-		display: flex;
+
+/* CALENDLY DIV */
+	.calendly-container {
+		padding: 3vw;
+		border-top-right-radius: 0;
 	}
-	.form-div {
-		width: 70%;
+
+/* FOOTER */
+	#footer-logo {
+		width: 7vw;
+		margin: 3vw;
 	}
 	.contact-div {
-		width: 30%;
+		padding: 0;
 	}
-/* CALENDLY DIV */
-.calendly-container {
-	padding: 3vw;
-	border-top-right-radius: 0;
-	
-}
+	#contact-icon {
+		width: 4vw;
+
+	}
 
 }
 
