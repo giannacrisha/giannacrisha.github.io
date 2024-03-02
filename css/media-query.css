@@ -96,11 +96,33 @@
 		display: block;
 	}
 
+/* CERT */
+.cert-div {
+	padding: 3vw;
+	width: 55%;
+	height: fit-content;
+}
+.cert-button {
+font-size: 2vw;
+}
+.slides-info {
+		margin: 0 1vw;
+}
+.slides-info i {
+	font-size: 3vw;
+}
+.indicator-div {
+bottom: 3vw;
+}
+.left, .right {
+	padding: 2vw;
+}
+
 /* PORTFOLIO DIV */
 .portfolio-div {
 	border-bottom-left-radius: 0;
 	padding: 3vw;
-	width: 50%;
+	width: 45%;
 	height: auto;
 }
 .project-cards {
@@ -108,17 +130,10 @@
 	padding: 2vw;
 	margin: 2vw 2vw 0 0;
 }
-.qual-div {
+.qual {
 	display: flex;
 }
-.cert-div {
-	padding: 3vw;
-	width: 50%;
-	height: fit-content;
-}
-.cert-button {
-font-size: 2vw;
-}
+/*SERVICES*/
 	.services-list ul {
 		list-style-type: none;
 		padding-inline-start: 0;
