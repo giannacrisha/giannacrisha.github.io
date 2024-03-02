@@ -133,6 +133,9 @@ font-size: 2vw;
 	}
 
 /* FOOTER */
+.form-div button {
+	font-size: 2vw;
+}
 	#footer-logo {
 		width: 7vw;
 		margin: 3vw;
@@ -142,7 +145,6 @@ font-size: 2vw;
 	}
 	#contact-icon {
 		width: 4vw;
-
 	}
 
 }
