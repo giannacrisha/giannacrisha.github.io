@@ -1,7 +1,7 @@
 
 @media only screen and (min-width: 768px) {
 	html {
-		font-size: 2vw;
+		font-size: 1rem;
 	}
 	#bionote-pic {
 		width: 30vw;
@@ -44,7 +44,7 @@
 @media only screen and (min-width: 992px) {
 /* TEXT ELEMENTS */
 	html {
-		font-size: 1.5vw;
+		font-size: 1rem;
 	}
 	h1 {
 		font-size: 6vw;
@@ -76,7 +76,7 @@
 	#bionote-pic {
 	max-width: 40%;
 	float: left;
-	margin: 1rem 2rem 1rem 3rem;
+	margin: 1rem 2rem 0 0;
 	}
 	.bionote-container {
 		margin: 0;
@@ -155,9 +155,27 @@ bottom: 3vw;
 		border-top-right-radius: 0;
 	}
 
+	#blog-name {
+		font-size: 2vw;
+	}
+	#blog-description {
+		font-size: 1.5vw;
+	}
+	.blog-profile {
+		margin: 5rem 5rem 0 5rem;
+	}
+
 /* FOOTER */
+.form-div textarea {
+		font-size: 1.5vw;
+	}
+
+	.form-div input {
+		font-size: 1.5vw;
+	}
 .form-div button {
-	font-size: 2vw;
+	font-size: 1.5vw;
+	padding: 2vw 3vw;
 }
 	#footer-logo {
 		width: 7vw;
@@ -169,6 +187,7 @@ bottom: 3vw;
 	#contact-icon {
 		width: 4vw;
 	}
+
 
 }
 
