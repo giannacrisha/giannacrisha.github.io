@@ -291,6 +291,93 @@ if (!hasWebGLSupport()) {
   bubbles.visible = false;
   scene.add(bubbles);
 
+  const fishSchool = new THREE.Group();
+  fishSchool.visible = false;
+  scene.add(fishSchool);
+
+  const fishPalette = [
+    0xffb36e,
+    0xff7b9d,
+    0x7dd3fc,
+    0xfff4a6,
+    0x9be7ff
+  ];
+
+  const createFish = (hexColor) => {
+    const group = new THREE.Group();
+    const bodyMaterial = new THREE.MeshStandardMaterial({
+      color: hexColor,
+      metalness: 0.14,
+      roughness: 0.32,
+      emissive: hexColor,
+      emissiveIntensity: 0.16
+    });
+
+    const bodyGeometry = new THREE.CapsuleGeometry(0.26, 0.5, 10, 18);
+    const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+    body.rotation.z = Math.PI / 2;
+    group.add(body);
+
+    const tailMaterial = bodyMaterial.clone();
+    tailMaterial.color = bodyMaterial.color.clone();
+    tailMaterial.color.offsetHSL(0, 0.1, 0.12);
+    const tailGeometry = new THREE.ConeGeometry(0.18, 0.48, 10, 1);
+    const tail = new THREE.Mesh(tailGeometry, tailMaterial);
+    tail.name = 'tail';
+    tail.position.x = -0.62;
+    tail.rotation.z = Math.PI / 2;
+    tail.rotation.y = Math.PI;
+    group.add(tail);
+
+    const dorsalMaterial = bodyMaterial.clone();
+    dorsalMaterial.color = bodyMaterial.color.clone();
+    dorsalMaterial.color.offsetHSL(0.02, 0.18, 0.18);
+    const dorsalGeometry = new THREE.ConeGeometry(0.12, 0.28, 8, 1);
+    const dorsal = new THREE.Mesh(dorsalGeometry, dorsalMaterial);
+    dorsal.position.set(0.08, 0.18, 0);
+    dorsal.rotation.x = Math.PI;
+    group.add(dorsal);
+
+    const finMaterial = bodyMaterial.clone();
+    finMaterial.color = bodyMaterial.color.clone();
+    finMaterial.color.offsetHSL(-0.04, 0.12, 0.08);
+    const pectoralGeometry = new THREE.ConeGeometry(0.1, 0.22, 8, 1);
+    const leftFin = new THREE.Mesh(pectoralGeometry, finMaterial);
+    leftFin.position.set(-0.02, -0.02, 0.16);
+    leftFin.rotation.set(Math.PI * 0.5, 0, 0);
+    group.add(leftFin);
+
+    const rightFin = leftFin.clone();
+    rightFin.position.z = -leftFin.position.z;
+    rightFin.rotation.y = Math.PI;
+    group.add(rightFin);
+
+    return group;
+  };
+
+  const fishStartX = -13;
+  const fishEndX = 13;
+  const fishSpan = fishEndX - fishStartX;
+  const fishCount = reduceMotion ? 6 : 15;
+
+  for (let i = 0; i < fishCount; i += 1) {
+    const color = fishPalette[i % fishPalette.length];
+    const fish = createFish(color);
+    const scale = 0.3 + Math.random() * 0.26;
+    fish.scale.setScalar(scale);
+    const baseY = -0.8 - Math.random() * 1.5;
+    const depth = -1.6 - Math.random() * 3.6;
+    fish.position.set(fishStartX, baseY, depth);
+    fish.userData = {
+      baseY,
+      depth,
+      sway: 0.18 + Math.random() * 0.28,
+      phase: Math.random() * Math.PI * 2,
+      offset: Math.random()
+    };
+    fishSchool.add(fish);
+  }
+
   const underwaterCtx = underwaterCanvas.getContext('2d');
   const underwaterParticles = [];
   const underwaterParticleCount = 90;
@@ -356,7 +443,15 @@ if (!hasWebGLSupport()) {
   const state = {
     buoyStrength: 0.12,
     underwaterActive: false,
-    waterRise: -0.42
+    waterRise: -0.42,
+    fishActive: false,
+    fishProgress: 0,
+    fishLoopCount: 3
+  };
+
+  const setFishActive = (active) => {
+    state.fishActive = active;
+    fishSchool.visible = active;
   };
 
   let lenis;
@@ -404,6 +499,8 @@ if (!hasWebGLSupport()) {
     processTL.to(camera.position, { y: 1.0, z: 4.4, duration: 1.2, ease: 'power1.inOut' }, 0);
     processTL.to(state, { waterRise: -1.1, duration: 1.2, ease: 'sine.inOut' }, 0);
     processTL.to(scene.fog, { density: 0.07, duration: 1.2 }, 0);
+    processTL.to(sun.position, { y: -0.2, z: -9.6, duration: 1.2, ease: 'sine.inOut' }, 0);
+    processTL.to(sunUniforms.uIntensity, { value: 0.85, duration: 1.2 }, 0);
     processTL.to(waterUniforms.uColorShallow.value, { r: 0.14, g: 0.39, b: 0.58, duration: 1.2 }, 0);
     processTL.to(waterUniforms.uColorDeep.value, { r: 0.01, g: 0.09, b: 0.2, duration: 1.2 }, 0);
     processTL.to(bubbleMaterial, { opacity: 0.45, duration: 1 }, 0.2);
@@ -415,12 +512,18 @@ if (!hasWebGLSupport()) {
     aboutTL.to(camera.position, { y: 0.86, z: 3.4, duration: 1 }, 0);
     aboutTL.to(scene.fog, { density: 0.09, duration: 1 }, 0);
     aboutTL.to(state, { buoyStrength: 0.18, duration: 1 }, 0);
+    aboutTL.to(sun.position, { y: -0.52, z: -9.0, duration: 1 }, 0);
+    aboutTL.to(sunUniforms.uIntensity, { value: 0.72, duration: 1 }, 0);
 
     const writingTL = gsap.timeline({
       scrollTrigger: { trigger: '#writing', start: 'top 80%', end: 'bottom center' }
     });
     writingTL.to(camera.position, { y: 0.72, z: 2.8, duration: 1 }, 0);
     writingTL.to(scene.fog, { density: 0.095, duration: 1 }, 0);
+    writingTL.to(sun.position, { y: -0.95, z: -8.7, duration: 1 }, 0);
+    writingTL.to(sunUniforms.uCoreColor.value, { r: 0.88, g: 0.56, b: 0.72, duration: 1 }, 0);
+    writingTL.to(sunUniforms.uEdgeColor.value, { r: 0.52, g: 0.2, b: 0.45, duration: 1 }, 0);
+    writingTL.to(sunUniforms.uIntensity, { value: 0.6, duration: 1 }, 0);
     writingTL.to(underwaterCanvas, { opacity: 0.75, duration: 1 }, 0);
     writingTL.to(bubbleMaterial, { opacity: 0.55, duration: 1 }, 0);
 
@@ -429,14 +532,31 @@ if (!hasWebGLSupport()) {
         trigger: '#contact',
         start: 'top 80%',
         end: 'bottom bottom',
-        onLeave: () => { state.underwaterActive = false; },
-        onLeaveBack: () => { state.underwaterActive = true; }
+        onLeave: () => { state.underwaterActive = false; setFishActive(false); },
+        onLeaveBack: () => { state.underwaterActive = true; setFishActive(true); }
       }
     });
     contactTL.to(camera.position, { y: 0.85, z: 3.1, duration: 1 }, 0);
     contactTL.to(scene.fog, { density: 0.06, duration: 1 }, 0);
+    contactTL.to(sun.position, { y: -1.35, z: -8.3, duration: 1 }, 0);
+    contactTL.to(sunUniforms.uIntensity, { value: 0.48, duration: 1 }, 0);
     contactTL.to(underwaterCanvas, { opacity: 0.35, duration: 1 }, 0.2);
     contactTL.to(bubbleMaterial, { opacity: 0.3, duration: 1 }, 0.2);
+
+    ScrollTrigger.create({
+      trigger: '#process',
+      start: 'top bottom',
+      endTrigger: '#contact',
+      end: 'bottom top',
+      scrub: false,
+      onEnter: () => setFishActive(true),
+      onEnterBack: () => setFishActive(true),
+      onLeave: () => setFishActive(false),
+      onLeaveBack: () => setFishActive(false),
+      onUpdate: (self) => {
+        state.fishProgress = self.progress;
+      }
+    });
   } else {
     waterUniforms.uAmplitude.value = 0.08;
     state.buoyStrength = 0.05;
@@ -444,6 +564,9 @@ if (!hasWebGLSupport()) {
     scene.fog.density = 0.055;
     bubbles.visible = false;
     underwaterCanvas.style.opacity = '0';
+    state.fishLoopCount = 1;
+    state.fishProgress = 0;
+    setFishActive(false);
   }
 
   const portrait = document.querySelector('.about-portrait');
@@ -491,6 +614,24 @@ if (!hasWebGLSupport()) {
       cloud.position.x += Math.sin(elapsed * 0.05 + idx) * 0.0008;
       cloud.position.y += Math.cos(elapsed * 0.08 + idx) * 0.0006;
     });
+
+    if (fishSchool.children.length > 0) {
+      const loops = Math.max(state.fishLoopCount, 1);
+      const loopedProgress = state.fishProgress * loops;
+      fishSchool.children.forEach((fish, idx) => {
+        const data = fish.userData;
+        const normalized = ((loopedProgress + data.offset) % 1 + 1) % 1;
+        fish.position.x = fishStartX + normalized * fishSpan;
+        fish.position.y = data.baseY + Math.sin(elapsed * 2.2 + data.phase + idx * 0.15) * data.sway;
+        fish.rotation.y = 0;
+        fish.rotation.x = Math.sin(elapsed * 0.7 + data.phase) * 0.06;
+        fish.rotation.z = Math.sin(elapsed * 0.8 + data.phase) * 0.03;
+        const tail = fish.getObjectByName('tail');
+        if (tail) {
+          tail.rotation.y = Math.sin(elapsed * 6.4 + data.phase) * 0.55;
+        }
+      });
+    }
 
     if (state.underwaterActive || bubbleMaterial.opacity > 0.01) {
       const positionsAttr = bubbleGeometry.getAttribute('position');
