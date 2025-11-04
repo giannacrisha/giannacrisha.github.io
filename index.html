@@ -1,67 +1,232 @@
 <!DOCTYPE html>
 <html lang="en-US">
 <head>
-	<!-- META TAGS -->
-	<meta charset="utf-8" name="google-site-verification" content="3cNtBgBQ-POsuleYb3anTbuDpXZJXlz2G6lzAbpoJOo">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title></title>
-	<!-- FAVICON -->
-	<link rel="icon" type="image/x-icon" href="/img/icons/favicon.png">
-	<!-- CSS -->
-	<link rel="stylesheet" type="text/css" href="css/style.css">
-	<link rel="stylesheet" type="text/css" href="css/loader.css">
-	<!-- MEDIA QUERIES -->
-	<link rel="stylesheet" type="text/css" href="css/mq/medium.css">
-	<link rel="stylesheet" type="text/css" href="css/mq/large.css">
-	<!-- ICON KITS -->
-	<script src="https://kit.fontawesome.com/b87a731647.js" crossorigin="anonymous"></script>
+  <meta charset="utf-8" name="google-site-verification" content="3cNtBgBQ-POsuleYb3anTbuDpXZJXlz2G6lzAbpoJOo">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gi | Sunset to Sea Portfolio</title>
+  <link rel="icon" type="image/x-icon" href="/img/icons/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/mq/medium.css">
+  <link rel="stylesheet" href="css/mq/large.css">
 </head>
 <body>
-<!-- NAV -->
-<div id="mySidenav" class="sidenav">
-	<a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
-	<!-- <a class="active-tab" href="#">Home</a>
-	<a href="about.html" accesskey="d">About</a>
-	<a href="https://bit.ly/PortfolioByGi" target="_blank">Portfolio</a> -->
-	<a href="https://www.instagram.com/giannaesque?igsh=MTl5a3MwaTV6MWJ5YQ%3D%3D&utm_source=qr" target="_blank">Instagram</a>
-	<a href="https://linkedin.com/in/giannacrisha" target="_blank">LinkedIn</a>
-	<a href="https://github.com/giannacrisha" target="_blank">Github</a>
-	<a href="https://linktr.ee/giannacrisha" target="_blank">Linktree</a>
-	<a href="https://medium.com/@giannacrisha" target="_blank">Medium</a>
-</div>
-<span id="nav-icon" onclick="openNav()">&#10209;</span>
-<!-- MAIN DIV -->
-	<div class="main-div">
-		<!-- HOME DIV -->
-		<div class="home-div">
-			<div class="my-bubble">
-				<span style="animation-delay: 1.5s; animation: pop 0.4s linear 1; animation-fill-mode: forwards;">hi! it's gi :)</span>
-				<span style="animation: pop 0.4s linear 1; animation-delay: 2s; animation-fill-mode: forwards;">i'm refreshing the look of my website. stay tuned!</span>
-				<span style="animation: pop 0.4s linear 1;  animation-fill-mode: forwards; background-color: #776688; animation-delay: 4s; ">for the meantime, you can visit my linktree.</span>
-			</div>
-			<div class="your-bubble">
-				<a href="https://linktr.ee/giannacrisha"><span style="animation: pop 0.4s linear 1;  animation-fill-mode: forwards; animation-delay: 6.5s; float: right; border: 4px solid #191919; background-color:#F4F1F1; color:#191919; transition: 0.5s;">okay...</span></a>
-			</div>
-		<div class="book">
-		</div>
-	</div>
+  <div class="film-grain" aria-hidden="true"></div>
+  <header class="site-header">
+    <div class="brand">
+      <img class="brand-logo" src="img/icons/logo.png" alt="Gi logo">
+      <span class="brand-mark">Gi</span>
+    </div>
+    <nav class="site-nav" aria-label="Primary">
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-list">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="nav-toggle-bar"></span>
+        <span class="nav-toggle-bar"></span>
+      </button>
+      <ul id="nav-list" class="nav-links">
+        <li><a href="#hero">Sunset</a></li>
+        <li><a href="#projects">Projects</a></li>
+        <li><a href="#process">Process</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#writing">Writing</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
 
-<!-- LOADER DIV
-	<div class="loaderDIV">
-			<span class="page turn"></span>
-			<span class="page turn"></span>
-		  <span class="page turn"></span>
-		  <span class="page turn"></span>
-		  <span class="page turn"></span>
-		  <span class="page turn"></span>
-		  <span class="cover"></span>
-		  <span class="page"></span>
-		  <span class="cover turn"></span>
-		</div>
-	</div>-->
+  <main>
+    <section id="hero" class="section hero" aria-labelledby="hero-title">
+      <div class="canvas-wrapper" aria-hidden="true">
+        <canvas id="hero-canvas"></canvas>
+        <canvas id="underwater-canvas" hidden></canvas>
+      </div>
+      <div class="section-content hero-content">
+        <p class="eyebrow">Designing systems that move like tides.</p>
+        <h1 id="hero-title">Where creativity meets the current.</h1>
+        <p class="lead">
+          I’m Gi, a designer, strategist, and entrepreneur turning complex ideas into intuitive experiences.
+          From startups to social innovation, I build products that feel alive—adaptive, meaningful, and human.
+        </p>
+        <div class="cta-group">
+          <a class="btn primary" href="#projects">See My Work</a>
+        </div>
+      </div>
+    </section>
 
-<!-- JAVASCRIPT -->
-	<script type="text/javascript" src="js/loader.js"></script>
-	<script type="text/javascript" src="js/nav.js"></script>
+    <section id="projects" class="section projects" aria-labelledby="projects-title">
+      <div class="section-anchor" aria-hidden="true"></div>
+      <div class="section-content">
+        <p class="section-eyebrow">Selected projects flowing between design, technology, and transformation.</p>
+        <h2 id="projects-title">On the Water</h2>
+        <div class="projects-grid">
+          <article class="project-card">
+            <div class="card-body">
+              <h3>LifeLoops — Gamified Self-Automation App</h3>
+              <p>A journaling and habit-tracking system that visualizes personal data as living “loops.”</p>
+              <div class="tags" aria-label="Tags">
+                <span>UX Design</span>
+                <span>Automation</span>
+                <span>Behavioral Psychology</span>
+                <span>Data Visualization</span>
+              </div>
+            </div>
+            <footer>
+              <a class="ghost-link" href="/work/lifeloops">Explore project</a>
+            </footer>
+          </article>
+
+          <article class="project-card">
+            <div class="card-body">
+              <h3>WheeLoan — Campus Mobility Platform</h3>
+              <p>A community-driven vehicle-sharing app for college campuses, promoting accessibility and sustainability.</p>
+              <div class="tags" aria-label="Tags">
+                <span>App Design</span>
+                <span>Social Impact</span>
+                <span>Prototyping</span>
+                <span>No-Code</span>
+              </div>
+            </div>
+            <footer>
+              <a class="ghost-link" href="/work/wheeloan">Explore project</a>
+            </footer>
+          </article>
+
+          <article class="project-card">
+            <div class="card-body">
+              <h3>CYCLE — Youth Coalition for Empowerment</h3>
+              <p>A grassroots leadership network in Caraga empowering young changemakers to co-design local solutions.</p>
+              <div class="tags" aria-label="Tags">
+                <span>Systems Design</span>
+                <span>Governance</span>
+                <span>Brand Strategy</span>
+                <span>SDGs</span>
+              </div>
+            </div>
+            <footer>
+              <a class="ghost-link" href="/work/cycle">Explore project</a>
+            </footer>
+          </article>
+
+          <article class="project-card">
+            <div class="card-body">
+              <h3>Earth Moon Magick — Ethical Publishing Studio</h3>
+              <p>Designing mystical-modern print collections—journals, decks, and tools for reflection and ritual.</p>
+              <div class="tags" aria-label="Tags">
+                <span>Product Design</span>
+                <span>Branding</span>
+                <span>E-commerce</span>
+                <span>Illustration</span>
+              </div>
+            </div>
+            <footer>
+              <a class="ghost-link" href="/work/emm">Explore project</a>
+            </footer>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="process" class="section process" aria-labelledby="process-title">
+      <div class="section-content">
+        <h2 id="process-title">Dive Below</h2>
+        <p class="section-lead">Beneath every story is a system.</p>
+        <p>
+          Each project begins with listening—understanding human rhythms, cultural patterns, and emotional cues.
+          From there, I prototype loops: feedback systems that turn insights into experiences.
+          Whether building with code, canvas, or community, my process blends anthropology, psychology, and design thinking
+          to surface what truly connects people.
+        </p>
+      </div>
+    </section>
+
+    <section id="about" class="section about" aria-labelledby="about-title">
+      <div class="section-content about-grid">
+        <div class="about-portrait" aria-hidden="true"></div>
+        <div class="about-copy">
+          <h2 id="about-title">Deep Sea</h2>
+          <p class="section-lead">Designer. Researcher. Builder of meaningful systems.</p>
+          <p>
+            I’m a multidisciplinary student at Brandeis University majoring in Psychology, Anthropology, and Business—with
+            minors in Legal Studies and CAST. My work explores how creativity and systems design can reshape education,
+            wellness, and community. I lead ventures that bridge storytelling and technology, from LifeLoops to CYCLE,
+            while serving as a Marketing &amp; Startup Champion at Brandeis Innovation.
+          </p>
+          <div class="pillars">
+            <h3>Skill Pillars</h3>
+            <ul>
+              <li><strong>Design &amp; Systems Thinking</strong> — Turning abstract ideas into intuitive flows and frameworks.</li>
+              <li><strong>Storytelling &amp; Brand</strong> — Crafting narratives that translate vision into emotional clarity.</li>
+              <li><strong>Social Impact Strategy</strong> — Building ventures that scale inclusion and access.</li>
+            </ul>
+          </div>
+          <div class="credentials">
+            <h3>Credentials &amp; Affiliations</h3>
+            <ul>
+              <li>Brandeis Innovation</li>
+              <li>Weston Art &amp; Innovation Center</li>
+              <li>DeisHacks</li>
+              <li>Girls Who Code Brandeis</li>
+              <li>Wien Scholar</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="writing" class="section writing" aria-labelledby="writing-title">
+      <div class="section-content">
+        <h2 id="writing-title">Surface Reflections</h2>
+        <p class="section-lead">Thoughts and essays from the intersections of art, systems, and impact.</p>
+        <div class="writing-list">
+          <article class="writing-card">
+            <h3>Designing Memory: Why Loops Matter</h3>
+            <p>On building LifeLoops and the psychology of remembering.</p>
+            <a class="ghost-link" href="/writing/designing-memory">Read story</a>
+          </article>
+          <article class="writing-card">
+            <h3>The Future of Youth Systems Design</h3>
+            <p>Lessons from organizing movements in Caraga.</p>
+            <a class="ghost-link" href="/writing/youth-design">Read story</a>
+          </article>
+          <article class="writing-card">
+            <h3>Automation as Art</h3>
+            <p>Rethinking productivity through play, narrative, and flow.</p>
+            <a class="ghost-link" href="/writing/automation-art">Read story</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact" class="section contact" aria-labelledby="contact-title">
+      <div class="section-content">
+        <h2 id="contact-title">Return to Shore</h2>
+        <p class="section-lead">Let’s build something that flows.</p>
+        <p class="contact-body">
+          If my work resonates with your vision, reach out—I’d love to collaborate, brainstorm, or design together.
+        </p>
+        <div class="cta-group">
+          <a class="btn secondary" href="mailto:gi@domain.com">Email Me</a>
+        </div>
+        <div class="social-links" aria-label="Social media">
+          <a href="" aria-disabled="true">LinkedIn</a>
+          <a href="" aria-disabled="true">GitHub</a>
+          <a href="" aria-disabled="true">Instagram</a>
+          <a href="" aria-disabled="true">Medium</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>© <span id="year"></span> Gi. Crafted with tides and Three.js.</p>
+  </footer>
+
+  <noscript>
+    <div class="noscript">This experience relies on modern JavaScript. Please enable JavaScript to explore the full sunset-to-sea portfolio.</div>
+  </noscript>
+
+  <script type="module" src="js/main.js"></script>
 </body>
 </html>
