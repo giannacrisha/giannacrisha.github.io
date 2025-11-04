@@ -1,154 +1,54 @@
-@media only screen and (min-width: 992px) {
-/* TEXT ELEMENTS */
-	html {
-		font-size: 1rem;
-	}
-	h1 {
-		font-size: 6vw;
-	}
-	h3 {
-		font-size: 4vw;
-	}
+@media (min-width: 992px) {
+  :root {
+    --header-height: 90px;
+  }
 
-/* NAVIGATION */
-	#nav-icon {
-		font-size: 10vw;
-	}
-	.sidenav a {
-		font-size: 5rem;
-		padding: 1vw 0vw 0 10vw;
-	}
-	.sidenav .closebtn {
-		font-size: 8rem;
-	}
+  .site-header {
+    padding: 0 6vw;
+  }
 
+  .section {
+    padding: clamp(5rem, 12vh, 9rem) 8vw;
+  }
 
-/* HOME DIV */
-	.home-div h1 {
-		font-size: 8vw;
-	}
+  .hero .section-content {
+    max-width: 640px;
+  }
 
+  .projects-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2rem;
+  }
 
-/* ABOUT DIV */
-	.about-div {
-		display: flex;
-	}
-	#bionote-pic {
-	max-width: 40%;
-	float: left;
-	margin: 0 2rem 2rem 0;
-	}
-	.bionote-container {
-		margin: 0;
-		width: 65%;
-	}
-	.academy-badge {
-		display: none;
-	}
-	.services-div {
-		width: 35%;
-		overflow: hidden;
-	}
-	.services-grid {
-		display: none;
-	}
-	.services-list {
-		display: block;
-	}
+  .project-card {
+    padding: 2rem;
+  }
 
-/* CERT */
-.cert-div {
-	padding: 3vw;
-	width: 55%;
-	height: fit-content;
-}
-.cert-button {
-font-size: 2vw;
-}
-.slides-info {
-		margin: 0 1vw;
-}
-.slides-info i {
-	font-size: 3vw;
-}
-.indicator-div {
-bottom: 3vw;
-}
-.left, .right {
-	padding: 2vw;
-}
+  .writing-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 
-/* PORTFOLIO DIV */
-.portfolio-div {
-	border-bottom-left-radius: 0;
-	padding: 3vw;
-	width: 45%;
-	height: auto;
-}
-.project-cards {
-	padding: 2vw;
-	margin: 2vw 2vw 0 0;
-}
-.project-cards h3 {
-	font-size: 2.5vw;
-}
-.qual {
-	display: flex;
-}
-/*SERVICES*/
-	.services-list ul {
-		list-style-type: none;
-		padding-inline-start: 0;
-		padding: 2vw;
-		text-align: left;
-	}
-	.service {
-		color: white;
-		transition: 0.5s;
-		line-height: 2;
-	}
-	.service:hover {
-		font-weight: 1000;
-	}
+  .about-grid {
+    grid-template-columns: minmax(280px, 1fr) minmax(0, 1.6fr);
+    gap: 3rem;
+  }
 
-/*BLOG*/
+  .about-portrait {
+    width: 100%;
+    max-width: 340px;
+  }
 
-	#blog-name {
-		font-size: 2vw;
-	}
-	#blog-description {
-		font-size: 1.5vw;
-	}
-	.blog-profile {
-		margin: 5rem 5rem 0 5rem;
-	}
-	#blog-follow-btn {
-		padding: 1vw 2vw;
-	}
-	.medium_publication_feed_data {
-    width: 33% !important;
-	}
+  .contact .section-content {
+    max-width: 720px;
+    text-align: center;
+    align-items: center;
+  }
 
-/* FOOTER */
-.form-div textarea {
-		font-size: 1.5vw;
-	}
+  .contact .section-content .cta-group {
+    justify-content: center;
+  }
 
-	.form-div input {
-		font-size: 1.5vw;
-	}
-.form-div button {
-	font-size: 1.5vw;
-	padding: 2vw 3vw;
-}
-	#footer-logo {
-		width: 7vw;
-		margin: 3vw;
-	}
-	.contact-div {
-		padding: 0;
-	}
-	#contact-icon {
-		width: 4vw;
-	}
+  .contact .social-links {
+    justify-content: center;
+  }
 }
