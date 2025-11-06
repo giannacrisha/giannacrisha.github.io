@@ -1,7 +1,7 @@
 .loaderDIV {
 	width: 100%;
 	height: 100%;
-	background: linear-gradient(#4E3F76, #202020);
+	background: linear-gradient(#ede0d8, #d6bdb0, #362111);
 	position: fixed;
 	top: 0;
 	left: 0;
@@ -18,7 +18,7 @@
   perspective: 70rem;
 }
 .cover {
-	background: linear-gradient(#E1B940, #FFEEA3, #E1B940);
+	background: linear-gradient(#ede0d8, #d6bdb0, #ede0d8);
   transform: rotateY(0deg);
   width: 9.25rem;
   height: 12.5rem;
