@@ -71,22 +71,22 @@ if (!hasWebGLSupport()) {
   renderer.toneMappingExposure = 1.08;
 
   const scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2(0x071729, 0.036);
+  scene.fog = new THREE.FogExp2(0x362111, 0.036);
 
   const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 160);
   camera.position.set(0, 1.8, 6.2);
   scene.add(camera);
 
-  const ambientLight = new THREE.AmbientLight(0xffe5c5, 0.6);
-  const keyLight = new THREE.DirectionalLight(0xffc689, 1.1);
+  const ambientLight = new THREE.AmbientLight(0xede0d8, 0.6);
+  const keyLight = new THREE.DirectionalLight(0xd6bdb0, 1.1);
   keyLight.position.set(-5, 6, 3);
-  const rimLight = new THREE.DirectionalLight(0x6ab9ff, 0.55);
+  const rimLight = new THREE.DirectionalLight(0x362111, 0.55);
   rimLight.position.set(4, -2, -6);
   scene.add(ambientLight, keyLight, rimLight);
 
   const skyUniforms = {
-    uTopColor: { value: new THREE.Color('#FF9A64') },
-    uBottomColor: { value: new THREE.Color('#1D3B5E') }
+    uTopColor: { value: new THREE.Color('#ede0d8') },
+    uBottomColor: { value: new THREE.Color('#d6bdb0') }
   };
 
   const skyMaterial = new THREE.ShaderMaterial({
@@ -118,8 +118,8 @@ if (!hasWebGLSupport()) {
   scene.add(sky);
 
   const sunUniforms = {
-    uCoreColor: { value: new THREE.Color('#FFD8A6') },
-    uEdgeColor: { value: new THREE.Color('#FF7B45') },
+    uCoreColor: { value: new THREE.Color('#ede0d8') },
+    uEdgeColor: { value: new THREE.Color('#d6bdb0') },
     uIntensity: { value: 1.0 }
   };
 
@@ -157,7 +157,7 @@ if (!hasWebGLSupport()) {
     transparent: true,
     depthWrite: false,
     uniforms: {
-      uColor: { value: new THREE.Color('#FFF1E4') },
+      uColor: { value: new THREE.Color('#ede0d8') },
       uOpacity: { value: 0.55 }
     },
     vertexShader: `
@@ -192,8 +192,8 @@ if (!hasWebGLSupport()) {
     uTime: { value: 0 },
     uAmplitude: { value: 0.16 },
     uRippleStrength: { value: 0.0 },
-    uColorShallow: { value: new THREE.Color('#2F6FA1') },
-    uColorDeep: { value: new THREE.Color('#06223A') },
+    uColorShallow: { value: new THREE.Color('#d6bdb0') },
+    uColorDeep: { value: new THREE.Color('#362111') },
     uOpacity: { value: 0.92 }
   };
 
@@ -242,10 +242,10 @@ if (!hasWebGLSupport()) {
 
   const chipGeometry = new THREE.BoxGeometry(0.8, 0.1, 1.4);
   const chipMaterial = new THREE.MeshStandardMaterial({
-    color: 0xff9a7d,
+    color: 0xd6bdb0,
     metalness: 0.1,
     roughness: 0.45,
-    emissive: 0x331710,
+    emissive: 0x362111,
     emissiveIntensity: 0.18
   });
 
@@ -279,7 +279,7 @@ if (!hasWebGLSupport()) {
   bubbleGeometry.setAttribute('speed', new THREE.BufferAttribute(bubbleSpeeds, 1));
 
   const bubbleMaterial = new THREE.PointsMaterial({
-    color: 0x7ae7c7,
+    color: 0xd6bdb0,
     size: 0.08,
     transparent: true,
     opacity: 0.0,
@@ -296,11 +296,9 @@ if (!hasWebGLSupport()) {
   scene.add(fishSchool);
 
   const fishPalette = [
-    0xffb36e,
-    0xff7b9d,
-    0x7dd3fc,
-    0xfff4a6,
-    0x9be7ff
+    0xede0d8,
+    0xd6bdb0,
+    0x362111
   ];
 
   const createFish = (hexColor) => {
@@ -408,7 +406,7 @@ if (!hasWebGLSupport()) {
         y: Math.random() * viewportHeight,
         radius: 1 + Math.random() * 2,
         speed: 12 + Math.random() * 20,
-        hue: 168 + Math.random() * 40,
+        hue: 30 + Math.random() * 10,
         alpha: 0.0
       });
     }
@@ -471,10 +469,10 @@ if (!hasWebGLSupport()) {
       scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top' }
     });
     heroTL.to(sun.position, { y: 1.2, z: -10.4, duration: 1 }, 0);
-    heroTL.to(sunUniforms.uCoreColor.value, { r: 1.0, g: 0.74, b: 0.52, duration: 1 }, 0);
-    heroTL.to(sunUniforms.uEdgeColor.value, { r: 0.96, g: 0.35, b: 0.2, duration: 1 }, 0);
-    heroTL.to(skyUniforms.uTopColor.value, { r: 0.36, g: 0.45, b: 0.82, duration: 1 }, 0.4);
-    heroTL.to(skyUniforms.uBottomColor.value, { r: 0.02, g: 0.09, b: 0.21, duration: 1 }, 0.4);
+    heroTL.to(sunUniforms.uCoreColor.value, { r: 0.839, g: 0.741, b: 0.69, duration: 1 }, 0);
+    heroTL.to(sunUniforms.uEdgeColor.value, { r: 0.212, g: 0.129, b: 0.067, duration: 1 }, 0);
+    heroTL.to(skyUniforms.uTopColor.value, { r: 0.929, g: 0.878, b: 0.847, duration: 1 }, 0.4);
+    heroTL.to(skyUniforms.uBottomColor.value, { r: 0.839, g: 0.741, b: 0.69, duration: 1 }, 0.4);
     heroTL.to(clouds.position, { y: -0.45, duration: 1 }, 0);
 
     const projectsTL = gsap.timeline({
@@ -501,8 +499,8 @@ if (!hasWebGLSupport()) {
     processTL.to(scene.fog, { density: 0.07, duration: 1.2 }, 0);
     processTL.to(sun.position, { y: -0.2, z: -9.6, duration: 1.2, ease: 'sine.inOut' }, 0);
     processTL.to(sunUniforms.uIntensity, { value: 0.85, duration: 1.2 }, 0);
-    processTL.to(waterUniforms.uColorShallow.value, { r: 0.14, g: 0.39, b: 0.58, duration: 1.2 }, 0);
-    processTL.to(waterUniforms.uColorDeep.value, { r: 0.01, g: 0.09, b: 0.2, duration: 1.2 }, 0);
+    processTL.to(waterUniforms.uColorShallow.value, { r: 0.839, g: 0.741, b: 0.69, duration: 1.2 }, 0);
+    processTL.to(waterUniforms.uColorDeep.value, { r: 0.212, g: 0.129, b: 0.067, duration: 1.2 }, 0);
     processTL.to(bubbleMaterial, { opacity: 0.45, duration: 1 }, 0.2);
     processTL.to(underwaterCanvas, { opacity: 0.65, duration: 1.4, ease: 'sine.inOut' }, 0.1);
 
@@ -521,8 +519,8 @@ if (!hasWebGLSupport()) {
     writingTL.to(camera.position, { y: 0.72, z: 2.8, duration: 1 }, 0);
     writingTL.to(scene.fog, { density: 0.095, duration: 1 }, 0);
     writingTL.to(sun.position, { y: -0.95, z: -8.7, duration: 1 }, 0);
-    writingTL.to(sunUniforms.uCoreColor.value, { r: 0.88, g: 0.56, b: 0.72, duration: 1 }, 0);
-    writingTL.to(sunUniforms.uEdgeColor.value, { r: 0.52, g: 0.2, b: 0.45, duration: 1 }, 0);
+    writingTL.to(sunUniforms.uCoreColor.value, { r: 0.929, g: 0.878, b: 0.847, duration: 1 }, 0);
+    writingTL.to(sunUniforms.uEdgeColor.value, { r: 0.212, g: 0.129, b: 0.067, duration: 1 }, 0);
     writingTL.to(sunUniforms.uIntensity, { value: 0.6, duration: 1 }, 0);
     writingTL.to(underwaterCanvas, { opacity: 0.75, duration: 1 }, 0);
     writingTL.to(bubbleMaterial, { opacity: 0.55, duration: 1 }, 0);
