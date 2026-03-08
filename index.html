@@ -1,232 +1,318 @@
 <!DOCTYPE html>
-<html lang="en-US">
+<html lang="en">
 <head>
-  <meta charset="utf-8" name="google-site-verification" content="3cNtBgBQ-POsuleYb3anTbuDpXZJXlz2G6lzAbpoJOo">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gi | Sunset to Sea Portfolio</title>
-    <link rel="icon" type="image/x-icon" href="/img/icons/favicon.png">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/mq/medium.css">
-  <link rel="stylesheet" href="css/mq/large.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gianna Crisha — Journal</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Cormorant+SC:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/journal.css" />
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/"
+    }
+  }
+  </script>
 </head>
 <body>
-  <div class="film-grain" aria-hidden="true"></div>
-  <header class="site-header">
-    <div class="brand">
-      <img class="brand-logo" src="img/icons/logo.png" alt="Gi logo">
-      <span class="brand-mark">Gi</span>
+
+  <!-- WebGL Canvas -->
+  <canvas id="canvas"></canvas>
+
+  <!-- Loading Screen -->
+  <div id="loading">
+    <div class="loading-inner">
+      <div class="loading-monogram">G.C.</div>
+      <div class="loading-tagline">portfolio journal</div>
+      <div class="loading-bar-wrap">
+        <div id="loading-bar"></div>
+      </div>
     </div>
-    <nav class="site-nav" aria-label="Primary">
-      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-list">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="nav-toggle-bar"></span>
-        <span class="nav-toggle-bar"></span>
-      </button>
-      <ul id="nav-list" class="nav-links">
-        <li><a href="#hero">Sunset</a></li>
-        <li><a href="#projects">Projects</a></li>
-        <li><a href="#process">Process</a></li>
-        <li><a href="#about">About</a></li>
-        <li><a href="#writing">Writing</a></li>
-        <li><a href="#contact">Contact</a></li>
+  </div>
+
+  <!-- Click Hint -->
+  <div id="hint">
+    <span class="hint-text">open the journal</span>
+    <span class="hint-arrow">↓</span>
+  </div>
+
+  <!-- Journal UI Overlay -->
+  <div id="journal-ui">
+
+    <!-- Left Page: Table of Contents -->
+    <nav id="toc">
+      <div class="toc-top">
+        <div class="toc-monogram">G.C.</div>
+        <div class="toc-rule"></div>
+        <div class="toc-subtitle">Portfolio Journal</div>
+      </div>
+
+      <ul class="toc-list">
+        <li class="toc-item active" data-page="about">
+          <span class="toc-num">I</span>
+          <span class="toc-label">About</span>
+          <span class="toc-dots"></span>
+          <span class="toc-pg">1</span>
+        </li>
+        <li class="toc-item" data-page="projects">
+          <span class="toc-num">II</span>
+          <span class="toc-label">Projects</span>
+          <span class="toc-dots"></span>
+          <span class="toc-pg">2</span>
+        </li>
+        <li class="toc-item" data-page="writing">
+          <span class="toc-num">III</span>
+          <span class="toc-label">Writing</span>
+          <span class="toc-dots"></span>
+          <span class="toc-pg">3</span>
+        </li>
+        <li class="toc-item" data-page="doodle">
+          <span class="toc-num">IV</span>
+          <span class="toc-label">Doodle</span>
+          <span class="toc-dots"></span>
+          <span class="toc-pg">4</span>
+        </li>
       </ul>
+
+      <div class="toc-bottom">
+        <div class="toc-rule"></div>
+        <div class="toc-year">MMXXIV</div>
+        <div class="toc-close" id="toc-close" title="Close journal">✕</div>
+      </div>
     </nav>
-  </header>
 
-  <main>
-    <section id="hero" class="section hero" aria-labelledby="hero-title">
-      <div class="canvas-wrapper" aria-hidden="true">
-        <canvas id="hero-canvas"></canvas>
-        <canvas id="underwater-canvas" hidden></canvas>
-      </div>
-      <div class="section-content hero-content">
-        <p class="eyebrow">Designing systems that move like tides.</p>
-        <h1 id="hero-title">Where creativity meets the current.</h1>
-        <p class="lead">
-          I’m Gi, a designer, strategist, and entrepreneur turning complex ideas into intuitive experiences.
-          From startups to social innovation, I build products that feel alive—adaptive, meaningful, and human.
-        </p>
-        <div class="cta-group">
-          <a class="btn primary" href="#projects">See My Work</a>
-        </div>
-      </div>
-    </section>
+    <!-- Right Page: Content -->
+    <div id="pages">
 
-    <section id="projects" class="section projects" aria-labelledby="projects-title">
-      <div class="section-anchor" aria-hidden="true"></div>
-      <div class="section-content">
-        <p class="section-eyebrow">Selected projects flowing between design, technology, and transformation.</p>
-        <h2 id="projects-title">On the Water</h2>
-        <div class="projects-grid">
-          <article class="project-card">
-            <div class="card-body">
-              <h3>LifeLoops — Gamified Self-Automation App</h3>
-              <p>A journaling and habit-tracking system that visualizes personal data as living “loops.”</p>
-              <div class="tags" aria-label="Tags">
-                <span>UX Design</span>
-                <span>Automation</span>
-                <span>Behavioral Psychology</span>
-                <span>Data Visualization</span>
+      <!-- PAGE: About -->
+      <div class="page" id="page-about">
+        <div class="page-inner">
+          <div class="page-corner-tl"></div>
+          <div class="page-corner-tr"></div>
+
+          <header class="page-hd">
+            <div class="page-chapter">Chapter I</div>
+            <h1 class="page-title">About</h1>
+            <div class="page-rule-gold"></div>
+          </header>
+
+          <div class="page-body">
+            <p class="page-intro">Hello — I'm <em>Gianna.</em></p>
+            <p>A creative technologist living at the crossing of art and code. I craft digital experiences that feel handmade — built with intention, texture, and soul.</p>
+            <p>When I'm not building things, you'll find me in coffee shops filling journal pages, wandering through art museums, or dreaming up new ways to make the web feel more human.</p>
+
+            <div class="page-divider">
+              <span>✦</span>
+            </div>
+
+            <div class="skills-grid">
+              <div class="skill-col">
+                <div class="skill-heading">Design</div>
+                <ul>
+                  <li>Creative Direction</li>
+                  <li>UI / UX</li>
+                  <li>Motion &amp; Interaction</li>
+                  <li>Typography</li>
+                </ul>
+              </div>
+              <div class="skill-col">
+                <div class="skill-heading">Code</div>
+                <ul>
+                  <li>Three.js / WebGL</li>
+                  <li>React / Next.js</li>
+                  <li>Node.js</li>
+                  <li>Creative Coding</li>
+                </ul>
               </div>
             </div>
-            <footer>
-              <a class="ghost-link" href="/work/lifeloops">Explore project</a>
-            </footer>
-          </article>
 
-          <article class="project-card">
-            <div class="card-body">
-              <h3>WheeLoan — Campus Mobility Platform</h3>
-              <p>A community-driven vehicle-sharing app for college campuses, promoting accessibility and sustainability.</p>
-              <div class="tags" aria-label="Tags">
-                <span>App Design</span>
-                <span>Social Impact</span>
-                <span>Prototyping</span>
-                <span>No-Code</span>
-              </div>
-            </div>
-            <footer>
-              <a class="ghost-link" href="/work/wheeloan">Explore project</a>
-            </footer>
-          </article>
-
-          <article class="project-card">
-            <div class="card-body">
-              <h3>CYCLE — Youth Coalition for Empowerment</h3>
-              <p>A grassroots leadership network in Caraga empowering young changemakers to co-design local solutions.</p>
-              <div class="tags" aria-label="Tags">
-                <span>Systems Design</span>
-                <span>Governance</span>
-                <span>Brand Strategy</span>
-                <span>SDGs</span>
-              </div>
-            </div>
-            <footer>
-              <a class="ghost-link" href="/work/cycle">Explore project</a>
-            </footer>
-          </article>
-
-          <article class="project-card">
-            <div class="card-body">
-              <h3>Earth Moon Magick — Ethical Publishing Studio</h3>
-              <p>Designing mystical-modern print collections—journals, decks, and tools for reflection and ritual.</p>
-              <div class="tags" aria-label="Tags">
-                <span>Product Design</span>
-                <span>Branding</span>
-                <span>E-commerce</span>
-                <span>Illustration</span>
-              </div>
-            </div>
-            <footer>
-              <a class="ghost-link" href="/work/emm">Explore project</a>
-            </footer>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section id="process" class="section process" aria-labelledby="process-title">
-      <div class="section-content">
-        <h2 id="process-title">Dive Below</h2>
-        <p class="section-lead">Beneath every story is a system.</p>
-        <p>
-          Each project begins with listening—understanding human rhythms, cultural patterns, and emotional cues.
-          From there, I prototype loops: feedback systems that turn insights into experiences.
-          Whether building with code, canvas, or community, my process blends anthropology, psychology, and design thinking
-          to surface what truly connects people.
-        </p>
-      </div>
-    </section>
-
-    <section id="about" class="section about" aria-labelledby="about-title">
-      <div class="section-content about-grid">
-        <div class="about-portrait" aria-hidden="true"></div>
-        <div class="about-copy">
-          <h2 id="about-title">Deep Sea</h2>
-          <p class="section-lead">Designer. Researcher. Builder of meaningful systems.</p>
-          <p>
-            I’m a multidisciplinary student at Brandeis University majoring in Psychology, Anthropology, and Business—with
-            minors in Legal Studies and CAST. My work explores how creativity and systems design can reshape education,
-            wellness, and community. I lead ventures that bridge storytelling and technology, from LifeLoops to CYCLE,
-            while serving as a Marketing &amp; Startup Champion at Brandeis Innovation.
-          </p>
-          <div class="pillars">
-            <h3>Skill Pillars</h3>
-            <ul>
-              <li><strong>Design &amp; Systems Thinking</strong> — Turning abstract ideas into intuitive flows and frameworks.</li>
-              <li><strong>Storytelling &amp; Brand</strong> — Crafting narratives that translate vision into emotional clarity.</li>
-              <li><strong>Social Impact Strategy</strong> — Building ventures that scale inclusion and access.</li>
-            </ul>
+            <blockquote class="page-quote">
+              <p>"The details are not the details.<br/>They make the design."</p>
+              <cite>— Charles Eames</cite>
+            </blockquote>
           </div>
-          <div class="credentials">
-            <h3>Credentials &amp; Affiliations</h3>
-            <ul>
-              <li>Brandeis Innovation</li>
-              <li>Weston Art &amp; Innovation Center</li>
-              <li>DeisHacks</li>
-              <li>Girls Who Code Brandeis</li>
-              <li>Wien Scholar</li>
-            </ul>
+
+          <footer class="page-ft">
+            <span class="page-num">1</span>
+          </footer>
+        </div>
+      </div>
+
+      <!-- PAGE: Projects -->
+      <div class="page hidden" id="page-projects">
+        <div class="page-inner">
+          <div class="page-corner-tl"></div>
+          <div class="page-corner-tr"></div>
+
+          <header class="page-hd">
+            <div class="page-chapter">Chapter II</div>
+            <h1 class="page-title">Projects</h1>
+            <div class="page-rule-gold"></div>
+          </header>
+
+          <div class="page-body">
+            <div class="project-entry">
+              <div class="project-num">01</div>
+              <div class="project-info">
+                <h3 class="project-name">Ethereal Canvas</h3>
+                <p class="project-desc">An interactive generative art experience exploring particle systems and fluid simulation. Users paint with light across a dark canvas.</p>
+                <div class="project-tags">
+                  <span>Three.js</span><span>GLSL</span><span>WebGL</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="project-entry">
+              <div class="project-num">02</div>
+              <div class="project-info">
+                <h3 class="project-name">Paper Garden</h3>
+                <p class="project-desc">A virtual botanical garden built entirely from CSS and SVG origami. Every plant unfolds as you scroll through the seasons.</p>
+                <div class="project-tags">
+                  <span>React</span><span>SVG</span><span>GSAP</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="project-entry">
+              <div class="project-num">03</div>
+              <div class="project-info">
+                <h3 class="project-name">Tender Letters</h3>
+                <p class="project-desc">A slow social platform for handwritten digital correspondence. Letters arrive like real mail — one day at a time.</p>
+                <div class="project-tags">
+                  <span>Next.js</span><span>Node</span><span>Canvas API</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="project-entry">
+              <div class="project-num">04</div>
+              <div class="project-info">
+                <h3 class="project-name">Reverie OS</h3>
+                <p class="project-desc">A whimsical browser-based desktop environment. Windows, wallpapers, and tiny worlds to explore, all made of dreams.</p>
+                <div class="project-tags">
+                  <span>TypeScript</span><span>WebAssembly</span>
+                </div>
+              </div>
+            </div>
           </div>
+
+          <footer class="page-ft">
+            <span class="page-num">2</span>
+          </footer>
         </div>
       </div>
-    </section>
 
-    <section id="writing" class="section writing" aria-labelledby="writing-title">
-      <div class="section-content">
-        <h2 id="writing-title">Surface Reflections</h2>
-        <p class="section-lead">Thoughts and essays from the intersections of art, systems, and impact.</p>
-        <div class="writing-list">
-          <article class="writing-card">
-            <h3>Designing Memory: Why Loops Matter</h3>
-            <p>On building LifeLoops and the psychology of remembering.</p>
-            <a class="ghost-link" href="/writing/designing-memory">Read story</a>
-          </article>
-          <article class="writing-card">
-            <h3>The Future of Youth Systems Design</h3>
-            <p>Lessons from organizing movements in Caraga.</p>
-            <a class="ghost-link" href="/writing/youth-design">Read story</a>
-          </article>
-          <article class="writing-card">
-            <h3>Automation as Art</h3>
-            <p>Rethinking productivity through play, narrative, and flow.</p>
-            <a class="ghost-link" href="/writing/automation-art">Read story</a>
-          </article>
+      <!-- PAGE: Writing -->
+      <div class="page hidden" id="page-writing">
+        <div class="page-inner">
+          <div class="page-corner-tl"></div>
+          <div class="page-corner-tr"></div>
+
+          <header class="page-hd">
+            <div class="page-chapter">Chapter III</div>
+            <h1 class="page-title">Writing</h1>
+            <div class="page-rule-gold"></div>
+          </header>
+
+          <div class="page-body">
+
+            <div class="writing-entry">
+              <div class="writing-date">March 2024</div>
+              <h3 class="writing-title">On the Nature of Digital Craft</h3>
+              <p class="writing-excerpt">There is a kind of honesty in handmade things — a fingerprint pressed into clay, the trembling line of a brushstroke. I've been thinking about whether code can carry that same truth...</p>
+              <a class="writing-read" href="#">Read →</a>
+            </div>
+
+            <div class="writing-entry">
+              <div class="writing-date">February 2024</div>
+              <h3 class="writing-title">The Quiet Art of Debugging</h3>
+              <p class="writing-excerpt">Sometimes the best code is the code you delete. I spent three hours this week tracing a bug through six files only to find it in a missing semicolon. There's a strange meditation in that...</p>
+              <a class="writing-read" href="#">Read →</a>
+            </div>
+
+            <div class="writing-entry">
+              <div class="writing-date">January 2024</div>
+              <h3 class="writing-title">Finding Beauty in Systems</h3>
+              <p class="writing-excerpt">There is poetry in a well-designed API. The way functions nest inside one another like Russian dolls, each doing exactly its one thing with elegant restraint...</p>
+              <a class="writing-read" href="#">Read →</a>
+            </div>
+
+            <div class="writing-entry">
+              <div class="writing-date">December 2023</div>
+              <h3 class="writing-title">Slow Tech</h3>
+              <p class="writing-excerpt">What if we made websites the way potters throw pots? Slowly. With our hands. Feeling the material resist and yield. The web doesn't have to be fast to be good...</p>
+              <a class="writing-read" href="#">Read →</a>
+            </div>
+
+          </div>
+
+          <footer class="page-ft">
+            <span class="page-num">3</span>
+          </footer>
         </div>
       </div>
-    </section>
 
-    <section id="contact" class="section contact" aria-labelledby="contact-title">
-      <div class="section-content">
-        <h2 id="contact-title">Return to Shore</h2>
-        <p class="section-lead">Let’s build something that flows.</p>
-        <p class="contact-body">
-          If my work resonates with your vision, reach out—I’d love to collaborate, brainstorm, or design together.
-        </p>
-        <div class="cta-group">
-          <a class="btn secondary" href="mailto:gi@domain.com">Email Me</a>
-        </div>
-        <div class="social-links" aria-label="Social media">
-          <a href="" aria-disabled="true">LinkedIn</a>
-          <a href="" aria-disabled="true">GitHub</a>
-          <a href="" aria-disabled="true">Instagram</a>
-          <a href="" aria-disabled="true">Medium</a>
+      <!-- PAGE: Doodle -->
+      <div class="page hidden" id="page-doodle">
+        <div class="page-inner doodle-page-inner">
+          <div class="page-corner-tl"></div>
+          <div class="page-corner-tr"></div>
+
+          <header class="page-hd">
+            <div class="page-chapter">Chapter IV</div>
+            <h1 class="page-title">Doodle</h1>
+            <div class="page-rule-gold"></div>
+            <p class="doodle-invite">Pick up the golden pen and draw something.</p>
+          </header>
+
+          <div class="doodle-wrap">
+            <canvas id="doodle-canvas"></canvas>
+          </div>
+
+          <div class="doodle-toolbar">
+            <div class="toolbar-group">
+              <div class="toolbar-label">Ink</div>
+              <div class="color-swatches">
+                <button class="swatch active" data-color="#2A1F1A" style="--sw: #2A1F1A" title="Ink"></button>
+                <button class="swatch" data-color="#C9A84C" style="--sw: #C9A84C" title="Gold"></button>
+                <button class="swatch" data-color="#8B4357" style="--sw: #8B4357" title="Rose"></button>
+                <button class="swatch" data-color="#3A5A8A" style="--sw: #3A5A8A" title="Indigo"></button>
+                <button class="swatch" data-color="#4A6741" style="--sw: #4A6741" title="Sage"></button>
+              </div>
+            </div>
+
+            <div class="toolbar-group">
+              <div class="toolbar-label">Weight</div>
+              <div class="size-buttons">
+                <button class="size-btn" data-size="1.5" title="Fine" style="font-size:6px">&#9679;</button>
+                <button class="size-btn active" data-size="4" title="Medium" style="font-size:10px">&#9679;</button>
+                <button class="size-btn" data-size="10" title="Bold" style="font-size:16px">&#9679;</button>
+              </div>
+            </div>
+
+            <div class="toolbar-group">
+              <button class="clear-btn" id="clear-btn">✕ Clear</button>
+            </div>
+          </div>
+
+          <footer class="page-ft">
+            <span class="page-num">4</span>
+          </footer>
         </div>
       </div>
-    </section>
-  </main>
 
-  <footer class="site-footer">
-    <p>© <span id="year"></span> Gi. Crafted with tides and Three.js.</p>
-  </footer>
+    </div><!-- #pages -->
+  </div><!-- #journal-ui -->
 
-  <noscript>
-    <div class="noscript">This experience relies on modern JavaScript. Please enable JavaScript to explore the full sunset-to-sea portfolio.</div>
-  </noscript>
+  <!-- Scroll indicator -->
+  <div id="scroll-hint">scroll to turn pages</div>
 
-  <script type="module" src="js/main.js"></script>
+  <script type="module" src="js/journal.js"></script>
 </body>
 </html>
