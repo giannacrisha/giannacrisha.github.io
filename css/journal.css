@@ -178,6 +178,15 @@ html, body {
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.5s ease;
+
+  /* Top-down shadow illusion: bright overhead light at centre fades to shadow at edges */
+  background: radial-gradient(
+    ellipse 70% 60% at 50% 50%,
+    rgba(255, 255, 255, 0.72) 0%,
+    rgba(230, 230, 230, 0.55) 35%,
+    rgba(180, 180, 180, 0.45) 65%,
+    rgba(100, 100, 100, 0.38) 100%
+  );
 }
 
 #journal-ui.visible {
