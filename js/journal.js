@@ -744,9 +744,9 @@ function openJournal() {
     onUpdate: () => camera.lookAt(0, 0, 0),
   });
 
-  // Flip journal cover open (rotate around spine — Y axis)
+  // Flip journal cover open (rotate around spine — Z axis, cover arcs up then left)
   gsap.to(coverPivot.rotation, {
-    y: -Math.PI * 0.97,
+    z: Math.PI * 0.97,
     duration: 1.9,
     delay: 0.55,
     ease: 'power2.inOut',
@@ -777,7 +777,7 @@ function closeJournal() {
 
   // Close cover
   gsap.to(coverPivot.rotation, {
-    y: 0,
+    z: 0,
     duration: 1.5,
     ease: 'power2.inOut',
   });
