@@ -736,57 +736,83 @@ function openJournal() {
   // Hide hint
   gsap.to('#hint', { opacity: 0, duration: 0.4 });
 
-  // Camera → directly overhead so full journal is visible
+  // Camera zooms in toward the journal surface — like leaning over the desk
   gsap.to(camera.position, {
-    x: 0, y: 11.5, z: 0,
-    duration: 2.2,
+    x: 0, y: 3.8, z: 3.2,
+    duration: 1.8,
     ease: 'power3.inOut',
     onUpdate: () => camera.lookAt(0, 0, 0),
   });
 
-  // Flip journal cover open (rotate around spine — Z axis, cover arcs up then left)
+  // Flip journal cover open as we zoom in
   gsap.to(coverPivot.rotation, {
     z: Math.PI * 0.97,
-    duration: 1.9,
-    delay: 0.55,
+    duration: 1.5,
+    delay: 0.3,
     ease: 'power2.inOut',
   });
 
-  // Fog up a little so table fades back
-  gsap.to(scene.fog, { density: 0.09, duration: 2.2 });
+  // Fade 3D canvas out as camera arrives
+  gsap.to(renderer.domElement, {
+    opacity: 0,
+    duration: 0.55,
+    delay: 1.45,
+    ease: 'power2.in',
+  });
 
-  // Show journal UI after cover animation
+  // Show HTML book panel after 3D fades
   setTimeout(() => {
-    const ui = document.getElementById('journal-ui');
+    const ui   = document.getElementById('journal-ui');
+    const book = document.getElementById('journal-book');
     ui.classList.add('visible');
+    // Book enters with a gentle unfold from left
+    gsap.fromTo(book,
+      { scaleX: 0.88, scaleY: 0.94, opacity: 0 },
+      { scaleX: 1,    scaleY: 1,    opacity: 1, duration: 0.55, ease: 'power2.out' }
+    );
 
     const scrollHint = document.getElementById('scroll-hint');
     scrollHint.classList.add('visible');
-  }, 2100);
+  }, 1820);
 }
 
 function closeJournal() {
   S.journalOpen = false;
 
-  // Hide UI
-  const ui = document.getElementById('journal-ui');
-  ui.classList.remove('visible');
   document.getElementById('scroll-hint').classList.remove('visible');
-
   penGroup.visible = false;
+
+  // Collapse HTML book
+  const book = document.getElementById('journal-book');
+  const ui   = document.getElementById('journal-ui');
+  gsap.to(book, {
+    scaleX: 0.88, scaleY: 0.94, opacity: 0,
+    duration: 0.4,
+    ease: 'power2.in',
+    onComplete: () => { ui.classList.remove('visible'); },
+  });
+
+  // Fade 3D canvas back in
+  gsap.to(renderer.domElement, {
+    opacity: 1,
+    duration: 0.6,
+    delay: 0.3,
+    ease: 'power2.out',
+  });
 
   // Close cover
   gsap.to(coverPivot.rotation, {
     z: 0,
     duration: 1.5,
+    delay: 0.3,
     ease: 'power2.inOut',
   });
 
-  // Camera back
+  // Camera back to original view
   gsap.to(camera.position, {
     x: 0, y: 5.5, z: 8,
     duration: 2.0,
-    delay: 0.3,
+    delay: 0.5,
     ease: 'power3.inOut',
     onUpdate: () => camera.lookAt(0, 0, 0),
   });
@@ -794,7 +820,7 @@ function closeJournal() {
   gsap.to(scene.fog, { density: 0.055, duration: 2.0 });
 
   // Show hint again
-  setTimeout(() => gsap.to('#hint', { opacity: 0.8, duration: 0.8 }), 2200);
+  setTimeout(() => gsap.to('#hint', { opacity: 0.8, duration: 0.8 }), 2400);
 }
 
 // ──────────────────────────────────────────────
