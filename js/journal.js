@@ -871,9 +871,9 @@ function navigateTo(pageName) {
 
       // Show pen only on doodle page
       penGroup.visible = (pageName === 'doodle');
-    }, 420);
+    }, 520);
 
-  }, 420);
+  }, 520);
 }
 
 // ──────────────────────────────────────────────
