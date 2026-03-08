@@ -45,49 +45,26 @@
   <!-- Journal UI Overlay -->
   <div id="journal-ui">
 
-    <!-- Left Page: Table of Contents -->
-    <nav id="toc">
-      <div class="toc-top">
-        <div class="toc-monogram">G.C.</div>
-        <div class="toc-rule"></div>
-        <div class="toc-subtitle">Portfolio Journal</div>
+    <!-- Top Navigation -->
+    <nav id="journal-nav">
+      <div class="nav-left">
+        <span class="nav-monogram">G.C.</span>
       </div>
-
-      <ul class="toc-list">
-        <li class="toc-item active" data-page="about">
-          <span class="toc-num">I</span>
-          <span class="toc-label">About</span>
-          <span class="toc-dots"></span>
-          <span class="toc-pg">1</span>
-        </li>
-        <li class="toc-item" data-page="projects">
-          <span class="toc-num">II</span>
-          <span class="toc-label">Projects</span>
-          <span class="toc-dots"></span>
-          <span class="toc-pg">2</span>
-        </li>
-        <li class="toc-item" data-page="writing">
-          <span class="toc-num">III</span>
-          <span class="toc-label">Writing</span>
-          <span class="toc-dots"></span>
-          <span class="toc-pg">3</span>
-        </li>
-        <li class="toc-item" data-page="doodle">
-          <span class="toc-num">IV</span>
-          <span class="toc-label">Doodle</span>
-          <span class="toc-dots"></span>
-          <span class="toc-pg">4</span>
-        </li>
-      </ul>
-
-      <div class="toc-bottom">
-        <div class="toc-rule"></div>
-        <div class="toc-year">MMXXIV</div>
-        <div class="toc-close" id="toc-close" title="Close journal">✕</div>
+      <div class="nav-links">
+        <span class="nav-item active" data-page="about">About</span>
+        <span class="nav-sep">·</span>
+        <span class="nav-item" data-page="projects">Projects</span>
+        <span class="nav-sep">·</span>
+        <span class="nav-item" data-page="writing">Writing</span>
+        <span class="nav-sep">·</span>
+        <span class="nav-item" data-page="doodle">Doodle</span>
+      </div>
+      <div class="nav-right">
+        <span class="nav-close" id="toc-close" title="Close journal">✕</span>
       </div>
     </nav>
 
-    <!-- Right Page: Content -->
+    <!-- Pages -->
     <div id="pages">
 
       <!-- PAGE: About -->

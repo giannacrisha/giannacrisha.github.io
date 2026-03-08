@@ -646,7 +646,7 @@ function bindEvents() {
   window.addEventListener('wheel', onWheel, { passive: false });
 
   // TOC navigation
-  document.querySelectorAll('.toc-item').forEach(el => {
+  document.querySelectorAll('.nav-item').forEach(el => {
     el.addEventListener('click', () => navigateTo(el.dataset.page));
   });
 
@@ -809,7 +809,7 @@ function navigateTo(pageName) {
   const goForward = idx > S.pageIdx;
 
   // Update TOC highlight
-  document.querySelectorAll('.toc-item').forEach(el => {
+  document.querySelectorAll('.nav-item').forEach(el => {
     el.classList.toggle('active', el.dataset.page === pageName);
   });
 
