@@ -736,9 +736,9 @@ function openJournal() {
   // Hide hint
   gsap.to('#hint', { opacity: 0, duration: 0.4 });
 
-  // Camera → top-down angled view
+  // Camera → directly overhead so full journal is visible
   gsap.to(camera.position, {
-    x: 0, y: 10.5, z: 2.0,
+    x: 0, y: 11.5, z: 0,
     duration: 2.2,
     ease: 'power3.inOut',
     onUpdate: () => camera.lookAt(0, 0, 0),
