@@ -26,6 +26,13 @@ const S = {
   lastDoodle:   null,
 };
 
+const CHAPTER_META = {
+  about:    { chapter: 'Chapter I',   title: 'About',    num: '1' },
+  projects: { chapter: 'Chapter II',  title: 'Projects', num: '2' },
+  writing:  { chapter: 'Chapter III', title: 'Writing',  num: '3' },
+  doodle:   { chapter: 'Chapter IV',  title: 'Doodle',   num: '4' },
+};
+
 // ──────────────────────────────────────────────
 // THREE.JS CORE
 // ──────────────────────────────────────────────
@@ -645,13 +652,13 @@ function bindEvents() {
   window.addEventListener('mousemove', onMouseMove);
   window.addEventListener('wheel', onWheel, { passive: false });
 
-  // TOC navigation
-  document.querySelectorAll('.nav-item').forEach(el => {
+  // Bookmark navigation
+  document.querySelectorAll('.bookmark').forEach(el => {
     el.addEventListener('click', () => navigateTo(el.dataset.page));
   });
 
   // Close journal
-  document.getElementById('toc-close')?.addEventListener('click', closeJournal);
+  document.getElementById('bm-close')?.addEventListener('click', closeJournal);
 
   // Doodle toolbar — colors
   document.querySelectorAll('.swatch').forEach(btn => {
@@ -736,44 +743,36 @@ function openJournal() {
   // Hide hint
   gsap.to('#hint', { opacity: 0, duration: 0.4 });
 
-  // Camera zooms in toward the journal surface — like leaning over the desk
+  // Flip journal cover open
+  gsap.to(coverPivot.rotation, {
+    z: Math.PI * 0.97,
+    duration: 1.6,
+    delay: 0.2,
+    ease: 'power2.inOut',
+  });
+
+  // Camera sweeps from angled view to top-down
   gsap.to(camera.position, {
-    x: 0, y: 3.8, z: 3.2,
-    duration: 1.8,
+    x: 0, y: 13, z: 0.8,
+    duration: 2.0,
     ease: 'power3.inOut',
     onUpdate: () => camera.lookAt(0, 0, 0),
   });
 
-  // Flip journal cover open as we zoom in
-  gsap.to(coverPivot.rotation, {
-    z: Math.PI * 0.97,
-    duration: 1.5,
-    delay: 0.3,
-    ease: 'power2.inOut',
-  });
+  // Fog up slightly so table fades back
+  gsap.to(scene.fog, { density: 0.09, duration: 2.0 });
 
-  // Fade 3D canvas out as camera arrives
-  gsap.to(renderer.domElement, {
-    opacity: 0,
-    duration: 0.55,
-    delay: 1.45,
-    ease: 'power2.in',
-  });
-
-  // Show HTML book panel after 3D fades
+  // Show HTML book as camera arrives overhead (canvas stays visible beneath)
   setTimeout(() => {
     const ui   = document.getElementById('journal-ui');
     const book = document.getElementById('journal-book');
     ui.classList.add('visible');
-    // Book enters with a gentle unfold from left
     gsap.fromTo(book,
-      { scaleX: 0.88, scaleY: 0.94, opacity: 0 },
-      { scaleX: 1,    scaleY: 1,    opacity: 1, duration: 0.55, ease: 'power2.out' }
+      { scale: 0.92, opacity: 0 },
+      { scale: 1,    opacity: 1, duration: 0.6, ease: 'power2.out' }
     );
-
-    const scrollHint = document.getElementById('scroll-hint');
-    scrollHint.classList.add('visible');
-  }, 1820);
+    document.getElementById('scroll-hint').classList.add('visible');
+  }, 1900);
 }
 
 function closeJournal() {
@@ -782,37 +781,29 @@ function closeJournal() {
   document.getElementById('scroll-hint').classList.remove('visible');
   penGroup.visible = false;
 
-  // Collapse HTML book
+  // Dismiss HTML book
   const book = document.getElementById('journal-book');
   const ui   = document.getElementById('journal-ui');
   gsap.to(book, {
-    scaleX: 0.88, scaleY: 0.94, opacity: 0,
-    duration: 0.4,
+    scale: 0.92, opacity: 0,
+    duration: 0.45,
     ease: 'power2.in',
     onComplete: () => { ui.classList.remove('visible'); },
-  });
-
-  // Fade 3D canvas back in
-  gsap.to(renderer.domElement, {
-    opacity: 1,
-    duration: 0.6,
-    delay: 0.3,
-    ease: 'power2.out',
   });
 
   // Close cover
   gsap.to(coverPivot.rotation, {
     z: 0,
     duration: 1.5,
-    delay: 0.3,
+    delay: 0.35,
     ease: 'power2.inOut',
   });
 
-  // Camera back to original view
+  // Camera back to original angled view
   gsap.to(camera.position, {
     x: 0, y: 5.5, z: 8,
     duration: 2.0,
-    delay: 0.5,
+    delay: 0.35,
     ease: 'power3.inOut',
     onUpdate: () => camera.lookAt(0, 0, 0),
   });
@@ -834,10 +825,27 @@ function navigateTo(pageName) {
   S.flipping = true;
   const goForward = idx > S.pageIdx;
 
-  // Update TOC highlight
-  document.querySelectorAll('.nav-item').forEach(el => {
+  // Update bookmark highlight
+  document.querySelectorAll('.bookmark').forEach(el => {
     el.classList.toggle('active', el.dataset.page === pageName);
   });
+
+  // Update left page chapter info
+  const meta = CHAPTER_META[pageName];
+  if (meta) {
+    const chEl  = document.getElementById('left-chapter');
+    const ttEl  = document.getElementById('left-title');
+    const numEl = document.getElementById('left-pagenum');
+    gsap.to([chEl, ttEl, numEl], {
+      opacity: 0, y: -8, duration: 0.2,
+      onComplete: () => {
+        chEl.textContent  = meta.chapter;
+        ttEl.textContent  = meta.title;
+        numEl.textContent = `— ${meta.num} —`;
+        gsap.to([chEl, ttEl, numEl], { opacity: 1, y: 0, duration: 0.3 });
+      },
+    });
+  }
 
   const fromId = `page-${S.pages[S.pageIdx]}`;
   const toId   = `page-${pageName}`;
