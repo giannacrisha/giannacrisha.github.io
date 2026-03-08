@@ -84,7 +84,7 @@ function setupRenderer() {
   renderer.shadowMap.type     = THREE.PCFSoftShadowMap;
   renderer.outputColorSpace   = THREE.SRGBColorSpace;
   renderer.toneMapping        = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.1;
+  renderer.toneMappingExposure = 0.85;
 }
 
 // ──────────────────────────────────────────────
@@ -92,8 +92,8 @@ function setupRenderer() {
 // ──────────────────────────────────────────────
 function setupScene() {
   scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x0A0705);
-  scene.fog = new THREE.FogExp2(0x0A0705, 0.055);
+  scene.background = new THREE.Color(0xE8D5B4);
+  scene.fog = new THREE.FogExp2(0xDDC9A8, 0.055);
 }
 
 // ──────────────────────────────────────────────
@@ -110,28 +110,28 @@ function setupCamera() {
 // LIGHTING
 // ──────────────────────────────────────────────
 function setupLighting() {
-  // Soft warm fill
-  const ambient = new THREE.AmbientLight(0xFFE8C0, 0.25);
+  // Bright warm ambient — daylit room feel
+  const ambient = new THREE.AmbientLight(0xFFF5E8, 1.1);
   scene.add(ambient);
 
-  // Main desk lamp — warm golden point light, upper right
-  const lamp = new THREE.PointLight(0xFFD4A0, 4.5, 20, 2);
-  lamp.position.set(4, 7, 3);
+  // Overhead soft key light — like a window above
+  const lamp = new THREE.PointLight(0xFFEDD0, 2.2, 28, 2);
+  lamp.position.set(2, 9, 2);
   lamp.castShadow = true;
   lamp.shadow.mapSize.set(2048, 2048);
-  lamp.shadow.radius = 12;
+  lamp.shadow.radius = 16;
   lamp.shadow.camera.near = 0.5;
   lamp.shadow.camera.far  = 30;
   scene.add(lamp);
 
-  // Cool blue fill from opposite side
-  const fill = new THREE.PointLight(0x7080C0, 0.6, 25, 2);
-  fill.position.set(-5, 5, -4);
+  // Warm secondary fill from the left
+  const fill = new THREE.PointLight(0xFFE0B0, 1.0, 30, 2);
+  fill.position.set(-6, 6, 2);
   scene.add(fill);
 
-  // Rim/top — soft purple glow from behind
-  const rim = new THREE.DirectionalLight(0xB0A0E0, 0.35);
-  rim.position.set(0, 6, -10);
+  // Very soft cool top fill (sky)
+  const rim = new THREE.DirectionalLight(0xE8F0FF, 0.5);
+  rim.position.set(0, 10, -5);
   scene.add(rim);
 
   // Very soft bounce light from table surface
@@ -516,11 +516,11 @@ function createParticles() {
   geo.userData.phases = phases;
 
   const mat = new THREE.PointsMaterial({
-    color:       0xFFE0A0,
-    size:        0.04,
+    color:       0xB08050,
+    size:        0.035,
     transparent: true,
-    opacity:     0.55,
-    blending:    THREE.AdditiveBlending,
+    opacity:     0.35,
+    blending:    THREE.NormalBlending,
     depthWrite:  false,
     sizeAttenuation: true,
   });
