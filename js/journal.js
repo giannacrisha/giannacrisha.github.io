@@ -800,31 +800,27 @@ function closeJournal() {
       gsap.set(book, { opacity: 0 });
       ui.classList.remove('visible');
 
-      // Snap camera back above the journal while screen is white
+      // Kill any lingering open-animation camera tweens, then snap to overhead
+      gsap.killTweensOf(camera.position);
       camera.position.set(0, 9, 0.5);
       camera.lookAt(0, 0, 0);
 
-      // Fade out white while camera sweeps back to angled view
+      // Everything starts from here, while screen is still white
       gsap.to('#portal-flash', { opacity: 0, duration: 1.0, ease: 'power2.out' });
+
+      gsap.to(coverPivot.rotation, { z: 0, duration: 1.5, ease: 'power2.inOut' });
+
+      gsap.to(camera.position, {
+        x: 0, y: 5.5, z: 8,
+        duration: 2.0,
+        ease: 'power3.inOut',
+        onUpdate: () => camera.lookAt(0, 0, 0),
+      });
+
+      gsap.to(scene.fog, { density: 0.055, duration: 2.0 });
+      setTimeout(() => gsap.to('#hint', { opacity: 0.8, duration: 0.8 }), 2400);
     },
   });
-
-  // Close cover + camera return (begin after flash completes ~0.4s)
-  gsap.to(coverPivot.rotation, {
-    z: 0,
-    duration: 1.5, delay: 0.5,
-    ease: 'power2.inOut',
-  });
-
-  gsap.to(camera.position, {
-    x: 0, y: 5.5, z: 8,
-    duration: 2.0, delay: 0.4,
-    ease: 'power3.inOut',
-    onUpdate: () => camera.lookAt(0, 0, 0),
-  });
-
-  gsap.to(scene.fog, { density: 0.055, duration: 2.0, delay: 0.4 });
-  setTimeout(() => gsap.to('#hint', { opacity: 0.8, duration: 0.8 }), 2400);
 }
 
 // ──────────────────────────────────────────────
