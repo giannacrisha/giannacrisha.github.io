@@ -26,6 +26,13 @@ const S = {
   lastDoodle:   null,
 };
 
+const CHAPTER_META = {
+  about:    { chapter: 'Chapter I',   title: 'About',    num: '1' },
+  projects: { chapter: 'Chapter II',  title: 'Projects', num: '2' },
+  writing:  { chapter: 'Chapter III', title: 'Writing',  num: '3' },
+  doodle:   { chapter: 'Chapter IV',  title: 'Doodle',   num: '4' },
+};
+
 // ──────────────────────────────────────────────
 // THREE.JS CORE
 // ──────────────────────────────────────────────
@@ -84,7 +91,7 @@ function setupRenderer() {
   renderer.shadowMap.type     = THREE.PCFSoftShadowMap;
   renderer.outputColorSpace   = THREE.SRGBColorSpace;
   renderer.toneMapping        = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.1;
+  renderer.toneMappingExposure = 0.85;
 }
 
 // ──────────────────────────────────────────────
@@ -92,8 +99,8 @@ function setupRenderer() {
 // ──────────────────────────────────────────────
 function setupScene() {
   scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x0A0705);
-  scene.fog = new THREE.FogExp2(0x0A0705, 0.055);
+  scene.background = new THREE.Color(0xE8D5B4);
+  scene.fog = new THREE.FogExp2(0xDDC9A8, 0.055);
 }
 
 // ──────────────────────────────────────────────
@@ -110,28 +117,28 @@ function setupCamera() {
 // LIGHTING
 // ──────────────────────────────────────────────
 function setupLighting() {
-  // Soft warm fill
-  const ambient = new THREE.AmbientLight(0xFFE8C0, 0.25);
+  // Bright warm ambient — daylit room feel
+  const ambient = new THREE.AmbientLight(0xFFF5E8, 1.1);
   scene.add(ambient);
 
-  // Main desk lamp — warm golden point light, upper right
-  const lamp = new THREE.PointLight(0xFFD4A0, 4.5, 20, 2);
-  lamp.position.set(4, 7, 3);
+  // Overhead soft key light — like a window above
+  const lamp = new THREE.PointLight(0xFFEDD0, 2.2, 28, 2);
+  lamp.position.set(2, 9, 2);
   lamp.castShadow = true;
   lamp.shadow.mapSize.set(2048, 2048);
-  lamp.shadow.radius = 12;
+  lamp.shadow.radius = 16;
   lamp.shadow.camera.near = 0.5;
   lamp.shadow.camera.far  = 30;
   scene.add(lamp);
 
-  // Cool blue fill from opposite side
-  const fill = new THREE.PointLight(0x7080C0, 0.6, 25, 2);
-  fill.position.set(-5, 5, -4);
+  // Warm secondary fill from the left
+  const fill = new THREE.PointLight(0xFFE0B0, 1.0, 30, 2);
+  fill.position.set(-6, 6, 2);
   scene.add(fill);
 
-  // Rim/top — soft purple glow from behind
-  const rim = new THREE.DirectionalLight(0xB0A0E0, 0.35);
-  rim.position.set(0, 6, -10);
+  // Very soft cool top fill (sky)
+  const rim = new THREE.DirectionalLight(0xE8F0FF, 0.5);
+  rim.position.set(0, 10, -5);
   scene.add(rim);
 
   // Very soft bounce light from table surface
@@ -516,11 +523,11 @@ function createParticles() {
   geo.userData.phases = phases;
 
   const mat = new THREE.PointsMaterial({
-    color:       0xFFE0A0,
-    size:        0.04,
+    color:       0xB08050,
+    size:        0.035,
     transparent: true,
-    opacity:     0.55,
-    blending:    THREE.AdditiveBlending,
+    opacity:     0.35,
+    blending:    THREE.NormalBlending,
     depthWrite:  false,
     sizeAttenuation: true,
   });
@@ -645,13 +652,13 @@ function bindEvents() {
   window.addEventListener('mousemove', onMouseMove);
   window.addEventListener('wheel', onWheel, { passive: false });
 
-  // TOC navigation
-  document.querySelectorAll('.toc-item').forEach(el => {
+  // Bookmark navigation
+  document.querySelectorAll('.bookmark').forEach(el => {
     el.addEventListener('click', () => navigateTo(el.dataset.page));
   });
 
   // Close journal
-  document.getElementById('toc-close')?.addEventListener('click', closeJournal);
+  document.getElementById('bm-close')?.addEventListener('click', closeJournal);
 
   // Doodle toolbar — colors
   document.querySelectorAll('.swatch').forEach(btn => {
@@ -736,57 +743,67 @@ function openJournal() {
   // Hide hint
   gsap.to('#hint', { opacity: 0, duration: 0.4 });
 
-  // Camera → top-down angled view
+  // Flip journal cover open
+  gsap.to(coverPivot.rotation, {
+    z: Math.PI * 0.97,
+    duration: 1.6,
+    delay: 0.2,
+    ease: 'power2.inOut',
+  });
+
+  // Camera sweeps from angled view to top-down
   gsap.to(camera.position, {
-    x: 0, y: 10.5, z: 2.0,
-    duration: 2.2,
+    x: 0, y: 13, z: 0.8,
+    duration: 2.0,
     ease: 'power3.inOut',
     onUpdate: () => camera.lookAt(0, 0, 0),
   });
 
-  // Flip journal cover open (rotate around spine — Y axis)
-  gsap.to(coverPivot.rotation, {
-    y: -Math.PI * 0.97,
-    duration: 1.9,
-    delay: 0.55,
-    ease: 'power2.inOut',
-  });
+  // Fog up slightly so table fades back
+  gsap.to(scene.fog, { density: 0.09, duration: 2.0 });
 
-  // Fog up a little so table fades back
-  gsap.to(scene.fog, { density: 0.09, duration: 2.2 });
-
-  // Show journal UI after cover animation
+  // Show HTML book as camera arrives overhead (canvas stays visible beneath)
   setTimeout(() => {
-    const ui = document.getElementById('journal-ui');
+    const ui   = document.getElementById('journal-ui');
+    const book = document.getElementById('journal-book');
     ui.classList.add('visible');
-
-    const scrollHint = document.getElementById('scroll-hint');
-    scrollHint.classList.add('visible');
-  }, 2100);
+    gsap.fromTo(book,
+      { scale: 0.92, opacity: 0 },
+      { scale: 1,    opacity: 1, duration: 0.6, ease: 'power2.out' }
+    );
+    document.getElementById('scroll-hint').classList.add('visible');
+  }, 1900);
 }
 
 function closeJournal() {
   S.journalOpen = false;
 
-  // Hide UI
-  const ui = document.getElementById('journal-ui');
-  ui.classList.remove('visible');
   document.getElementById('scroll-hint').classList.remove('visible');
-
   penGroup.visible = false;
+
+  // Dismiss HTML book
+  const book = document.getElementById('journal-book');
+  const ui   = document.getElementById('journal-ui');
+  gsap.to(book, {
+    scale: 0.92, opacity: 0,
+    duration: 0.45,
+    ease: 'power2.in',
+    onComplete: () => { ui.classList.remove('visible'); },
+  });
 
   // Close cover
   gsap.to(coverPivot.rotation, {
-    y: 0,
+    z: 0,
     duration: 1.5,
+    delay: 0.35,
     ease: 'power2.inOut',
   });
 
-  // Camera back
+  // Camera back to original angled view
   gsap.to(camera.position, {
     x: 0, y: 5.5, z: 8,
     duration: 2.0,
-    delay: 0.3,
+    delay: 0.35,
     ease: 'power3.inOut',
     onUpdate: () => camera.lookAt(0, 0, 0),
   });
@@ -794,7 +811,7 @@ function closeJournal() {
   gsap.to(scene.fog, { density: 0.055, duration: 2.0 });
 
   // Show hint again
-  setTimeout(() => gsap.to('#hint', { opacity: 0.8, duration: 0.8 }), 2200);
+  setTimeout(() => gsap.to('#hint', { opacity: 0.8, duration: 0.8 }), 2400);
 }
 
 // ──────────────────────────────────────────────
@@ -808,10 +825,27 @@ function navigateTo(pageName) {
   S.flipping = true;
   const goForward = idx > S.pageIdx;
 
-  // Update TOC highlight
-  document.querySelectorAll('.toc-item').forEach(el => {
+  // Update bookmark highlight
+  document.querySelectorAll('.bookmark').forEach(el => {
     el.classList.toggle('active', el.dataset.page === pageName);
   });
+
+  // Update left page chapter info
+  const meta = CHAPTER_META[pageName];
+  if (meta) {
+    const chEl  = document.getElementById('left-chapter');
+    const ttEl  = document.getElementById('left-title');
+    const numEl = document.getElementById('left-pagenum');
+    gsap.to([chEl, ttEl, numEl], {
+      opacity: 0, y: -8, duration: 0.2,
+      onComplete: () => {
+        chEl.textContent  = meta.chapter;
+        ttEl.textContent  = meta.title;
+        numEl.textContent = `— ${meta.num} —`;
+        gsap.to([chEl, ttEl, numEl], { opacity: 1, y: 0, duration: 0.3 });
+      },
+    });
+  }
 
   const fromId = `page-${S.pages[S.pageIdx]}`;
   const toId   = `page-${pageName}`;
@@ -837,9 +871,9 @@ function navigateTo(pageName) {
 
       // Show pen only on doodle page
       penGroup.visible = (pageName === 'doodle');
-    }, 420);
+    }, 520);
 
-  }, 420);
+  }, 520);
 }
 
 // ──────────────────────────────────────────────
