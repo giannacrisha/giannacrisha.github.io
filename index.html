@@ -42,6 +42,9 @@
     <span class="hint-arrow">↓</span>
   </div>
 
+  <!-- Portal flash — full-screen white overlay for camera-dive transition -->
+  <div id="portal-flash"></div>
+
   <!-- Journal UI Overlay -->
   <div id="journal-ui">
     <div id="journal-book">
@@ -72,9 +75,6 @@
             <!-- PAGE: About -->
             <div class="page" id="page-about">
               <div class="page-inner">
-                <div class="page-corner-tl"></div>
-                <div class="page-corner-tr"></div>
-
                 <header class="page-hd">
                   <div class="page-chapter">Chapter I</div>
                   <h1 class="page-title">About</h1>
@@ -126,9 +126,6 @@
             <!-- PAGE: Projects -->
             <div class="page hidden" id="page-projects">
               <div class="page-inner">
-                <div class="page-corner-tl"></div>
-                <div class="page-corner-tr"></div>
-
                 <header class="page-hd">
                   <div class="page-chapter">Chapter II</div>
                   <h1 class="page-title">Projects</h1>
@@ -190,9 +187,6 @@
             <!-- PAGE: Writing -->
             <div class="page hidden" id="page-writing">
               <div class="page-inner">
-                <div class="page-corner-tl"></div>
-                <div class="page-corner-tr"></div>
-
                 <header class="page-hd">
                   <div class="page-chapter">Chapter III</div>
                   <h1 class="page-title">Writing</h1>
@@ -240,9 +234,6 @@
             <!-- PAGE: Doodle -->
             <div class="page hidden" id="page-doodle">
               <div class="page-inner doodle-page-inner">
-                <div class="page-corner-tl"></div>
-                <div class="page-corner-tr"></div>
-
                 <header class="page-hd">
                   <div class="page-chapter">Chapter IV</div>
                   <h1 class="page-title">Doodle</h1>
@@ -290,14 +281,6 @@
         </div><!-- #page-right -->
 
       </div><!-- #book-paper -->
-
-      <!-- Bookmark tabs — stick out from the right edge -->
-      <div id="bookmarks">
-        <div class="bookmark active" data-page="about">About</div>
-        <div class="bookmark" data-page="projects">Projects</div>
-        <div class="bookmark" data-page="writing">Writing</div>
-        <div class="bookmark" data-page="doodle">Doodle</div>
-      </div>
 
     </div><!-- #journal-book -->
   </div><!-- #journal-ui -->
