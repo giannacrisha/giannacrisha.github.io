@@ -918,33 +918,181 @@ function playPageSound() {
 }
 
 // ──────────────────────────────────────────────
+// HEART LOADER  (gold anatomical 3-D heart)
+// ──────────────────────────────────────────────
+
+// Parametric 3-D heart surface
+//   x = sin³(u)·cos(v)
+//   y = [13cos(u) – 5cos(2u) – 2cos(3u) – cos(4u)] / 16
+//   z = sin³(u)·sin(v)·0.72          (slight z-flatten)
+function buildHeartGeometry(uSeg, vSeg) {
+  const pos = [], uv = [], idx = [];
+
+  for (let i = 0; i <= uSeg; i++) {
+    for (let j = 0; j <= vSeg; j++) {
+      const u  = (i / uSeg) * Math.PI;
+      const v  = (j / vSeg) * Math.PI * 2;
+      const su = Math.sin(u), cu = Math.cos(u);
+      pos.push(
+        su * su * su * Math.cos(v),
+        (13*cu - 5*Math.cos(2*u) - 2*Math.cos(3*u) - Math.cos(4*u)) / 16,
+        su * su * su * Math.sin(v) * 0.72
+      );
+      uv.push(j / vSeg, i / uSeg);
+    }
+  }
+
+  for (let i = 0; i < uSeg; i++) {
+    for (let j = 0; j < vSeg; j++) {
+      const a = i * (vSeg + 1) + j;
+      const b = a + 1, c = a + vSeg + 1, d = c + 1;
+      idx.push(a, c, b,  b, c, d);
+    }
+  }
+
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  geo.setAttribute('uv',       new THREE.Float32BufferAttribute(uv,  2));
+  geo.setIndex(idx);
+  geo.computeVertexNormals();
+  return geo;
+}
+
+function _makeVessel(mat, pts, r) {
+  const curve = new THREE.CatmullRomCurve3(pts.map(p => new THREE.Vector3(...p)));
+  return new THREE.Mesh(new THREE.TubeGeometry(curve, 18, r, 8, false), mat);
+}
+
+let _heartRaf = null;
+
+function startHeartLoader() {
+  const canvas = document.getElementById('heart-canvas');
+  if (!canvas) return;
+
+  // Renderer — updateStyle:false so CSS controls display size
+  const rdr = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  rdr.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  rdr.setSize(280, 280, false);
+  rdr.outputColorSpace    = THREE.SRGBColorSpace;
+  rdr.toneMapping         = THREE.ACESFilmicToneMapping;
+  rdr.toneMappingExposure = 1.4;
+
+  const sc  = new THREE.Scene();
+  const cam = new THREE.PerspectiveCamera(40, 1.0, 0.1, 50);
+  cam.position.set(0, 0.2, 7.0);
+  cam.lookAt(0, -0.4, 0);
+
+  // IBL for metal reflections
+  const pmrem  = new THREE.PMREMGenerator(rdr);
+  sc.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+  pmrem.dispose();
+
+  // Gold metallic material
+  const goldMat = new THREE.MeshStandardMaterial({
+    color:           new THREE.Color(0xC8A040),
+    metalness:       1.0,
+    roughness:       0.14,
+    envMapIntensity: 2.8,
+  });
+
+  // Heart body
+  const heartGeo  = buildHeartGeometry(110, 110);
+  const heartMesh = new THREE.Mesh(heartGeo, goldMat);
+  heartMesh.scale.setScalar(1.8);
+  heartMesh.rotation.set(0.0, -0.2, 0.15);  // cardiac axis tilt
+  heartMesh.position.y = -0.15;
+
+  // Vessels as children of heartMesh — coords in heart model space (pre-scale)
+  // Aortic arch
+  heartMesh.add(_makeVessel(goldMat, [[-0.04,0.37,0.04],[-0.14,0.49,0.02],[-0.26,0.60,-0.01],[-0.38,0.55,-0.03]], 0.065));
+  // Brachiocephalic
+  heartMesh.add(_makeVessel(goldMat, [[-0.20,0.54,0.00],[-0.10,0.65,0.03],[-0.02,0.73,0.05]], 0.034));
+  // Left carotid
+  heartMesh.add(_makeVessel(goldMat, [[-0.30,0.58,-0.02],[-0.26,0.68,-0.04],[-0.21,0.76,-0.05]], 0.026));
+  // Left subclavian
+  heartMesh.add(_makeVessel(goldMat, [[-0.36,0.56,-0.03],[-0.34,0.64,-0.07],[-0.40,0.70,-0.11]], 0.024));
+  // Pulmonary trunk
+  heartMesh.add(_makeVessel(goldMat, [[0.06,0.35,0.07],[0.14,0.51,0.09],[0.18,0.64,0.07]], 0.055));
+  // Pulmonary branch L
+  heartMesh.add(_makeVessel(goldMat, [[0.18,0.64,0.07],[0.09,0.72,0.12],[0.02,0.77,0.14]], 0.030));
+  // Pulmonary branch R
+  heartMesh.add(_makeVessel(goldMat, [[0.18,0.64,0.07],[0.27,0.69,0.04],[0.35,0.66,0.00]], 0.028));
+  // Superior vena cava
+  heartMesh.add(_makeVessel(goldMat, [[-0.03,0.30,-0.06],[-0.08,0.43,-0.10],[-0.12,0.56,-0.13]], 0.034));
+
+  // Assembly group — beat scale animation applied here
+  const assembly = new THREE.Group();
+  assembly.add(heartMesh);
+  sc.add(assembly);
+
+  // Warm gold lighting rig
+  sc.add(new THREE.AmbientLight(0xFFF5E0, 0.45));
+  const kl = new THREE.PointLight(0xFFE8B0, 5.5, 28);
+  kl.position.set(3, 5, 5);  sc.add(kl);
+  const fl = new THREE.PointLight(0xFFCC60, 2.2, 22);
+  fl.position.set(-4, 2, 4); sc.add(fl);
+  const bl = new THREE.PointLight(0xFFF4D0, 1.0, 18);
+  bl.position.set(0, -5, -4); sc.add(bl);
+
+  // Heartbeat scale curve — ba-dum pattern, 1.1 s cycle
+  function beatScale(t) {
+    const m = t % 1.1;
+    if (m < 0.10) return 1.000 + (m / 0.10) * 0.068;            // beat 1 ↑
+    if (m < 0.20) return 1.068 - ((m - 0.10) / 0.10) * 0.085;  // beat 1 ↓
+    if (m < 0.28) return 0.983 + ((m - 0.20) / 0.08) * 0.042;  // beat 2 ↑
+    if (m < 0.42) return 1.025 - ((m - 0.28) / 0.14) * 0.025;  // beat 2 ↓
+    return 1.000;                                                 // diastole
+  }
+
+  let elapsed = 0, prev = performance.now();
+
+  function tick() {
+    _heartRaf = requestAnimationFrame(tick);
+    const now = performance.now();
+    elapsed  += Math.min((now - prev) / 1000, 0.05);
+    prev = now;
+
+    const s = beatScale(elapsed);
+    assembly.scale.setScalar(s);
+    assembly.rotation.y = elapsed * 0.20;  // slow gentle rotation
+
+    rdr.render(sc, cam);
+  }
+  tick();
+
+  // Cleanup called when loader is dismissed
+  window._heartCleanup = () => {
+    cancelAnimationFrame(_heartRaf);
+    goldMat.dispose();
+    heartGeo.dispose();
+    rdr.dispose();
+  };
+}
+
+// ──────────────────────────────────────────────
 // LOADING SEQUENCE
 // ──────────────────────────────────────────────
 function startLoading() {
-  const bar  = document.getElementById('loading-bar');
-  let pct    = 0;
+  startHeartLoader();
 
+  let pct = 0;
   const tick = setInterval(() => {
     pct += Math.random() * 18;
-    if (pct >= 100) {
-      pct = 100;
-      clearInterval(tick);
-      bar.style.width = '100%';
+    if (pct < 100) return;
+    clearInterval(tick);
 
-      setTimeout(() => {
-        const loading = document.getElementById('loading');
-        gsap.to(loading, {
-          opacity: 0, duration: 1.2, delay: 0.3,
-          onComplete: () => {
-            loading.style.display = 'none';
-            S.loaded = true;
-            gsap.to('#hint', { opacity: 1, duration: 1.2, delay: 0.5 });
-          },
-        });
-      }, 400);
-    } else {
-      bar.style.width = pct + '%';
-    }
+    setTimeout(() => {
+      const loading = document.getElementById('loading');
+      gsap.to(loading, {
+        opacity: 0, duration: 1.2, delay: 0.3,
+        onComplete: () => {
+          loading.style.display = 'none';
+          if (window._heartCleanup) window._heartCleanup();
+          S.loaded = true;
+          gsap.to('#hint', { opacity: 1, duration: 1.2, delay: 0.5 });
+        },
+      });
+    }, 600);
   }, 120);
 }
 
