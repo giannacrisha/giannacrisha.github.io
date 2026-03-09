@@ -15,22 +15,8 @@ import { gsap } from 'https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm';
 // STATE
 // ──────────────────────────────────────────────
 const S = {
-  loaded:       false,
-  journalOpen:  false,
-  pageIdx:      0,                                   // current page index
-  pages:        ['about', 'projects', 'writing', 'doodle'],
-  flipping:     false,
-  penDown:      false,
-  doodleColor:  '#2A1F1A',
-  doodleSize:   4,
-  lastDoodle:   null,
-};
-
-const CHAPTER_META = {
-  about:    { chapter: 'Chapter I',   title: 'About',    num: '1' },
-  projects: { chapter: 'Chapter II',  title: 'Projects', num: '2' },
-  writing:  { chapter: 'Chapter III', title: 'Writing',  num: '3' },
-  doodle:   { chapter: 'Chapter IV',  title: 'Doodle',   num: '4' },
+  loaded:      false,
+  journalOpen: false,
 };
 
 // ──────────────────────────────────────────────
@@ -698,35 +684,10 @@ function onClick(e) {
   }
 }
 
-function onMouseMove(e) {
-  if (!S.journalOpen) return;
-  if (S.pages[S.pageIdx] !== 'doodle') return;
-
-  // Map mouse to 3D plane for pen position
-  mouseNDC.set(
-    (e.clientX / window.innerWidth)  *  2 - 1,
-   -(e.clientY / window.innerHeight) *  2 + 1
-  );
-  raycaster.setFromCamera(mouseNDC, camera);
-
-  // Plane at the page surface (y ≈ 0.55)
-  const plane   = new THREE.Plane(new THREE.Vector3(0, 1, 0), -0.55);
-  const hitPt   = new THREE.Vector3();
-  raycaster.ray.intersectPlane(plane, hitPt);
-  if (hitPt) {
-    penTarget.set(hitPt.x, 0.85, hitPt.z);
-  }
-}
+function onMouseMove(e) {}
 
 function onWheel(e) {
-  if (!S.journalOpen || S.flipping) return;
-  e.preventDefault();
-
-  if (e.deltaY > 0 && S.pageIdx < S.pages.length - 1) {
-    navigateTo(S.pages[S.pageIdx + 1]);
-  } else if (e.deltaY < 0 && S.pageIdx > 0) {
-    navigateTo(S.pages[S.pageIdx - 1]);
-  }
+  if (S.journalOpen) e.preventDefault();
 }
 
 // ──────────────────────────────────────────────
@@ -775,7 +736,6 @@ function openJournal() {
       const book = document.getElementById('journal-book');
       ui.classList.add('visible');
       gsap.set(book, { opacity: 1, scale: 1 });
-      document.getElementById('scroll-hint').classList.add('visible');
 
       // Fade the white flash out to reveal the paper page
       gsap.to('#portal-flash', { opacity: 0, duration: 0.55, ease: 'power2.out' });
@@ -785,9 +745,6 @@ function openJournal() {
 
 function closeJournal() {
   S.journalOpen = false;
-
-  document.getElementById('scroll-hint').classList.remove('visible');
-  penGroup.visible = false;
 
   // Flash to white to mask the scene swap
   gsap.to('#portal-flash', {
@@ -800,155 +757,206 @@ function closeJournal() {
       gsap.set(book, { opacity: 0 });
       ui.classList.remove('visible');
 
-      // Snap camera back above the journal while screen is white
+      // Kill any lingering open-animation camera tweens, then snap to overhead
+      gsap.killTweensOf(camera.position);
       camera.position.set(0, 9, 0.5);
       camera.lookAt(0, 0, 0);
 
-      // Fade out white while camera sweeps back to angled view
+      // Everything starts from here, while screen is still white
       gsap.to('#portal-flash', { opacity: 0, duration: 1.0, ease: 'power2.out' });
+
+      gsap.to(coverPivot.rotation, { z: 0, duration: 1.5, ease: 'power2.inOut' });
+
+      gsap.to(camera.position, {
+        x: 0, y: 5.5, z: 8,
+        duration: 2.0,
+        ease: 'power3.inOut',
+        onUpdate: () => camera.lookAt(0, 0, 0),
+      });
+
+      gsap.to(scene.fog, { density: 0.055, duration: 2.0 });
+      setTimeout(() => gsap.to('#hint', { opacity: 0.8, duration: 0.8 }), 2400);
     },
   });
-
-  // Close cover + camera return (begin after flash completes ~0.4s)
-  gsap.to(coverPivot.rotation, {
-    z: 0,
-    duration: 1.5, delay: 0.5,
-    ease: 'power2.inOut',
-  });
-
-  gsap.to(camera.position, {
-    x: 0, y: 5.5, z: 8,
-    duration: 2.0, delay: 0.4,
-    ease: 'power3.inOut',
-    onUpdate: () => camera.lookAt(0, 0, 0),
-  });
-
-  gsap.to(scene.fog, { density: 0.055, duration: 2.0, delay: 0.4 });
-  setTimeout(() => gsap.to('#hint', { opacity: 0.8, duration: 0.8 }), 2400);
 }
 
+
 // ──────────────────────────────────────────────
-// PAGE FLIP
+// HEART LOADER  (gold anatomical 3-D heart)
 // ──────────────────────────────────────────────
-function navigateTo(pageName) {
-  if (S.flipping) return;
-  const idx = S.pages.indexOf(pageName);
-  if (idx === S.pageIdx) return;
 
-  S.flipping = true;
-  const goForward = idx > S.pageIdx;
+// Parametric 3-D heart surface
+//   x = sin³(u)·cos(v)
+//   y = [13cos(u) – 5cos(2u) – 2cos(3u) – cos(4u)] / 16
+//   z = sin³(u)·sin(v)·0.72          (slight z-flatten)
+function buildHeartGeometry(uSeg, vSeg) {
+  const pos = [], uv = [], idx = [];
 
-
-  // Update left page chapter info
-  const meta = CHAPTER_META[pageName];
-  if (meta) {
-    const chEl  = document.getElementById('left-chapter');
-    const ttEl  = document.getElementById('left-title');
-    const numEl = document.getElementById('left-pagenum');
-    gsap.to([chEl, ttEl, numEl], {
-      opacity: 0, y: -8, duration: 0.2,
-      onComplete: () => {
-        chEl.textContent  = meta.chapter;
-        ttEl.textContent  = meta.title;
-        numEl.textContent = `— ${meta.num} —`;
-        gsap.to([chEl, ttEl, numEl], { opacity: 1, y: 0, duration: 0.3 });
-      },
-    });
+  for (let i = 0; i <= uSeg; i++) {
+    for (let j = 0; j <= vSeg; j++) {
+      const u  = (i / uSeg) * Math.PI;
+      const v  = (j / vSeg) * Math.PI * 2;
+      const su = Math.sin(u), cu = Math.cos(u);
+      pos.push(
+        su * su * su * Math.cos(v),
+        (13*cu - 5*Math.cos(2*u) - 2*Math.cos(3*u) - Math.cos(4*u)) / 16,
+        su * su * su * Math.sin(v) * 0.72
+      );
+      uv.push(j / vSeg, i / uSeg);
+    }
   }
 
-  const fromId = `page-${S.pages[S.pageIdx]}`;
-  const toId   = `page-${pageName}`;
-  const fromEl = document.getElementById(fromId);
-  const toEl   = document.getElementById(toId);
+  for (let i = 0; i < uSeg; i++) {
+    for (let j = 0; j < vSeg; j++) {
+      const a = i * (vSeg + 1) + j;
+      const b = a + 1, c = a + vSeg + 1, d = c + 1;
+      idx.push(a, c, b,  b, c, d);
+    }
+  }
 
-  playPageSound();
-
-  // Animate out current page
-  fromEl.classList.add(goForward ? 'flip-out-forward' : 'flip-out-backward');
-
-  setTimeout(() => {
-    fromEl.classList.remove('flip-out-forward', 'flip-out-backward');
-    fromEl.classList.add('hidden');
-
-    toEl.classList.remove('hidden');
-    toEl.classList.add(goForward ? 'flip-in-forward' : 'flip-in-backward');
-
-    setTimeout(() => {
-      toEl.classList.remove('flip-in-forward', 'flip-in-backward');
-      S.pageIdx  = idx;
-      S.flipping = false;
-
-      // Show pen only on doodle page
-      penGroup.visible = (pageName === 'doodle');
-    }, 520);
-
-  }, 520);
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  geo.setAttribute('uv',       new THREE.Float32BufferAttribute(uv,  2));
+  geo.setIndex(idx);
+  geo.computeVertexNormals();
+  return geo;
 }
 
-// ──────────────────────────────────────────────
-// PAGE FLIP SOUND (Web Audio API)
-// ──────────────────────────────────────────────
-function playPageSound() {
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const sr  = ctx.sampleRate;
-    const dur = 0.35;
-    const buf = ctx.createBuffer(1, sr * dur, sr);
-    const dat = buf.getChannelData(0);
+function _makeVessel(mat, pts, r) {
+  const curve = new THREE.CatmullRomCurve3(pts.map(p => new THREE.Vector3(...p)));
+  return new THREE.Mesh(new THREE.TubeGeometry(curve, 18, r, 8, false), mat);
+}
 
-    for (let i = 0; i < dat.length; i++) {
-      const t     = i / sr;
-      const env   = Math.pow(1 - t / dur, 2.5);
-      // Paper rustle: band-limited noise
-      dat[i] = (Math.random() * 2 - 1) * env * 0.18;
-    }
+let _heartRaf = null;
 
-    const src = ctx.createBufferSource();
-    src.buffer = buf;
+function startHeartLoader() {
+  const canvas = document.getElementById('heart-canvas');
+  if (!canvas) return;
 
-    const filter  = ctx.createBiquadFilter();
-    filter.type   = 'bandpass';
-    filter.frequency.value = 1200;
-    filter.Q.value = 0.4;
+  // Renderer — updateStyle:false so CSS controls display size
+  const rdr = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  rdr.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  rdr.setSize(280, 280, false);
+  rdr.outputColorSpace    = THREE.SRGBColorSpace;
+  rdr.toneMapping         = THREE.ACESFilmicToneMapping;
+  rdr.toneMappingExposure = 1.4;
 
-    const gain     = ctx.createGain();
-    gain.gain.value = 0.35;
+  const sc  = new THREE.Scene();
+  const cam = new THREE.PerspectiveCamera(40, 1.0, 0.1, 50);
+  cam.position.set(0, 0.2, 7.0);
+  cam.lookAt(0, -0.4, 0);
 
-    src.connect(filter);
-    filter.connect(gain);
-    gain.connect(ctx.destination);
-    src.start();
-  } catch (_) {/* Audio not available */}
+  // IBL for metal reflections
+  const pmrem  = new THREE.PMREMGenerator(rdr);
+  sc.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+  pmrem.dispose();
+
+  // Gold metallic material
+  const goldMat = new THREE.MeshStandardMaterial({
+    color:           new THREE.Color(0xC8A040),
+    metalness:       1.0,
+    roughness:       0.14,
+    envMapIntensity: 2.8,
+  });
+
+  // Heart body
+  const heartGeo  = buildHeartGeometry(110, 110);
+  const heartMesh = new THREE.Mesh(heartGeo, goldMat);
+  heartMesh.scale.setScalar(1.8);
+  heartMesh.rotation.set(0.0, -0.2, 0.15);  // cardiac axis tilt
+  heartMesh.position.y = -0.15;
+
+  // Vessels as children of heartMesh — coords in heart model space (pre-scale)
+  // Aortic arch
+  heartMesh.add(_makeVessel(goldMat, [[-0.04,0.37,0.04],[-0.14,0.49,0.02],[-0.26,0.60,-0.01],[-0.38,0.55,-0.03]], 0.065));
+  // Brachiocephalic
+  heartMesh.add(_makeVessel(goldMat, [[-0.20,0.54,0.00],[-0.10,0.65,0.03],[-0.02,0.73,0.05]], 0.034));
+  // Left carotid
+  heartMesh.add(_makeVessel(goldMat, [[-0.30,0.58,-0.02],[-0.26,0.68,-0.04],[-0.21,0.76,-0.05]], 0.026));
+  // Left subclavian
+  heartMesh.add(_makeVessel(goldMat, [[-0.36,0.56,-0.03],[-0.34,0.64,-0.07],[-0.40,0.70,-0.11]], 0.024));
+  // Pulmonary trunk
+  heartMesh.add(_makeVessel(goldMat, [[0.06,0.35,0.07],[0.14,0.51,0.09],[0.18,0.64,0.07]], 0.055));
+  // Pulmonary branch L
+  heartMesh.add(_makeVessel(goldMat, [[0.18,0.64,0.07],[0.09,0.72,0.12],[0.02,0.77,0.14]], 0.030));
+  // Pulmonary branch R
+  heartMesh.add(_makeVessel(goldMat, [[0.18,0.64,0.07],[0.27,0.69,0.04],[0.35,0.66,0.00]], 0.028));
+  // Superior vena cava
+  heartMesh.add(_makeVessel(goldMat, [[-0.03,0.30,-0.06],[-0.08,0.43,-0.10],[-0.12,0.56,-0.13]], 0.034));
+
+  // Assembly group — beat scale animation applied here
+  const assembly = new THREE.Group();
+  assembly.add(heartMesh);
+  sc.add(assembly);
+
+  // Warm gold lighting rig
+  sc.add(new THREE.AmbientLight(0xFFF5E0, 0.45));
+  const kl = new THREE.PointLight(0xFFE8B0, 5.5, 28);
+  kl.position.set(3, 5, 5);  sc.add(kl);
+  const fl = new THREE.PointLight(0xFFCC60, 2.2, 22);
+  fl.position.set(-4, 2, 4); sc.add(fl);
+  const bl = new THREE.PointLight(0xFFF4D0, 1.0, 18);
+  bl.position.set(0, -5, -4); sc.add(bl);
+
+  // Heartbeat scale curve — ba-dum pattern, 1.1 s cycle
+  function beatScale(t) {
+    const m = t % 1.1;
+    if (m < 0.10) return 1.000 + (m / 0.10) * 0.068;            // beat 1 ↑
+    if (m < 0.20) return 1.068 - ((m - 0.10) / 0.10) * 0.085;  // beat 1 ↓
+    if (m < 0.28) return 0.983 + ((m - 0.20) / 0.08) * 0.042;  // beat 2 ↑
+    if (m < 0.42) return 1.025 - ((m - 0.28) / 0.14) * 0.025;  // beat 2 ↓
+    return 1.000;                                                 // diastole
+  }
+
+  let elapsed = 0, prev = performance.now();
+
+  function tick() {
+    _heartRaf = requestAnimationFrame(tick);
+    const now = performance.now();
+    elapsed  += Math.min((now - prev) / 1000, 0.05);
+    prev = now;
+
+    const s = beatScale(elapsed);
+    assembly.scale.setScalar(s);
+    assembly.rotation.y = elapsed * 0.20;  // slow gentle rotation
+
+    rdr.render(sc, cam);
+  }
+  tick();
+
+  // Cleanup called when loader is dismissed
+  window._heartCleanup = () => {
+    cancelAnimationFrame(_heartRaf);
+    goldMat.dispose();
+    heartGeo.dispose();
+    rdr.dispose();
+  };
 }
 
 // ──────────────────────────────────────────────
 // LOADING SEQUENCE
 // ──────────────────────────────────────────────
 function startLoading() {
-  const bar  = document.getElementById('loading-bar');
-  let pct    = 0;
+  startHeartLoader();
 
+  let pct = 0;
   const tick = setInterval(() => {
     pct += Math.random() * 18;
-    if (pct >= 100) {
-      pct = 100;
-      clearInterval(tick);
-      bar.style.width = '100%';
+    if (pct < 100) return;
+    clearInterval(tick);
 
-      setTimeout(() => {
-        const loading = document.getElementById('loading');
-        gsap.to(loading, {
-          opacity: 0, duration: 1.2, delay: 0.3,
-          onComplete: () => {
-            loading.style.display = 'none';
-            S.loaded = true;
-            gsap.to('#hint', { opacity: 1, duration: 1.2, delay: 0.5 });
-          },
-        });
-      }, 400);
-    } else {
-      bar.style.width = pct + '%';
-    }
+    setTimeout(() => {
+      const loading = document.getElementById('loading');
+      gsap.to(loading, {
+        opacity: 0, duration: 1.2, delay: 0.3,
+        onComplete: () => {
+          loading.style.display = 'none';
+          if (window._heartCleanup) window._heartCleanup();
+          S.loaded = true;
+          gsap.to('#hint', { opacity: 1, duration: 1.2, delay: 0.5 });
+        },
+      });
+    }, 600);
   }, 120);
 }
 
