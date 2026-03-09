@@ -652,11 +652,6 @@ function bindEvents() {
   window.addEventListener('mousemove', onMouseMove);
   window.addEventListener('wheel', onWheel, { passive: false });
 
-  // Bookmark navigation
-  document.querySelectorAll('.bookmark').forEach(el => {
-    el.addEventListener('click', () => navigateTo(el.dataset.page));
-  });
-
   // Close journal
   document.getElementById('bm-close')?.addEventListener('click', closeJournal);
 
@@ -740,39 +735,52 @@ function onWheel(e) {
 function openJournal() {
   S.journalOpen = true;
 
-  // Hide hint
   gsap.to('#hint', { opacity: 0, duration: 0.4 });
 
-  // Flip journal cover open
+  // Cover opens
   gsap.to(coverPivot.rotation, {
     z: Math.PI * 0.97,
-    duration: 1.6,
-    delay: 0.2,
+    duration: 1.6, delay: 0.2,
     ease: 'power2.inOut',
   });
 
-  // Camera sweeps from angled view to top-down
+  // Phase 1 — camera sweeps overhead
   gsap.to(camera.position, {
-    x: 0, y: 13, z: 0.8,
-    duration: 2.0,
-    ease: 'power3.inOut',
+    x: 0, y: 9, z: 0.5,
+    duration: 1.5,
+    ease: 'power2.inOut',
     onUpdate: () => camera.lookAt(0, 0, 0),
   });
 
-  // Fog up slightly so table fades back
+  // Phase 2 — camera dives down into the journal (portal zoom)
+  gsap.to(camera.position, {
+    x: 0, y: 1.5, z: 0,
+    duration: 1.0,
+    delay: 1.5,
+    ease: 'power4.in',
+    onUpdate: () => camera.lookAt(0, 0, 0),
+  });
+
   gsap.to(scene.fog, { density: 0.09, duration: 2.0 });
 
-  // Show HTML book as camera arrives overhead (canvas stays visible beneath)
-  setTimeout(() => {
-    const ui   = document.getElementById('journal-ui');
-    const book = document.getElementById('journal-book');
-    ui.classList.add('visible');
-    gsap.fromTo(book,
-      { scale: 0.92, opacity: 0 },
-      { scale: 1,    opacity: 1, duration: 0.6, ease: 'power2.out' }
-    );
-    document.getElementById('scroll-hint').classList.add('visible');
-  }, 1900);
+  // White flash fades in as camera hits the journal surface
+  gsap.to('#portal-flash', {
+    opacity: 1,
+    duration: 0.55,
+    delay: 1.85,
+    ease: 'power3.in',
+    onComplete: () => {
+      // While screen is white, swap in the HTML UI
+      const ui   = document.getElementById('journal-ui');
+      const book = document.getElementById('journal-book');
+      ui.classList.add('visible');
+      gsap.set(book, { opacity: 1, scale: 1 });
+      document.getElementById('scroll-hint').classList.add('visible');
+
+      // Fade the white flash out to reveal the paper page
+      gsap.to('#portal-flash', { opacity: 0, duration: 0.55, ease: 'power2.out' });
+    },
+  });
 }
 
 function closeJournal() {
@@ -781,36 +789,41 @@ function closeJournal() {
   document.getElementById('scroll-hint').classList.remove('visible');
   penGroup.visible = false;
 
-  // Dismiss HTML book
-  const book = document.getElementById('journal-book');
-  const ui   = document.getElementById('journal-ui');
-  gsap.to(book, {
-    scale: 0.92, opacity: 0,
-    duration: 0.45,
+  // Flash to white to mask the scene swap
+  gsap.to('#portal-flash', {
+    opacity: 1,
+    duration: 0.4,
     ease: 'power2.in',
-    onComplete: () => { ui.classList.remove('visible'); },
+    onComplete: () => {
+      const book = document.getElementById('journal-book');
+      const ui   = document.getElementById('journal-ui');
+      gsap.set(book, { opacity: 0 });
+      ui.classList.remove('visible');
+
+      // Snap camera back above the journal while screen is white
+      camera.position.set(0, 9, 0.5);
+      camera.lookAt(0, 0, 0);
+
+      // Fade out white while camera sweeps back to angled view
+      gsap.to('#portal-flash', { opacity: 0, duration: 1.0, ease: 'power2.out' });
+    },
   });
 
-  // Close cover
+  // Close cover + camera return (begin after flash completes ~0.4s)
   gsap.to(coverPivot.rotation, {
     z: 0,
-    duration: 1.5,
-    delay: 0.35,
+    duration: 1.5, delay: 0.5,
     ease: 'power2.inOut',
   });
 
-  // Camera back to original angled view
   gsap.to(camera.position, {
     x: 0, y: 5.5, z: 8,
-    duration: 2.0,
-    delay: 0.35,
+    duration: 2.0, delay: 0.4,
     ease: 'power3.inOut',
     onUpdate: () => camera.lookAt(0, 0, 0),
   });
 
-  gsap.to(scene.fog, { density: 0.055, duration: 2.0 });
-
-  // Show hint again
+  gsap.to(scene.fog, { density: 0.055, duration: 2.0, delay: 0.4 });
   setTimeout(() => gsap.to('#hint', { opacity: 0.8, duration: 0.8 }), 2400);
 }
 
@@ -825,10 +838,6 @@ function navigateTo(pageName) {
   S.flipping = true;
   const goForward = idx > S.pageIdx;
 
-  // Update bookmark highlight
-  document.querySelectorAll('.bookmark').forEach(el => {
-    el.classList.toggle('active', el.dataset.page === pageName);
-  });
 
   // Update left page chapter info
   const meta = CHAPTER_META[pageName];
