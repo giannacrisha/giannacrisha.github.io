@@ -44,14 +44,244 @@
   <div id="journal-ui">
     <div id="journal-book">
 
-      <!-- Single sheet of plain paper -->
+      <!-- Inner paper area: overflow hidden clips texture to rounded corners -->
       <div id="book-paper">
-        <button class="book-close" id="bm-close" title="Close journal">close</button>
-      </div>
+
+        <!-- Left page: chapter title & decoration -->
+        <div id="page-left">
+          <div class="left-inner">
+            <div class="left-monogram">G · C</div>
+            <div class="left-ornament">✦</div>
+            <div id="left-chapter" class="left-chapter">Chapter I</div>
+            <h2 id="left-title" class="left-title">About</h2>
+            <div class="left-rule"></div>
+            <div id="left-pagenum" class="left-pagenum">— 1 —</div>
+            <button class="book-close" id="bm-close" title="Close journal">✕</button>
+          </div>
+        </div>
+
+        <!-- Center spine shadow -->
+        <div id="book-spine"></div>
+
+        <!-- Right page: scrollable content -->
+        <div id="page-right">
+          <div id="pages">
+
+            <!-- PAGE: About -->
+            <div class="page" id="page-about">
+              <div class="page-inner">
+                <header class="page-hd">
+                  <div class="page-chapter">Chapter I</div>
+                  <h1 class="page-title">About</h1>
+                  <div class="page-rule-gold"></div>
+                </header>
+
+                <div class="page-body">
+                  <p class="page-intro">Hello — I'm <em>Gianna.</em></p>
+                  <p>A creative technologist living at the crossing of art and code. I craft digital experiences that feel handmade — built with intention, texture, and soul.</p>
+                  <p>When I'm not building things, you'll find me in coffee shops filling journal pages, wandering through art museums, or dreaming up new ways to make the web feel more human.</p>
+
+                  <div class="page-divider">
+                    <span>✦</span>
+                  </div>
+
+                  <div class="skills-grid">
+                    <div class="skill-col">
+                      <div class="skill-heading">Design</div>
+                      <ul>
+                        <li>Creative Direction</li>
+                        <li>UI / UX</li>
+                        <li>Motion &amp; Interaction</li>
+                        <li>Typography</li>
+                      </ul>
+                    </div>
+                    <div class="skill-col">
+                      <div class="skill-heading">Code</div>
+                      <ul>
+                        <li>Three.js / WebGL</li>
+                        <li>React / Next.js</li>
+                        <li>Node.js</li>
+                        <li>Creative Coding</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <blockquote class="page-quote">
+                    <p>"The details are not the details.<br/>They make the design."</p>
+                    <cite>— Charles Eames</cite>
+                  </blockquote>
+                </div>
+
+                <footer class="page-ft">
+                  <span class="page-num">1</span>
+                </footer>
+              </div>
+            </div>
+
+            <!-- PAGE: Projects -->
+            <div class="page hidden" id="page-projects">
+              <div class="page-inner">
+                <header class="page-hd">
+                  <div class="page-chapter">Chapter II</div>
+                  <h1 class="page-title">Projects</h1>
+                  <div class="page-rule-gold"></div>
+                </header>
+
+                <div class="page-body">
+                  <div class="project-entry">
+                    <div class="project-num">01</div>
+                    <div class="project-info">
+                      <h3 class="project-name">Ethereal Canvas</h3>
+                      <p class="project-desc">An interactive generative art experience exploring particle systems and fluid simulation. Users paint with light across a dark canvas.</p>
+                      <div class="project-tags">
+                        <span>Three.js</span><span>GLSL</span><span>WebGL</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="project-entry">
+                    <div class="project-num">02</div>
+                    <div class="project-info">
+                      <h3 class="project-name">Paper Garden</h3>
+                      <p class="project-desc">A virtual botanical garden built entirely from CSS and SVG origami. Every plant unfolds as you scroll through the seasons.</p>
+                      <div class="project-tags">
+                        <span>React</span><span>SVG</span><span>GSAP</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="project-entry">
+                    <div class="project-num">03</div>
+                    <div class="project-info">
+                      <h3 class="project-name">Tender Letters</h3>
+                      <p class="project-desc">A slow social platform for handwritten digital correspondence. Letters arrive like real mail — one day at a time.</p>
+                      <div class="project-tags">
+                        <span>Next.js</span><span>Node</span><span>Canvas API</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="project-entry">
+                    <div class="project-num">04</div>
+                    <div class="project-info">
+                      <h3 class="project-name">Reverie OS</h3>
+                      <p class="project-desc">A whimsical browser-based desktop environment. Windows, wallpapers, and tiny worlds to explore, all made of dreams.</p>
+                      <div class="project-tags">
+                        <span>TypeScript</span><span>WebAssembly</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <footer class="page-ft">
+                  <span class="page-num">2</span>
+                </footer>
+              </div>
+            </div>
+
+            <!-- PAGE: Writing -->
+            <div class="page hidden" id="page-writing">
+              <div class="page-inner">
+                <header class="page-hd">
+                  <div class="page-chapter">Chapter III</div>
+                  <h1 class="page-title">Writing</h1>
+                  <div class="page-rule-gold"></div>
+                </header>
+
+                <div class="page-body">
+
+                  <div class="writing-entry">
+                    <div class="writing-date">March 2024</div>
+                    <h3 class="writing-title">On the Nature of Digital Craft</h3>
+                    <p class="writing-excerpt">There is a kind of honesty in handmade things — a fingerprint pressed into clay, the trembling line of a brushstroke. I've been thinking about whether code can carry that same truth...</p>
+                    <a class="writing-read" href="#">Read →</a>
+                  </div>
+
+                  <div class="writing-entry">
+                    <div class="writing-date">February 2024</div>
+                    <h3 class="writing-title">The Quiet Art of Debugging</h3>
+                    <p class="writing-excerpt">Sometimes the best code is the code you delete. I spent three hours this week tracing a bug through six files only to find it in a missing semicolon. There's a strange meditation in that...</p>
+                    <a class="writing-read" href="#">Read →</a>
+                  </div>
+
+                  <div class="writing-entry">
+                    <div class="writing-date">January 2024</div>
+                    <h3 class="writing-title">Finding Beauty in Systems</h3>
+                    <p class="writing-excerpt">There is poetry in a well-designed API. The way functions nest inside one another like Russian dolls, each doing exactly its one thing with elegant restraint...</p>
+                    <a class="writing-read" href="#">Read →</a>
+                  </div>
+
+                  <div class="writing-entry">
+                    <div class="writing-date">December 2023</div>
+                    <h3 class="writing-title">Slow Tech</h3>
+                    <p class="writing-excerpt">What if we made websites the way potters throw pots? Slowly. With our hands. Feeling the material resist and yield. The web doesn't have to be fast to be good...</p>
+                    <a class="writing-read" href="#">Read →</a>
+                  </div>
+
+                </div>
+
+                <footer class="page-ft">
+                  <span class="page-num">3</span>
+                </footer>
+              </div>
+            </div>
+
+            <!-- PAGE: Doodle -->
+            <div class="page hidden" id="page-doodle">
+              <div class="page-inner doodle-page-inner">
+                <header class="page-hd">
+                  <div class="page-chapter">Chapter IV</div>
+                  <h1 class="page-title">Doodle</h1>
+                  <div class="page-rule-gold"></div>
+                  <p class="doodle-invite">Pick up the golden pen and draw something.</p>
+                </header>
+
+                <div class="doodle-wrap">
+                  <canvas id="doodle-canvas"></canvas>
+                </div>
+
+                <div class="doodle-toolbar">
+                  <div class="toolbar-group">
+                    <div class="toolbar-label">Ink</div>
+                    <div class="color-swatches">
+                      <button class="swatch active" data-color="#2A1F1A" style="--sw: #2A1F1A" title="Ink"></button>
+                      <button class="swatch" data-color="#C9A84C" style="--sw: #C9A84C" title="Gold"></button>
+                      <button class="swatch" data-color="#8B4357" style="--sw: #8B4357" title="Rose"></button>
+                      <button class="swatch" data-color="#3A5A8A" style="--sw: #3A5A8A" title="Indigo"></button>
+                      <button class="swatch" data-color="#4A6741" style="--sw: #4A6741" title="Sage"></button>
+                    </div>
+                  </div>
+
+                  <div class="toolbar-group">
+                    <div class="toolbar-label">Weight</div>
+                    <div class="size-buttons">
+                      <button class="size-btn" data-size="1.5" title="Fine" style="font-size:6px">&#9679;</button>
+                      <button class="size-btn active" data-size="4" title="Medium" style="font-size:10px">&#9679;</button>
+                      <button class="size-btn" data-size="10" title="Bold" style="font-size:16px">&#9679;</button>
+                    </div>
+                  </div>
+
+                  <div class="toolbar-group">
+                    <button class="clear-btn" id="clear-btn">✕ Clear</button>
+                  </div>
+                </div>
+
+                <footer class="page-ft">
+                  <span class="page-num">4</span>
+                </footer>
+              </div>
+            </div>
+
+          </div><!-- #pages -->
+        </div><!-- #page-right -->
+
+      </div><!-- #book-paper -->
 
     </div><!-- #journal-book -->
   </div><!-- #journal-ui -->
 
+  <!-- Scroll indicator -->
+  <div id="scroll-hint">scroll to turn pages</div>
 
   <script type="module" src="js/journal.js"></script>
 </body>
