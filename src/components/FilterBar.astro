@@ -1,0 +1,117 @@
+---
+// src/components/FilterBar.astro
+// No emoji. Filter state syncs to URL query params.
+import GrowthIcon from './icons/GrowthIcon.astro';
+import type { GrowthStage } from '../config/design';
+
+interface FilterOption {
+  value: string;
+  label: string;
+  stage?: GrowthStage;
+}
+
+interface FilterGroup {
+  param: string;
+  label: string;
+  options: FilterOption[];
+}
+
+interface Props {
+  groups: FilterGroup[];
+}
+
+const { groups } = Astro.props;
+---
+<div class="filter-bar" id="filter-bar">
+  {groups.map(group => (
+    <div class="filter-group">
+      {group.options.map(opt => (
+        <button
+          class="filter-pill"
+          data-param={group.param}
+          data-value={opt.value}
+          aria-pressed="false"
+        >
+          {opt.stage && <GrowthIcon stage={opt.stage} size={11} />}
+          {opt.label}
+        </button>
+      ))}
+    </div>
+  ))}
+</div>
+
+<style>
+  .filter-bar { display: flex; flex-wrap: wrap; gap: var(--space-lg); margin-bottom: var(--space-xxl); }
+  .filter-group { display: flex; flex-wrap: wrap; gap: var(--space-sm); }
+  .filter-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: 4px 12px;
+    border-radius: var(--radius-pill);
+    background: var(--color-pill-bg);
+    border: 0.5px solid var(--color-accent-border);
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    color: var(--color-pill-text);
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    transition: background 0.12s ease, color 0.12s ease;
+  }
+  .filter-pill[aria-pressed="true"] {
+    background: var(--color-accent);
+    color: var(--color-card);
+    border-color: var(--color-accent);
+  }
+  .filter-pill:hover:not([aria-pressed="true"]) {
+    background: var(--color-accent-light);
+  }
+</style>
+
+<script>
+  function initFilters() {
+    const params = new URLSearchParams(window.location.search);
+    const pills = document.querySelectorAll<HTMLButtonElement>('.filter-pill');
+
+    pills.forEach(pill => {
+      const param = pill.dataset.param!;
+      const value = pill.dataset.value!;
+      const active = params.get(param) === value || (value === 'all' && !params.has(param));
+      pill.setAttribute('aria-pressed', String(active));
+
+      pill.addEventListener('click', () => {
+        const newParams = new URLSearchParams(window.location.search);
+        if (value === 'all') {
+          newParams.delete(param);
+        } else {
+          newParams.set(param, value);
+        }
+        window.history.replaceState(null, '', `?${newParams.toString()}`);
+        updateVisibility();
+        // Update pill states
+        document.querySelectorAll<HTMLButtonElement>(`.filter-pill[data-param="${param}"]`).forEach(p => {
+          const pv = p.dataset.value!;
+          const np = new URLSearchParams(window.location.search);
+          p.setAttribute('aria-pressed', String(np.get(param) === pv || (pv === 'all' && !np.has(param))));
+        });
+      });
+    });
+
+    updateVisibility();
+  }
+
+  function updateVisibility() {
+    const params = new URLSearchParams(window.location.search);
+    const cards = document.querySelectorAll<HTMLElement>('[data-filter]');
+    cards.forEach(card => {
+      const filters = JSON.parse(card.dataset.filter || '{}');
+      let visible = true;
+      params.forEach((value, key) => {
+        if (filters[key] && filters[key] !== value) visible = false;
+      });
+      card.style.display = visible ? '' : 'none';
+    });
+  }
+
+  initFilters();
+</script>

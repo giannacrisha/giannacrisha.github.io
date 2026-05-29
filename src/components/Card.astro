@@ -1,0 +1,113 @@
+---
+// src/components/Card.astro
+import GrowthPill from './GrowthPill.astro';
+import StarRating from './icons/StarRating.astro';
+import Timestamps from './Timestamps.astro';
+import type { GrowthStage } from '../config/design';
+
+interface Props {
+  title:          string;
+  slug:           string;
+  collection:     'lab' | 'archives' | 'gallery' | 'library';
+  type?:          string;
+  stage?:         GrowthStage;
+  date_published: Date;
+  date_written?:  Date;
+  date_built?:    Date;
+  date_made?:     Date;
+  date_added?:    Date;
+  cover_image?:   string;
+  rating?:        number;
+  description?:   string;
+  creator?:       string;
+  year?:          number;
+}
+
+const {
+  title, slug, collection, type, stage,
+  date_published, date_written, date_built, date_made, date_added,
+  cover_image, rating, description, creator, year,
+} = Astro.props;
+
+const href = `/${collection}/${slug}`;
+
+let primaryLabel = 'planted';
+let primaryDate  = date_published;
+if (collection === 'archives' && date_written)   { primaryLabel = 'written'; primaryDate = date_written; }
+if (collection === 'lab'      && date_built)     { primaryLabel = 'built';   primaryDate = date_built;   }
+if (collection === 'gallery'  && date_made)      { primaryLabel = 'made';    primaryDate = date_made;    }
+if (collection === 'library'  && date_added)     { primaryLabel = 'added';   primaryDate = date_added;   }
+
+const secondaryLabel = collection === 'library' ? 'added' : 'planted';
+const secondaryDate  = collection === 'library' ? (date_added ?? date_published) : date_published;
+
+const showTimestamps = primaryDate && secondaryDate && primaryDate.getTime() !== secondaryDate.getTime();
+---
+<article class="card">
+  <a href={href} class="card-link">
+    {cover_image && (
+      <div class="card-image">
+        <img src={cover_image} alt={title} loading="lazy" />
+      </div>
+    )}
+    <div class="card-body">
+      <div class="card-meta">
+        {type && <span class="pill">{type}</span>}
+        {stage && <GrowthPill stage={stage} />}
+        {rating !== undefined && <StarRating rating={rating} />}
+      </div>
+      <h3 class="card-title">{title}</h3>
+      {creator && <p class="card-creator">{creator}{year ? ` · ${year}` : ''}</p>}
+      {description && <p class="card-description">{description}</p>}
+      {showTimestamps && (
+        <Timestamps
+          primaryLabel={primaryLabel}
+          primaryDate={primaryDate}
+          secondaryLabel={secondaryLabel}
+          secondaryDate={secondaryDate}
+        />
+      )}
+    </div>
+  </a>
+</article>
+
+<style>
+  .card {
+    background: var(--color-card);
+    border: var(--border);
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    transition: border-color 0.15s ease;
+  }
+  .card:hover { border-color: var(--color-accent); }
+  .card-link { display: block; text-decoration: none; color: inherit; }
+  .card-image img {
+    width: 100%;
+    max-height: 180px;
+    object-fit: cover;
+    display: block;
+    border-radius: var(--radius-card) var(--radius-card) 0 0;
+  }
+  .card-body { padding: var(--space-lg); display: flex; flex-direction: column; gap: var(--space-sm); }
+  .card-meta { display: flex; flex-wrap: wrap; gap: var(--space-xs); align-items: center; }
+  .card-title {
+    font-family: var(--font-serif);
+    font-size: var(--text-md);
+    color: var(--color-fg);
+    line-height: var(--leading-tight);
+  }
+  .card-creator {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+  }
+  .card-description {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>

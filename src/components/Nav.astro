@@ -1,0 +1,119 @@
+---
+// src/components/Nav.astro
+const navLinks = [
+  { href: '/lab',      label: 'lab'      },
+  { href: '/archives', label: 'archives' },
+  { href: '/gallery',  label: 'gallery'  },
+  { href: '/library',  label: 'library'  },
+  { href: '/about',    label: 'about'    },
+];
+
+const currentPath = Astro.url.pathname;
+---
+<header class="nav">
+  <div class="nav-inner site-wrapper">
+    <a href="/garden" class="nav-logo">gi</a>
+    <nav class="nav-links" aria-label="Main navigation">
+      {navLinks.map(link => (
+        <a
+          href={link.href}
+          class:list={['nav-link', { active: currentPath.startsWith(link.href) }]}
+        >
+          {link.label}
+        </a>
+      ))}
+    </nav>
+    <button class="nav-hamburger" aria-label="Toggle menu" aria-expanded="false">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+        <line x1="2" y1="5"  x2="18" y2="5"  stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="2" y1="10" x2="18" y2="10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="2" y1="15" x2="18" y2="15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </div>
+  <div class="nav-mobile" id="mobile-menu" hidden>
+    {navLinks.map(link => (
+      <a href={link.href} class="nav-mobile-link">{link.label}</a>
+    ))}
+  </div>
+</header>
+
+<style>
+  .nav {
+    background: var(--color-bg);
+    border-bottom: var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 52px;
+  }
+  .nav-logo {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    color: var(--color-fg);
+    line-height: 1;
+  }
+  .nav-links {
+    display: flex;
+    gap: var(--space-xl);
+    align-items: center;
+  }
+  .nav-link {
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    color: var(--color-muted);
+    letter-spacing: 0.06em;
+    text-transform: lowercase;
+    padding-bottom: 2px;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+  .nav-link:hover { color: var(--color-fg); }
+  .nav-link.active {
+    color: var(--color-fg);
+    border-bottom-color: var(--color-accent);
+  }
+  .nav-hamburger {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-fg);
+    padding: var(--space-sm);
+  }
+  .nav-mobile {
+    background: var(--color-bg);
+    border-top: var(--border);
+    padding: var(--space-lg) var(--space-xl);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+  }
+  .nav-mobile-link {
+    font-family: var(--font-body);
+    font-size: var(--text-md);
+    color: var(--color-muted);
+    letter-spacing: 0.06em;
+  }
+  @media (max-width: 600px) {
+    .nav-links { display: none; }
+    .nav-hamburger { display: flex; }
+  }
+</style>
+
+<script>
+  const btn = document.querySelector('.nav-hamburger') as HTMLButtonElement;
+  const menu = document.getElementById('mobile-menu');
+  if (btn && menu) {
+    btn.addEventListener('click', () => {
+      const open = !menu.hidden;
+      menu.hidden = open;
+      btn.setAttribute('aria-expanded', String(!open));
+    });
+  }
+</script>

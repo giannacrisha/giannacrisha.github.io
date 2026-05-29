@@ -1,0 +1,30 @@
+---
+// src/components/GrowthPill.astro
+import GrowthIcon from './icons/GrowthIcon.astro';
+import type { GrowthStage } from '../config/design';
+import { growthStages } from '../config/design';
+
+interface Props { stage: GrowthStage; }
+const { stage } = Astro.props;
+const stageData = growthStages[stage];
+---
+<span class="growth-pill">
+  <GrowthIcon stage={stage} size={12} />
+  <span>{stageData.label}</span>
+</span>
+
+<style>
+  .growth-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: 3px 10px;
+    border-radius: var(--radius-pill);
+    background: var(--color-pill-bg);
+    border: 0.5px solid var(--color-accent-border);
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    color: var(--color-pill-text);
+    letter-spacing: 0.06em;
+  }
+</style>

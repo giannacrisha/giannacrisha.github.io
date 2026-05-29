@@ -1,0 +1,53 @@
+---
+// src/pages/lab/index.astro
+import Garden from '../../layouts/Garden.astro';
+import Card from '../../components/Card.astro';
+import FilterBar from '../../components/FilterBar.astro';
+import { getCollection } from 'astro:content';
+
+const entries = await getCollection('lab');
+const sorted = entries.sort((a, b) => b.data.date_published.getTime() - a.data.date_published.getTime());
+
+const filterGroups = [
+  {
+    param: 'stage',
+    label: 'stage',
+    options: [
+      { value: 'all', label: 'all' },
+      { value: 'dust', label: 'dust', stage: 'dust' as const },
+      { value: 'spark', label: 'spark', stage: 'spark' as const },
+      { value: 'star', label: 'star', stage: 'star' as const },
+    ],
+  },
+];
+---
+<Garden title="lab">
+  <div class="site-wrapper">
+    <div class="page-header">
+      <h1 class="section-header">lab</h1>
+      <p class="page-desc">design and code projects</p>
+    </div>
+    <FilterBar groups={filterGroups} />
+    <div class="card-grid">
+      {sorted.map(entry => (
+        <div data-filter={JSON.stringify({ stage: entry.data.growth_stage })}>
+          <Card
+            title={entry.data.title}
+            slug={entry.slug}
+            collection="lab"
+            stage={entry.data.growth_stage}
+            date_published={entry.data.date_published}
+            date_built={entry.data.date_built}
+            cover_image={entry.data.cover_image}
+            description={entry.data.description}
+          />
+        </div>
+      ))}
+    </div>
+  </div>
+</Garden>
+
+<style>
+  .page-header { padding: var(--space-section) 0 var(--space-xxl); }
+  .page-desc { font-family: var(--font-body); font-size: var(--text-md); color: var(--color-muted); margin-top: var(--space-sm); }
+</style>

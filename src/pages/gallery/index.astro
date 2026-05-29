@@ -1,0 +1,78 @@
+---
+// src/pages/gallery/index.astro
+import Garden from '../../layouts/Garden.astro';
+import FilterBar from '../../components/FilterBar.astro';
+import GrowthPill from '../../components/GrowthPill.astro';
+import { getCollection } from 'astro:content';
+
+const entries = await getCollection('gallery');
+const sorted = entries.sort((a, b) => b.data.date_published.getTime() - a.data.date_published.getTime());
+
+// Derive mediums dynamically
+const mediums = [...new Set(entries.map(e => e.data.medium))];
+
+const filterGroups = [
+  {
+    param: 'stage',
+    label: 'stage',
+    options: [
+      { value: 'all', label: 'all' },
+      { value: 'dust', label: 'dust', stage: 'dust' as const },
+      { value: 'spark', label: 'spark', stage: 'spark' as const },
+      { value: 'star', label: 'star', stage: 'star' as const },
+    ],
+  },
+  {
+    param: 'medium',
+    label: 'medium',
+    options: [
+      { value: 'all', label: 'all' },
+      ...mediums.map(m => ({ value: m, label: m })),
+    ],
+  },
+];
+---
+<Garden title="gallery">
+  <div class="site-wrapper">
+    <div class="page-header">
+      <h1 class="section-header">gallery</h1>
+      <p class="page-desc">artwork and visual work</p>
+    </div>
+    <FilterBar groups={filterGroups} />
+    <div class="masonry">
+      {sorted.map(entry => (
+        <div
+          class="masonry-item"
+          data-filter={JSON.stringify({ stage: entry.data.growth_stage, medium: entry.data.medium })}
+        >
+          <a href={`/gallery/${entry.slug}`} class="gallery-card">
+            <div class="gallery-image-wrap">
+              <img src={entry.data.image} alt={entry.data.title} loading="lazy" />
+            </div>
+            <div class="gallery-meta">
+              <span class="gallery-title">{entry.data.title}</span>
+              <div class="gallery-bottom">
+                <span class="pill">{entry.data.medium}</span>
+                <GrowthPill stage={entry.data.growth_stage} />
+              </div>
+            </div>
+          </a>
+        </div>
+      ))}
+    </div>
+  </div>
+</Garden>
+
+<style>
+  .page-header { padding: var(--space-section) 0 var(--space-xxl); }
+  .page-desc { font-family: var(--font-body); font-size: var(--text-md); color: var(--color-muted); margin-top: var(--space-sm); }
+  .masonry { columns: 2; column-gap: var(--space-xl); }
+  .masonry-item { break-inside: avoid; margin-bottom: var(--space-xl); }
+  .gallery-card { display: block; background: var(--color-card); border: var(--border); border-radius: var(--radius-card); overflow: hidden; transition: border-color 0.15s ease; }
+  .gallery-card:hover { border-color: var(--color-accent); }
+  .gallery-image-wrap img { width: 100%; display: block; }
+  .gallery-meta { padding: var(--space-lg); display: flex; flex-direction: column; gap: var(--space-sm); }
+  .gallery-title { font-family: var(--font-serif); font-size: var(--text-md); color: var(--color-fg); }
+  .gallery-bottom { display: flex; gap: var(--space-xs); flex-wrap: wrap; }
+  @media (max-width: 600px) { .masonry { columns: 1; } }
+</style>

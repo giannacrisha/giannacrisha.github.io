@@ -1,0 +1,104 @@
+---
+// src/pages/garden.astro — main hub
+import Garden from '../layouts/Garden.astro';
+import Card from '../components/Card.astro';
+import { getCollection } from 'astro:content';
+import { site } from '../config/design';
+
+const [lab, archives, gallery, library] = await Promise.all([
+  getCollection('lab'),
+  getCollection('archives'),
+  getCollection('gallery'),
+  getCollection('library'),
+]);
+
+// Combine and sort all entries by date_published descending
+const allEntries = [
+  ...lab.map(e => ({ ...e, collection: 'lab' as const, date: e.data.date_published })),
+  ...archives.map(e => ({ ...e, collection: 'archives' as const, date: e.data.date_published })),
+  ...gallery.map(e => ({ ...e, collection: 'gallery' as const, date: e.data.date_published })),
+  ...library.map(e => ({ ...e, collection: 'library' as const, date: e.data.date_added })),
+].sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 6);
+
+const areas = [
+  { href: '/lab',      name: 'lab',      desc: 'design and code projects' },
+  { href: '/archives', name: 'archives', desc: 'essays, poems, thoughts'  },
+  { href: '/gallery',  name: 'gallery',  desc: 'artwork and visual work'  },
+  { href: '/library',  name: 'library',  desc: 'films, books, albums, shows' },
+];
+---
+<Garden title="garden" description={site.description}>
+  <div class="site-wrapper">
+    <section class="recent-section">
+      <h2 class="section-header">recently planted</h2>
+      <div class="card-grid" style="margin-top: var(--space-xxl);">
+        {allEntries.map(entry => {
+          const data = entry.data as any;
+          return (
+            <Card
+              title={data.title}
+              slug={entry.slug}
+              collection={entry.collection}
+              type={data.type}
+              stage={data.growth_stage}
+              date_published={data.date_published ?? data.date_added}
+              date_written={data.date_written}
+              date_built={data.date_built}
+              date_made={data.date_made}
+              date_added={data.date_added}
+              cover_image={data.cover_image ?? data.image}
+              rating={data.rating}
+              description={data.description}
+              creator={data.creator}
+              year={data.year}
+            />
+          );
+        })}
+      </div>
+    </section>
+
+    <section class="areas-section">
+      <h2 class="section-header">the garden</h2>
+      <div class="areas-grid">
+        {areas.map(area => (
+          <a href={area.href} class="area-card">
+            <span class="area-name">{area.name}</span>
+            <span class="area-desc">{area.desc}</span>
+          </a>
+        ))}
+      </div>
+    </section>
+  </div>
+</Garden>
+
+<style>
+  .recent-section { padding: var(--space-section) 0 var(--space-xxl); }
+  .areas-section  { padding-bottom: var(--space-section); }
+  .areas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: var(--space-xl);
+    margin-top: var(--space-xxl);
+  }
+  .area-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    padding: var(--space-xl);
+    background: var(--color-card);
+    border: var(--border);
+    border-radius: var(--radius-card);
+    transition: border-color 0.15s ease;
+  }
+  .area-card:hover { border-color: var(--color-accent); }
+  .area-name {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    color: var(--color-fg);
+  }
+  .area-desc {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+  }
+</style>

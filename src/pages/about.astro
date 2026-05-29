@@ -1,0 +1,83 @@
+---
+// src/pages/about.astro
+import Garden from '../layouts/Garden.astro';
+import { site } from '../config/design';
+---
+<Garden title="about">
+  <div class="site-wrapper">
+    <div class="about-layout">
+      <section class="about-section">
+        <h2 class="section-subhead">about</h2>
+        <div class="portrait-placeholder" aria-hidden="true"></div>
+        <p class="body-text">
+          Hi, I'm gi — a creatress who loves building, making, and designing.
+          This garden is where I gather everything: the projects, the writing, the art, the things I've watched and read.
+        </p>
+      </section>
+
+      <section class="now-section">
+        <h2 class="section-subhead">now</h2>
+        <ul class="now-list">
+          <li>building this digital garden</li>
+          <li>reading — something good</li>
+          <li>thinking about how things grow</li>
+        </ul>
+      </section>
+    </div>
+  </div>
+</Garden>
+
+<style>
+  .about-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-section);
+    padding: var(--space-section) 0;
+  }
+  .section-subhead {
+    font-family: var(--font-serif);
+    font-size: var(--text-xxl);
+    color: var(--color-fg);
+    margin-bottom: var(--space-xxl);
+  }
+  .portrait-placeholder {
+    width: 100%;
+    max-width: 280px;
+    aspect-ratio: 3/4;
+    background: var(--color-accent-light);
+    border-radius: var(--radius-card);
+    margin-bottom: var(--space-xl);
+  }
+  .body-text {
+    font-family: var(--font-body);
+    font-size: var(--text-lg);
+    color: var(--color-fg);
+    line-height: var(--leading-loose);
+  }
+  .now-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+    font-family: var(--font-body);
+    font-size: var(--text-lg);
+    color: var(--color-fg);
+    line-height: var(--leading-loose);
+  }
+  .now-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-md);
+  }
+  .now-list li::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    flex-shrink: 0;
+    margin-top: 10px;
+  }
+  @media (max-width: 700px) {
+    .about-layout { grid-template-columns: 1fr; }
+  }
+</style>

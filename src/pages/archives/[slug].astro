@@ -1,0 +1,74 @@
+---
+// src/pages/archives/[slug].astro
+import Garden from '../../layouts/Garden.astro';
+import GrowthPill from '../../components/GrowthPill.astro';
+import Timestamps from '../../components/Timestamps.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('archives');
+  return entries.map(entry => ({ params: { slug: entry.slug }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+const { title, type, date_written, date_published, growth_stage, tags } = entry.data;
+const isPoem = type === 'poem';
+---
+<Garden title={title}>
+  <div class="content-wrapper">
+    <article class="archive-article">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="/archives">archives</a>
+        <span aria-hidden="true">/</span>
+      </nav>
+      <div class="entry-meta">
+        <span class="pill">{type}</span>
+        <GrowthPill stage={growth_stage} />
+      </div>
+      <h1 class="entry-title">{title}</h1>
+      <Timestamps
+        primaryLabel="written"
+        primaryDate={date_written}
+        secondaryLabel="planted"
+        secondaryDate={date_published}
+      />
+      {tags && tags.length > 0 && (
+        <div class="tags">
+          {tags.map(tag => <span class="pill">{tag}</span>)}
+        </div>
+      )}
+      <div class:list={['prose', { 'prose-poem': isPoem }]}>
+        <Content />
+      </div>
+    </article>
+  </div>
+</Garden>
+
+<style>
+  .archive-article { padding: var(--space-section) 0; }
+  .breadcrumb {
+    display: flex;
+    gap: var(--space-sm);
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    color: var(--color-muted);
+    margin-bottom: var(--space-xl);
+  }
+  .breadcrumb a { color: var(--color-muted); }
+  .breadcrumb a:hover { color: var(--color-fg); }
+  .entry-meta { display: flex; gap: var(--space-sm); flex-wrap: wrap; margin-bottom: var(--space-lg); }
+  .entry-title {
+    font-family: var(--font-serif);
+    font-size: var(--text-xxl);
+    color: var(--color-fg);
+    line-height: var(--leading-tight);
+    margin-bottom: var(--space-lg);
+  }
+  .tags { display: flex; gap: var(--space-sm); flex-wrap: wrap; margin-top: var(--space-md); }
+  .prose { margin-top: var(--space-xxl); }
+  .prose-poem {
+    text-align: center;
+    line-height: var(--leading-poem);
+  }
+</style>

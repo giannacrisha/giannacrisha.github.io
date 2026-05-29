@@ -1,0 +1,198 @@
+---
+// src/pages/system.astro
+// design system — not linked in nav, not in sitemap
+import Garden from '../layouts/Garden.astro';
+import GrowthIcon from '../components/icons/GrowthIcon.astro';
+import StarRating from '../components/icons/StarRating.astro';
+import GrowthPill from '../components/GrowthPill.astro';
+import Timestamps from '../components/Timestamps.astro';
+import Card from '../components/Card.astro';
+import { colors, fonts, fontSizes, spacing, growthStages } from '../config/design';
+---
+<Garden title="design system">
+  <div class="site-wrapper system-page">
+
+    <h1 class="system-title">design system</h1>
+
+    <!-- 1. Colors -->
+    <section class="system-section">
+      <h2 class="section-header">colors</h2>
+      <div class="swatch-row">
+        {Object.entries(colors).map(([key, value]) => (
+          <div class="swatch">
+            <div class="swatch-block" style={`background: ${value};`}></div>
+            <span class="swatch-name">{key}</span>
+            <span class="swatch-hex">{value}</span>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- 2. Typography -->
+    <section class="system-section">
+      <h2 class="section-header">typography</h2>
+      <div class="type-sample" style={`font-family: ${fonts.display}; font-size: ${fontSizes.hero};`}>
+        gi's digital garden
+      </div>
+      <p class="type-label">display / Jacquard 12 / hero</p>
+      <div class="type-sample" style={`font-family: ${fonts.serif}; font-size: ${fontSizes.xxl};`}>
+        subsection header
+      </div>
+      <p class="type-label">serif / Lora / xxl</p>
+      <div class="type-sample" style={`font-family: ${fonts.body}; font-size: ${fontSizes.lg};`}>
+        The quick brown fox builds a garden. Body text at its intended size, showing rhythm and readability.
+      </div>
+      <p class="type-label">body / Atkinson Hyperlegible Next / lg</p>
+    </section>
+
+    <!-- 3. Growth stages -->
+    <section class="system-section">
+      <h2 class="section-header">growth stages</h2>
+      <div class="stages-row">
+        {Object.values(growthStages).map(stage => (
+          <div class="stage-item">
+            <GrowthIcon stage={stage.id as any} size={24} />
+            <span class="stage-name">{stage.label}</span>
+            <span class="stage-desc">{stage.description}</span>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- 4. Components -->
+    <section class="system-section">
+      <h2 class="section-header">components</h2>
+
+      <h3 class="system-subhead">growth pills</h3>
+      <div class="component-row">
+        <GrowthPill stage="dust" />
+        <GrowthPill stage="spark" />
+        <GrowthPill stage="star" />
+      </div>
+
+      <h3 class="system-subhead">star ratings</h3>
+      <div class="component-row">
+        <StarRating rating={3} />
+        <StarRating rating={4} />
+        <StarRating rating={5} />
+      </div>
+
+      <h3 class="system-subhead">category pills</h3>
+      <div class="component-row">
+        <span class="pill">essay</span>
+        <span class="pill">poem</span>
+        <span class="pill">film</span>
+      </div>
+
+      <h3 class="system-subhead">timestamps</h3>
+      <Timestamps
+        primaryLabel="written"
+        primaryDate={new Date('2025-04-01')}
+        secondaryLabel="planted"
+        secondaryDate={new Date('2025-05-15')}
+      />
+
+      <h3 class="system-subhead">cards</h3>
+      <div class="card-grid">
+        <Card
+          title="on starting in the middle"
+          slug="on-starting-in-the-middle"
+          collection="archives"
+          type="thought"
+          stage="spark"
+          date_published={new Date('2025-05-15')}
+          date_written={new Date('2025-04-01')}
+          description="I keep starting projects in the middle. Not because I don't know the beginning."
+        />
+        <Card
+          title="this garden"
+          slug="this-garden"
+          collection="lab"
+          stage="spark"
+          date_published={new Date('2026-05-29')}
+          date_built={new Date('2026-05-29')}
+          description="building a place to gather everything I make and think"
+        />
+        <Card
+          title="Stalker"
+          slug="stalker"
+          collection="library"
+          type="film"
+          date_published={new Date('2025-01-10')}
+          date_added={new Date('2025-01-10')}
+          rating={5}
+          creator="Andrei Tarkovsky"
+          year={1979}
+        />
+      </div>
+    </section>
+
+    <!-- 5. Spacing -->
+    <section class="system-section">
+      <h2 class="section-header">spacing</h2>
+      <div class="spacing-row">
+        {Object.entries(spacing).map(([key, value]) => (
+          <div class="spacing-item">
+            <div class="spacing-block" style={`height: ${value}; width: ${value};`}></div>
+            <span class="spacing-label">{key}</span>
+            <span class="spacing-value">{value}</span>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- 6. Icons -->
+    <section class="system-section">
+      <h2 class="section-header">icons</h2>
+      {(['dust', 'spark', 'star'] as const).map(stage => (
+        <div class="icon-row">
+          <span class="icon-label">{stage}</span>
+          {[12, 16, 24, 32].map(size => (
+            <div class="icon-item">
+              <GrowthIcon stage={stage} size={size} />
+              <span class="icon-size">{size}px</span>
+            </div>
+          ))}
+        </div>
+      ))}
+      <div class="icon-row">
+        <span class="icon-label">star</span>
+        {[12, 16, 24, 32].map(size => (
+          <div class="icon-item">
+            <StarRating rating={1} max={1} />
+            <span class="icon-size">{size}px</span>
+          </div>
+        ))}
+      </div>
+    </section>
+
+  </div>
+</Garden>
+
+<style>
+  .system-page { padding: var(--space-section) 0; }
+  .system-title { font-family: var(--font-display); font-size: var(--text-section); margin-bottom: var(--space-section); }
+  .system-section { margin-bottom: var(--space-section); }
+  .system-subhead { font-family: var(--font-serif); font-size: var(--text-lg); color: var(--color-fg); margin: var(--space-xxl) 0 var(--space-lg); }
+  .swatch-row { display: flex; flex-wrap: wrap; gap: var(--space-lg); margin-top: var(--space-xxl); }
+  .swatch { display: flex; flex-direction: column; align-items: center; gap: var(--space-xs); }
+  .swatch-block { width: 64px; height: 64px; border-radius: var(--radius-card); border: var(--border); }
+  .swatch-name { font-family: var(--font-body); font-size: var(--text-xs); color: var(--color-fg); }
+  .swatch-hex { font-family: var(--font-body); font-size: var(--text-xs); color: var(--color-muted); }
+  .type-sample { color: var(--color-fg); margin: var(--space-xl) 0 var(--space-sm); line-height: var(--leading-tight); }
+  .type-label { font-family: var(--font-body); font-size: var(--text-xs); color: var(--color-muted); margin-bottom: var(--space-xxl); }
+  .stages-row { display: flex; gap: var(--space-xxl); flex-wrap: wrap; margin-top: var(--space-xxl); }
+  .stage-item { display: flex; flex-direction: column; gap: var(--space-sm); }
+  .stage-name { font-family: var(--font-serif); font-size: var(--text-md); color: var(--color-fg); }
+  .stage-desc { font-family: var(--font-body); font-size: var(--text-sm); color: var(--color-muted); max-width: 160px; }
+  .component-row { display: flex; flex-wrap: wrap; gap: var(--space-lg); align-items: center; margin-bottom: var(--space-xl); }
+  .spacing-row { display: flex; flex-wrap: wrap; gap: var(--space-xl); align-items: flex-end; margin-top: var(--space-xxl); }
+  .spacing-item { display: flex; flex-direction: column; align-items: center; gap: var(--space-xs); }
+  .spacing-block { background: var(--color-accent-light); border: 0.5px solid var(--color-accent-border); }
+  .spacing-label { font-family: var(--font-body); font-size: var(--text-xs); color: var(--color-fg); }
+  .spacing-value { font-family: var(--font-body); font-size: var(--text-xs); color: var(--color-muted); }
+  .icon-row { display: flex; align-items: center; gap: var(--space-xl); margin-bottom: var(--space-lg); }
+  .icon-label { font-family: var(--font-body); font-size: var(--text-xs); color: var(--color-muted); width: 40px; }
+  .icon-item { display: flex; flex-direction: column; align-items: center; gap: var(--space-xs); }
+  .icon-size { font-family: var(--font-body); font-size: var(--text-xs); color: var(--color-muted); }
+</style>

@@ -1,0 +1,37 @@
+---
+// src/pages/404.astro
+import Garden from '../layouts/Garden.astro';
+---
+<Garden title="not found">
+  <div class="site-wrapper">
+    <div class="not-found">
+      <h1 class="not-found-title">lost in the garden</h1>
+      <p class="not-found-body">this path doesn't exist yet. maybe it will grow here someday.</p>
+      <a href="/garden" class="pill">back to the garden</a>
+    </div>
+  </div>
+</Garden>
+
+<style>
+  .not-found {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    text-align: center;
+    gap: var(--space-xl);
+  }
+  .not-found-title {
+    font-family: var(--font-display);
+    font-size: var(--text-section);
+    color: var(--color-fg);
+  }
+  .not-found-body {
+    font-family: var(--font-body);
+    font-size: var(--text-md);
+    color: var(--color-muted);
+    max-width: 360px;
+    line-height: var(--leading-loose);
+  }
+</style>

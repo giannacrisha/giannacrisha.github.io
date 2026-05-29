@@ -1,0 +1,91 @@
+/* src/styles/global.css */
+/* No emoji anywhere in this codebase. All visual indicators use SVG. */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--leading-base);
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+ul, ol {
+  list-style: none;
+}
+
+.site-wrapper {
+  max-width: var(--width-site);
+  margin: 0 auto;
+  padding: 0 var(--space-xl);
+}
+
+.content-wrapper {
+  max-width: var(--width-content);
+  margin: 0 auto;
+  padding: 0 var(--space-xl);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--color-pill-bg);
+  border: 0.5px solid var(--color-accent-border);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  color: var(--color-pill-text);
+  letter-spacing: 0.06em;
+}
+
+.section-header {
+  font-family: var(--font-display);
+  font-size: var(--text-section);
+  color: var(--color-fg);
+  line-height: var(--leading-tight);
+}
+
+.prose {
+  font-family: var(--font-body);
+  font-size: var(--text-lg);
+  line-height: var(--leading-loose);
+  color: var(--color-fg);
+}
+
+.prose p + p { margin-top: var(--space-xl); }
+.prose h2 { font-family: var(--font-serif); font-size: var(--text-xl); margin-top: var(--space-xxl); margin-bottom: var(--space-lg); }
+.prose h3 { font-family: var(--font-serif); font-size: var(--text-lg); margin-top: var(--space-xl); margin-bottom: var(--space-md); }
+.prose a { color: var(--color-accent); text-decoration: underline; text-underline-offset: 2px; }
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-xl);
+}
+
+@media (max-width: 600px) {
+  .card-grid { grid-template-columns: 1fr; }
+  .site-wrapper { padding: 0 var(--space-lg); }
+  .content-wrapper { padding: 0 var(--space-lg); }
+}

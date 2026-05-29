@@ -1,0 +1,68 @@
+---
+// src/pages/library/[slug].astro
+import Garden from '../../layouts/Garden.astro';
+import StarRating from '../../components/icons/StarRating.astro';
+import Timestamps from '../../components/Timestamps.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('library');
+  return entries.map(entry => ({ params: { slug: entry.slug }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+const { title, creator, year, type, date_added, rating, cover_image } = entry.data;
+---
+<Garden title={title}>
+  <div class="content-wrapper">
+    <article class="library-article">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="/library">library</a>
+        <span aria-hidden="true">/</span>
+      </nav>
+      <div class="library-layout">
+        {cover_image && (
+          <div class="cover-col">
+            <img src={cover_image} alt={title} class="cover-img" />
+          </div>
+        )}
+        <div class="meta-col">
+          <h1 class="entry-title">{title}</h1>
+          <div class="creator-row">
+            <span class="creator">{creator}</span>
+            <span class="year-sep" aria-hidden="true">·</span>
+            <span class="year">{year}</span>
+            <span class="pill">{type}</span>
+          </div>
+          <StarRating rating={rating} />
+          <Timestamps
+            primaryLabel="added"
+            primaryDate={date_added}
+            secondaryLabel="added"
+            secondaryDate={date_added}
+          />
+        </div>
+      </div>
+      <div class="prose">
+        <Content />
+      </div>
+    </article>
+  </div>
+</Garden>
+
+<style>
+  .library-article { padding: var(--space-section) 0; }
+  .breadcrumb { display: flex; gap: var(--space-sm); font-family: var(--font-body); font-size: var(--text-xs); color: var(--color-muted); margin-bottom: var(--space-xl); }
+  .breadcrumb a { color: var(--color-muted); }
+  .library-layout { display: grid; grid-template-columns: 180px 1fr; gap: var(--space-xxl); margin-bottom: var(--space-xxl); }
+  .cover-img { width: 100%; border-radius: var(--radius-card); }
+  .meta-col { display: flex; flex-direction: column; gap: var(--space-lg); }
+  .entry-title { font-family: var(--font-serif); font-size: var(--text-xl); color: var(--color-fg); line-height: var(--leading-tight); }
+  .creator-row { display: flex; flex-wrap: wrap; gap: var(--space-sm); align-items: center; font-family: var(--font-body); font-size: var(--text-sm); color: var(--color-muted); }
+  .year-sep { color: var(--color-accent); }
+  .prose { margin-top: var(--space-xxl); }
+  @media (max-width: 600px) {
+    .library-layout { grid-template-columns: 1fr; }
+  }
+</style>

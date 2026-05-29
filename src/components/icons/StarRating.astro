@@ -1,0 +1,30 @@
+---
+// src/components/icons/StarRating.astro
+interface Props { rating: number; max?: number; }
+const { rating, max = 5 } = Astro.props;
+
+const filled = '#C9A84C';
+const empty  = '#D4BC8A';
+---
+<span class="star-rating" aria-label={`${rating} out of ${max} stars`} role="img">
+  {Array.from({ length: max }, (_, i) => {
+    const val = i + 1;
+    const isHalf   = rating >= val - 0.5 && rating < val;
+    const isFilled = rating >= val;
+    return (
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+        <path
+          d="M7 1l1.545 3.13 3.455.503-2.5 2.436.59 3.44L7 8.885l-3.09 1.624.59-3.44L2 4.633l3.455-.503z"
+          fill={isFilled ? filled : isHalf ? filled : empty}
+          fill-opacity={isHalf ? '0.5' : '1'}
+          stroke={isFilled || isHalf ? filled : empty}
+          stroke-width="0.8"
+        />
+      </svg>
+    );
+  })}
+</span>
+
+<style>
+  .star-rating { display: inline-flex; gap: 2px; align-items: center; }
+</style>
