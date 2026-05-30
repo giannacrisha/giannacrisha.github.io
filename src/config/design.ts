@@ -7,12 +7,12 @@ export const colors = {
   fg:           '#3d2f1f',
   card:         '#ffffff',
   muted:        '#7A6035',
-  accent:       '#C9A84C',
-  accentLight:  '#FAEEDA',
+  accent:       '#9C8B6E',
+  accentLight:  '#EDE5D8',
   border:       '#E8DCC8',
-  pillBg:       '#EEE0B8',
-  pillText:     '#8C7248',
-  accentBorder: '#D4BC8A',
+  pillBg:       '#E8DDD0',
+  pillText:     '#6B5C47',
+  accentBorder: '#C4B49A',
 } as const;
 
 export const fonts = {

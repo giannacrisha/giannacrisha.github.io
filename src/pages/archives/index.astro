@@ -32,7 +32,7 @@ const filterGroups = [
 ];
 ---
 <Garden title="archives">
-  <div class="site-wrapper">
+  <div class="page-wrapper">
     <div class="page-header">
       <h1 class="section-header">archives</h1>
       <p class="page-desc">essays, poems, thoughts</p>
@@ -51,6 +51,7 @@ const filterGroups = [
             stage={entry.data.growth_stage}
             date_published={entry.data.date_published}
             date_written={entry.data.date_written}
+            body={entry.body}
           />
         </div>
       ))}

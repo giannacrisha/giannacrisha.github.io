@@ -3,8 +3,8 @@
 interface Props { rating: number; max?: number; }
 const { rating, max = 5 } = Astro.props;
 
-const filled = '#C9A84C';
-const empty  = '#D4BC8A';
+const filled = '#9C8B6E';
+const empty  = '#C4B49A';
 ---
 <span class="star-rating" aria-label={`${rating} out of ${max} stars`} role="img">
   {Array.from({ length: max }, (_, i) => {

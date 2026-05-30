@@ -23,7 +23,7 @@ const filterGroups = [
 ];
 ---
 <Garden title="library">
-  <div class="site-wrapper">
+  <div class="page-wrapper">
     <div class="page-header">
       <h1 class="section-header">library</h1>
       <p class="page-desc">films, books, albums, shows</p>
@@ -43,6 +43,7 @@ const filterGroups = [
             rating={entry.data.rating}
             creator={entry.data.creator}
             year={entry.data.year}
+            body={entry.body}
           />
         </div>
       ))}

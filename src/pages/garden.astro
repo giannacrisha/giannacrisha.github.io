@@ -2,6 +2,7 @@
 // src/pages/garden.astro — main hub
 import Garden from '../layouts/Garden.astro';
 import Card from '../components/Card.astro';
+import GardenFilters from '../components/GardenFilters.astro';
 import { getCollection } from 'astro:content';
 import { site } from '../config/design';
 
@@ -12,93 +13,111 @@ const [lab, archives, gallery, library] = await Promise.all([
   getCollection('library'),
 ]);
 
-// Combine and sort all entries by date_published descending
 const allEntries = [
   ...lab.map(e => ({ ...e, collection: 'lab' as const, date: e.data.date_published })),
   ...archives.map(e => ({ ...e, collection: 'archives' as const, date: e.data.date_published })),
   ...gallery.map(e => ({ ...e, collection: 'gallery' as const, date: e.data.date_published })),
   ...library.map(e => ({ ...e, collection: 'library' as const, date: e.data.date_added })),
-].sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 6);
-
-const areas = [
-  { href: '/lab',      name: 'lab',      desc: 'design and code projects' },
-  { href: '/archives', name: 'archives', desc: 'essays, poems, thoughts'  },
-  { href: '/gallery',  name: 'gallery',  desc: 'artwork and visual work'  },
-  { href: '/library',  name: 'library',  desc: 'films, books, albums, shows' },
-];
+].sort((a, b) => b.date.getTime() - a.date.getTime());
 ---
-<Garden title="garden" description={site.description}>
-  <div class="site-wrapper">
-    <section class="recent-section">
-      <h2 class="section-header">recently planted</h2>
-      <div class="card-grid" style="margin-top: var(--space-xxl);">
+<Garden title="the garden" description={site.description}>
+  <div class="garden-page">
+    <div class="page-wrapper">
+
+      <header class="garden-header">
+        <h1 class="garden-title">the garden</h1>
+        <p class="garden-desc">{site.description}</p>
+      </header>
+
+      <GardenFilters />
+
+      <div class="masonry">
         {allEntries.map(entry => {
           const data = entry.data as any;
           return (
-            <Card
-              title={data.title}
-              slug={entry.slug}
-              collection={entry.collection}
-              type={data.type}
-              stage={data.growth_stage}
-              date_published={data.date_published ?? data.date_added}
-              date_written={data.date_written}
-              date_built={data.date_built}
-              date_made={data.date_made}
-              date_added={data.date_added}
-              cover_image={data.cover_image ?? data.image}
-              rating={data.rating}
-              description={data.description}
-              creator={data.creator}
-              year={data.year}
-            />
+            <div
+              class="masonry-item"
+              data-filter={JSON.stringify({ collection: entry.collection, stage: data.growth_stage })}
+              data-date={entry.date.getTime()}
+              data-stage={data.growth_stage}
+            >
+              <Card
+                title={data.title}
+                slug={entry.slug}
+                collection={entry.collection}
+                type={data.type}
+                stage={data.growth_stage}
+                date_published={data.date_published ?? data.date_added}
+                date_written={data.date_written}
+                date_built={data.date_built}
+                date_made={data.date_made}
+                date_added={data.date_added}
+                cover_image={data.cover_image ?? data.image}
+                rating={data.rating}
+                description={data.description}
+                body={entry.body}
+                creator={data.creator}
+                year={data.year}
+              />
+            </div>
           );
         })}
       </div>
-    </section>
 
-    <section class="areas-section">
-      <h2 class="section-header">the garden</h2>
-      <div class="areas-grid">
-        {areas.map(area => (
-          <a href={area.href} class="area-card">
-            <span class="area-name">{area.name}</span>
-            <span class="area-desc">{area.desc}</span>
-          </a>
-        ))}
-      </div>
-    </section>
+    </div>
   </div>
 </Garden>
 
 <style>
-  .recent-section { padding: var(--space-section) 0 var(--space-xxl); }
-  .areas-section  { padding-bottom: var(--space-section); }
-  .areas-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: var(--space-xl);
-    margin-top: var(--space-xxl);
+  /* white bg so the burst transition lands cleanly */
+  .garden-page {
+    background: #ffffff;
+    min-height: 100vh;
+    animation: fadeIn 0.5s ease-out both;
   }
-  .area-card {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-sm);
-    padding: var(--space-xl);
-    background: var(--color-card);
-    border: var(--border);
-    border-radius: var(--radius-card);
-    transition: border-color 0.15s ease;
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
   }
-  .area-card:hover { border-color: var(--color-accent); }
-  .area-name {
+
+  .garden-header {
+    padding: var(--space-section) 0 var(--space-xxl);
+  }
+
+  .garden-title {
     font-family: var(--font-display);
-    font-size: var(--text-xl);
+    font-size: var(--text-hero);
     color: var(--color-fg);
+    line-height: var(--leading-tight);
+    margin-bottom: var(--space-lg);
   }
-  .area-desc {
+
+  .garden-desc {
     font-family: var(--font-body);
-    font-size: var(--text-sm);
+    font-size: var(--text-xl);
     color: var(--color-muted);
+    line-height: var(--leading-loose);
+    max-width: 600px;
+  }
+
+  /* 3-column masonry */
+  .masonry {
+    columns: 3;
+    column-gap: var(--space-xl);
+    padding-bottom: var(--space-section);
+  }
+  .masonry-item {
+    break-inside: avoid;
+    margin-bottom: var(--space-xl);
+  }
+
+  @media (max-width: 900px) {
+    .masonry { columns: 2; }
+  }
+  @media (max-width: 600px) {
+    .masonry { columns: 1; }
+    .garden-title { font-size: var(--text-section); }
+    .garden-desc  { font-size: var(--text-md); }
   }
 </style>

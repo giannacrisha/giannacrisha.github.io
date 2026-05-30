@@ -22,7 +22,7 @@ const filterGroups = [
 ];
 ---
 <Garden title="lab">
-  <div class="site-wrapper">
+  <div class="page-wrapper">
     <div class="page-header">
       <h1 class="section-header">lab</h1>
       <p class="page-desc">design and code projects</p>
@@ -40,6 +40,7 @@ const filterGroups = [
             date_built={entry.data.date_built}
             cover_image={entry.data.cover_image}
             description={entry.data.description}
+            body={entry.body}
           />
         </div>
       ))}

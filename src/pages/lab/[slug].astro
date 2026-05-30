@@ -13,9 +13,10 @@ export async function getStaticPaths() {
 const { entry } = Astro.props;
 const { Content } = await entry.render();
 const { title, description, date_built, date_published, tools, cover_image, link, growth_stage } = entry.data;
+const published = date_published ?? date_built;
 ---
 <Garden title={title}>
-  <div class="content-wrapper">
+  <div class="page-wrapper">
     <article class="lab-article">
       <nav class="breadcrumb" aria-label="Breadcrumb">
         <a href="/lab">lab</a>
@@ -68,5 +69,7 @@ const { title, description, date_built, date_published, tools, cover_image, link
   .external-link { display: inline-flex; align-items: center; gap: var(--space-xs); font-family: var(--font-body); font-size: var(--text-xs); color: var(--color-accent); letter-spacing: 0.06em; }
   .tools { display: flex; gap: var(--space-sm); flex-wrap: wrap; margin-bottom: var(--space-lg); }
   .description { font-family: var(--font-body); font-size: var(--text-md); color: var(--color-muted); margin-bottom: var(--space-xl); line-height: var(--leading-base); }
-  .prose { margin-top: var(--space-xxl); }
+  .prose {
+    margin-top: var(--space-xxl);
+  }
 </style>

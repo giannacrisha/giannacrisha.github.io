@@ -1,0 +1,241 @@
+---
+// src/components/Footer.astro
+const year = new Date().getFullYear();
+const sitemap = [
+  { label: 'the garden', href: '/garden' },
+  { label: 'lab',        href: '/lab'     },
+  { label: 'archives',   href: '/archives'},
+  { label: 'gallery',    href: '/gallery' },
+  { label: 'library',    href: '/library' },
+  { label: 'about',      href: '/about'   },
+];
+---
+
+<footer class="footer">
+  <div class="footer-inner">
+
+    <!-- newsletter -->
+    <div class="footer-letter">
+      <p class="letter-heading">i'll write you letters!</p>
+      <p class="letter-subheading">tell me where to send them :)</p>
+      <div class="letter-form" id="letter-form">
+        <div class="input-wrap">
+          <input
+            type="email"
+            id="letter-email"
+            class="letter-input"
+            placeholder="your email"
+            autocomplete="email"
+            aria-label="email address"
+          />
+          <button class="send-btn" id="send-btn" aria-label="send" hidden>
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+              <path d="M2 9h14M10 3l6 6-6 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+        <p class="letter-confirm" id="letter-confirm" hidden>
+          alright! letter incoming, when it's ready &nbsp;xx
+        </p>
+      </div>
+    </div>
+
+    <!-- right col: socials + sitemap + copyright -->
+    <div class="footer-right">
+
+      <!-- social icons -->
+      <div class="socials">
+        <a href="https://bsky.app/profile/giannacrisha.com" target="_blank" rel="noopener noreferrer" class="social-icon" aria-label="Bluesky">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 10.8c-1.087-2.114-4.046-6.053-6.798-8.036C3.566 1.736 1.5 2.013 1.5 5.962c0 .99.125 5.67.198 6.456.254 2.76 2.777 3.65 5.302 3.202-3.953.738-4.938 3.64-2.753 6.38 4.016 5.155 5.778-1.483 6.253-3C10.5 18.999 10.5 19 12 19c1.5 0 1.5-.001 1.5 1c.475 1.517 2.237 8.155 6.253 3 2.185-2.74 1.2-5.642-2.753-6.38 2.525.448 5.048-.442 5.302-3.202.073-.786.198-5.466.198-6.456 0-3.949-2.066-4.226-3.702-3.198C14.046 4.747 13.087 8.686 12 10.8Z" fill="currentColor"/>
+          </svg>
+        </a>
+        <a href="https://linkedin.com/in/giannacrisha" target="_blank" rel="noopener noreferrer" class="social-icon" aria-label="LinkedIn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <rect x="2" y="2" width="20" height="20" rx="4" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M7 10v7M7 7v.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            <path d="M11 17v-3.5a2.5 2.5 0 015 0V17M11 10v7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+        </a>
+        <a href="https://github.com/giannacrisha" target="_blank" rel="noopener noreferrer" class="social-icon" aria-label="GitHub">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836a9.59 9.59 0 012.504.337c1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z" fill="currentColor"/>
+          </svg>
+        </a>
+      </div>
+
+      <!-- sitemap -->
+      <nav class="footer-sitemap" aria-label="Sitemap">
+        {sitemap.map(l => (
+          <a href={l.href} class="sitemap-link">{l.label}</a>
+        ))}
+      </nav>
+
+      <!-- copyright -->
+      <p class="copyright">&copy; {year} gianna crisha saludo</p>
+
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    background: var(--color-bg);
+    padding: var(--space-section) 0 var(--space-xxl);
+    margin-top: auto;
+  }
+  .footer-inner {
+    max-width: var(--width-site);
+    margin: 0 auto;
+    padding: 0 var(--space-xl);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-section);
+    align-items: start;
+  }
+
+  /* newsletter */
+  .letter-heading {
+    font-family: var(--font-serif);
+    font-size: var(--text-lg);
+    color: var(--color-fg);
+    line-height: var(--leading-tight);
+    margin-bottom: var(--space-xs);
+    max-width: 280px;
+  }
+  .letter-subheading {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+    margin-bottom: var(--space-xl);
+  }
+  .input-wrap {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: var(--space-sm);
+    transition: border-color 0.15s;
+  }
+  .input-wrap:focus-within {
+    border-bottom-color: var(--color-fg);
+  }
+  .letter-input {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-fg);
+    padding: var(--space-xs) 0;
+  }
+  .letter-input::placeholder { color: var(--color-muted); }
+
+  .send-btn {
+    background: var(--color-fg);
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    cursor: pointer;
+    flex-shrink: 0;
+    opacity: 0;
+    transform: scale(0.7);
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  .send-btn.visible {
+    opacity: 1;
+    transform: scale(1);
+  }
+  .send-btn:hover { background: var(--color-accent); }
+
+  .letter-confirm {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+    margin-top: var(--space-lg);
+    font-style: italic;
+  }
+
+  /* right col */
+  .footer-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--space-xl);
+  }
+
+  .socials {
+    display: flex;
+    gap: var(--space-lg);
+  }
+  .social-icon {
+    color: var(--color-muted);
+    display: flex;
+    transition: color 0.15s;
+  }
+  .social-icon:hover { color: var(--color-fg); }
+
+  .footer-sitemap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm) var(--space-lg);
+    justify-content: flex-end;
+  }
+  .sitemap-link {
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    color: var(--color-muted);
+    letter-spacing: 0.05em;
+    transition: color 0.15s;
+  }
+  .sitemap-link:hover { color: var(--color-fg); }
+
+  .copyright {
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    color: var(--color-muted);
+    letter-spacing: 0.03em;
+  }
+
+  @media (max-width: 700px) {
+    .footer-inner { grid-template-columns: 1fr; gap: var(--space-xxl); }
+    .footer-right  { align-items: flex-start; }
+    .footer-sitemap { justify-content: flex-start; }
+  }
+</style>
+
+<script>
+  const input   = document.getElementById('letter-email') as HTMLInputElement;
+  const btn     = document.getElementById('send-btn') as HTMLButtonElement;
+  const confirm = document.getElementById('letter-confirm') as HTMLElement;
+  const form    = document.getElementById('letter-form') as HTMLElement;
+
+  const isValidEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
+
+  input?.addEventListener('input', () => {
+    if (isValidEmail(input.value)) {
+      btn.removeAttribute('hidden');
+      btn.classList.add('visible');
+    } else {
+      btn.classList.remove('visible');
+      setTimeout(() => btn.setAttribute('hidden', ''), 200);
+    }
+  });
+
+  btn?.addEventListener('click', () => {
+    if (!isValidEmail(input.value)) return;
+    const wrap = input.closest('.input-wrap') as HTMLElement;
+    wrap.style.opacity = '0';
+    wrap.style.transition = 'opacity 0.2s';
+    setTimeout(() => {
+      wrap.style.display = 'none';
+      confirm.removeAttribute('hidden');
+    }, 200);
+  });
+</script>

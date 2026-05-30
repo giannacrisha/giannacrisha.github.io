@@ -4,12 +4,20 @@ import GrowthIcon from './icons/GrowthIcon.astro';
 import type { GrowthStage } from '../config/design';
 import { growthStages } from '../config/design';
 
-interface Props { stage: GrowthStage; }
-const { stage } = Astro.props;
+interface Props { stage: GrowthStage; forceColor?: string; }
+const { stage, forceColor } = Astro.props;
 const stageData = growthStages[stage];
+
+// dust=mid, spark=lightest, star=darkest
+const stageColor: Record<GrowthStage, string> = {
+  dust:  '#9C8B6E',
+  spark: '#C4B49A',
+  star:  '#5C4D3A',
+};
+const color = forceColor ?? stageColor[stage];
 ---
-<span class="growth-pill">
-  <GrowthIcon stage={stage} size={12} />
+<span class="growth-pill" style={`color: ${color};`}>
+  <GrowthIcon stage={stage} size={12} color={color} />
   <span>{stageData.label}</span>
 </span>
 
@@ -17,14 +25,14 @@ const stageData = growthStages[stage];
   .growth-pill {
     display: inline-flex;
     align-items: center;
+    align-self: flex-start;
+    width: fit-content;
     gap: var(--space-xs);
-    padding: 3px 10px;
-    border-radius: var(--radius-pill);
-    background: var(--color-pill-bg);
-    border: 0.5px solid var(--color-accent-border);
+    padding: 2px 0;
+    background: transparent;
+    border: none;
     font-family: var(--font-body);
     font-size: var(--text-xs);
-    color: var(--color-pill-text);
     letter-spacing: 0.06em;
   }
 </style>

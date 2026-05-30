@@ -11,7 +11,7 @@ const lab = defineCollection({
     title:          z.string(),
     description:    z.string(),
     date_built:     z.date(),
-    date_published: z.date(),
+    date_published: z.date().optional(), // defaults to date_built if omitted
     tools:          z.array(z.string()).optional(),
     cover_image:    z.string().optional(),
     link:           z.string().url().optional(),
@@ -26,7 +26,7 @@ const archives = defineCollection({
     title:          z.string(),
     type:           contentEnum,
     date_written:   z.date(),
-    date_published: z.date(),
+    date_published: z.date().optional(), // defaults to date_written if omitted
     tags:           z.array(z.string()).optional(),
     growth_stage:   stageEnum,
     featured:       z.boolean().default(false),
@@ -39,10 +39,29 @@ const gallery = defineCollection({
     title:          z.string(),
     medium:         z.string(),
     date_made:      z.date(),
-    date_published: z.date(),
+    date_published: z.date().optional(), // defaults to date_made if omitted
     image:          z.string(),
     caption:        z.string().optional(),
     growth_stage:   stageEnum,
+  }),
+});
+
+const case_studies = defineCollection({
+  type: 'content',
+  schema: z.object({
+    title:          z.string(),
+    subtitle:       z.string().optional(),
+    description:    z.string().optional(),
+    role:           z.string().optional(),
+    timeline:       z.string().optional(),
+    team:           z.string().optional(),
+    tools:          z.array(z.string()).optional(),
+    cover_image:    z.string().optional(),
+    video_demo:     z.string().optional(),
+    date_built:     z.date(),
+    date_published: z.date().optional(), // defaults to date_built if omitted
+    growth_stage:   stageEnum,
+    featured:       z.boolean().default(false),
   }),
 });
 
@@ -61,4 +80,4 @@ const library = defineCollection({
   }),
 });
 
-export const collections = { lab, archives, gallery, library };
+export const collections = { lab, archives, gallery, library, case_studies };

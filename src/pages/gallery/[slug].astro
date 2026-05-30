@@ -12,9 +12,10 @@ export async function getStaticPaths() {
 
 const { entry } = Astro.props;
 const { title, medium, date_made, date_published, image, caption, growth_stage } = entry.data;
+const published = date_published ?? date_made;
 ---
 <Garden title={title}>
-  <div class="content-wrapper">
+  <div class="page-wrapper">
     <article class="gallery-article">
       <nav class="breadcrumb" aria-label="Breadcrumb">
         <a href="/gallery">gallery</a>

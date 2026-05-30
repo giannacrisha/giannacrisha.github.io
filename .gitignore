@@ -4,3 +4,10 @@ dist/
 .env
 .env.*
 !.env.example
+
+# obsidian vault settings — do not commit
+src/content/.obsidian/
+
+# obsidian inbox and templates — personal, not part of the site
+src/content/inbox/
+src/content/templates/

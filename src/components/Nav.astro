@@ -1,119 +1,233 @@
 ---
 // src/components/Nav.astro
-const navLinks = [
-  { href: '/lab',      label: 'lab'      },
-  { href: '/archives', label: 'archives' },
-  { href: '/gallery',  label: 'gallery'  },
-  { href: '/library',  label: 'library'  },
-  { href: '/about',    label: 'about'    },
+const current = Astro.url.pathname;
+const gardenActive = ['/garden','/lab','/archives','/gallery','/library'].some(p => current.startsWith(p));
+const sublinks = [
+  { href: '/lab',      label: 'lab',      desc: 'design and code projects',    icon: '/icons/lab-icon.png'     },
+  { href: '/archives', label: 'archives', desc: 'essays, poems, thoughts',     icon: '/icons/archive-icon.png' },
+  { href: '/gallery',  label: 'gallery',  desc: 'artwork and visual work',     icon: '/icons/gallery-icon.png' },
+  { href: '/library',  label: 'library',  desc: 'films, books, shows', icon: '/icons/lib-icon.png'     },
 ];
-
-const currentPath = Astro.url.pathname;
 ---
-<header class="nav">
-  <div class="nav-inner site-wrapper">
-    <a href="/garden" class="nav-logo">gi</a>
-    <nav class="nav-links" aria-label="Main navigation">
-      {navLinks.map(link => (
-        <a
-          href={link.href}
-          class:list={['nav-link', { active: currentPath.startsWith(link.href) }]}
-        >
-          {link.label}
+<nav class="site-nav">
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">gi</a>
+
+    <!-- desktop -->
+    <ul class="nav-links">
+      <!-- the garden with hover dropdown -->
+      <li class="nav-item nav-item--garden">
+        <a href="/garden" class:list={['nav-link', { active: gardenActive }]}>
+          the garden
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true" class="caret">
+            <path d="M2 3.5l3 3 3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
         </a>
-      ))}
-    </nav>
-    <button class="nav-hamburger" aria-label="Toggle menu" aria-expanded="false">
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-        <line x1="2" y1="5"  x2="18" y2="5"  stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-        <line x1="2" y1="10" x2="18" y2="10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-        <line x1="2" y1="15" x2="18" y2="15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <div class="garden-dropdown">
+          <div class="garden-dropdown-inner">
+            {sublinks.map(l => (
+              <a href={l.href} class:list={['dropdown-link', { active: current.startsWith(l.href) }]}>
+                <img src={l.icon} alt="" class="dropdown-link-icon" aria-hidden="true" />
+                <span class="dropdown-link-text">
+                  <span class="dropdown-link-label">{l.label}</span>
+                  <span class="dropdown-link-desc">{l.desc}</span>
+                </span>
+              </a>
+            ))}
+          </div>
+        </div>
+      </li>
+      <li class="nav-item">
+        <a href="/about" class:list={['nav-link', { active: current.startsWith('/about') }]}>about</a>
+      </li>
+    </ul>
+
+    <!-- mobile hamburger -->
+    <button class="nav-hamburger" aria-label="open menu" aria-expanded="false" id="hamburger">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <line x1="3" y1="6"  x2="17" y2="6"  stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="3" y1="10" x2="17" y2="10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="3" y1="14" x2="17" y2="14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
       </svg>
     </button>
   </div>
-  <div class="nav-mobile" id="mobile-menu" hidden>
-    {navLinks.map(link => (
-      <a href={link.href} class="nav-mobile-link">{link.label}</a>
+
+  <!-- mobile menu -->
+  <div class="nav-mobile-menu" id="nav-mobile-menu" aria-hidden="true">
+    <a href="/garden" class="mobile-link">the garden</a>
+    {sublinks.map(l => (
+      <a href={l.href} class="mobile-link mobile-link--sub">{l.label}</a>
     ))}
+    <a href="/about" class="mobile-link">about</a>
   </div>
-</header>
+</nav>
 
 <style>
-  .nav {
-    background: var(--color-bg);
-    border-bottom: var(--border);
+  .site-nav {
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index: 50;
+    background: transparent;
+    border-bottom: none;
   }
   .nav-inner {
+    max-width: var(--width-site);
+    margin: 0 auto;
+    padding: 0 var(--space-xl);
+    height: 56px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 52px;
   }
   .nav-logo {
     font-family: var(--font-display);
-    font-size: var(--text-xl);
+    font-size: 22px;
     color: var(--color-fg);
-    line-height: 1;
+    text-decoration: none;
   }
+
+  /* desktop links */
   .nav-links {
     display: flex;
     gap: var(--space-xl);
+    list-style: none;
+    margin: 0;
+    padding: 0;
     align-items: center;
   }
+  .nav-item { position: relative; }
+
   .nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
     font-family: var(--font-body);
     font-size: var(--text-xs);
     color: var(--color-muted);
+    text-decoration: none;
     letter-spacing: 0.06em;
-    text-transform: lowercase;
     padding-bottom: 2px;
     border-bottom: 2px solid transparent;
-    transition: color 0.15s ease, border-color 0.15s ease;
+    transition: color 0.15s, border-color 0.15s;
   }
-  .nav-link:hover { color: var(--color-fg); }
+  .nav-link:hover  { color: var(--color-fg); }
   .nav-link.active {
     color: var(--color-fg);
-    border-bottom-color: var(--color-accent);
+    border-bottom: 2px solid var(--color-accent);
   }
+  .caret { transition: transform 0.15s; }
+
+  /* hover dropdown — padding-top bridges the gap so mouse can travel to the menu */
+  .garden-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    min-width: 200px;
+    padding-top: 12px; /* invisible bridge — keeps hover alive */
+    flex-direction: column;
+  }
+  .garden-dropdown-inner {
+    background: #ffffff;
+    border: 0.5px solid var(--color-border);
+    border-radius: var(--radius-card);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+    padding: var(--space-sm) 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .nav-item--garden:hover .garden-dropdown,
+  .nav-item--garden:focus-within .garden-dropdown {
+    display: flex;
+  }
+  .nav-item--garden:hover .caret {
+    transform: rotate(180deg);
+  }
+  .dropdown-link {
+    padding: var(--space-sm) var(--space-lg);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-md);
+    text-decoration: none;
+    transition: background 0.12s;
+  }
+  .dropdown-link-icon {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    flex-shrink: 0;
+    opacity: 0.7;
+    transition: opacity 0.12s;
+  }
+  .dropdown-link:hover .dropdown-link-icon,
+  .dropdown-link.active .dropdown-link-icon {
+    opacity: 1;
+  }
+  .dropdown-link-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .dropdown-link:hover  { background: var(--color-accent-light); }
+  .dropdown-link.active .dropdown-link-label { color: var(--color-fg); font-weight: 600; }
+  .dropdown-link-label {
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    color: var(--color-fg);
+    letter-spacing: 0.05em;
+  }
+  .dropdown-link-desc {
+    font-family: var(--font-body);
+    font-size: 10px;
+    color: var(--color-muted);
+    letter-spacing: 0.03em;
+  }
+
+  /* hamburger */
   .nav-hamburger {
     display: none;
     background: none;
     border: none;
-    cursor: pointer;
     color: var(--color-fg);
-    padding: var(--space-sm);
+    cursor: pointer;
+    padding: 4px;
   }
-  .nav-mobile {
-    background: var(--color-bg);
-    border-top: var(--border);
-    padding: var(--space-lg) var(--space-xl);
-    display: flex;
+
+  /* mobile menu */
+  .nav-mobile-menu {
+    display: none;
     flex-direction: column;
-    gap: var(--space-lg);
+    background: #ffffff;
+    border-top: var(--border);
   }
-  .nav-mobile-link {
+  .nav-mobile-menu.open { display: flex; }
+  .mobile-link {
+    padding: 12px var(--space-xl);
     font-family: var(--font-body);
     font-size: var(--text-md);
-    color: var(--color-muted);
-    letter-spacing: 0.06em;
+    color: var(--color-fg);
+    text-decoration: none;
+    border-bottom: var(--border);
   }
-  @media (max-width: 600px) {
-    .nav-links { display: none; }
-    .nav-hamburger { display: flex; }
+  .mobile-link--sub {
+    padding-left: calc(var(--space-xl) + var(--space-lg));
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+  }
+
+  @media (max-width: 767px) {
+    .nav-links     { display: none; }
+    .nav-hamburger { display: block; }
   }
 </style>
 
 <script>
-  const btn = document.querySelector('.nav-hamburger') as HTMLButtonElement;
-  const menu = document.getElementById('mobile-menu');
-  if (btn && menu) {
-    btn.addEventListener('click', () => {
-      const open = !menu.hidden;
-      menu.hidden = open;
-      btn.setAttribute('aria-expanded', String(!open));
-    });
-  }
+  const btn  = document.getElementById('hamburger');
+  const menu = document.getElementById('nav-mobile-menu');
+  btn?.addEventListener('click', () => {
+    const open = menu?.classList.toggle('open');
+    btn.setAttribute('aria-expanded', String(open));
+    menu?.setAttribute('aria-hidden', String(!open));
+  });
 </script>

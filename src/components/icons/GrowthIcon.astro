@@ -1,14 +1,13 @@
 ---
-// src/components/icons/GrowthIcon.astro
 import type { GrowthStage } from '../../config/design';
 
 interface Props {
   stage: GrowthStage;
   size?: number;
+  color?: string;
 }
 
-const { stage, size = 16 } = Astro.props;
-const color = '#C9A84C';
+const { stage, size = 16, color = 'currentColor' } = Astro.props;
 ---
 
 {stage === 'dust' && (

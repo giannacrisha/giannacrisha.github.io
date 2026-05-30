@@ -2,7 +2,6 @@
 // src/components/Card.astro
 import GrowthPill from './GrowthPill.astro';
 import StarRating from './icons/StarRating.astro';
-import Timestamps from './Timestamps.astro';
 import type { GrowthStage } from '../config/design';
 
 interface Props {
@@ -21,52 +20,71 @@ interface Props {
   description?:   string;
   creator?:       string;
   year?:          number;
+  body?:          string;
 }
 
 const {
   title, slug, collection, type, stage,
   date_published, date_written, date_built, date_made, date_added,
-  cover_image, rating, description, creator, year,
+  cover_image, rating, description, creator, year, body,
 } = Astro.props;
+
+// Strip markdown syntax and truncate to ~160 chars for preview
+function excerpt(raw: string, max = 160): string {
+  const stripped = raw
+    .replace(/^---[\s\S]*?---/, '')   // remove frontmatter if any
+    .replace(/#{1,6}\s+/g, '')        // headings
+    .replace(/\*\*(.+?)\*\*/g, '$1') // bold
+    .replace(/\*(.+?)\*/g, '$1')     // italic
+    .replace(/`{1,3}[^`]*`{1,3}/g, '') // code
+    .replace(/\[(.+?)\]\(.+?\)/g, '$1') // links
+    .replace(/^\s*[-*>]\s+/gm, '')   // list/blockquote markers
+    .replace(/\n+/g, ' ')            // collapse newlines
+    .trim();
+  return stripped.length > max ? stripped.slice(0, max).trimEnd() + '…' : stripped;
+}
+
+const preview = body ? excerpt(body) : description ?? null;
 
 const href = `/${collection}/${slug}`;
 
-let primaryLabel = 'planted';
-let primaryDate  = date_published;
-if (collection === 'archives' && date_written)   { primaryLabel = 'written'; primaryDate = date_written; }
-if (collection === 'lab'      && date_built)     { primaryLabel = 'built';   primaryDate = date_built;   }
-if (collection === 'gallery'  && date_made)      { primaryLabel = 'made';    primaryDate = date_made;    }
-if (collection === 'library'  && date_added)     { primaryLabel = 'added';   primaryDate = date_added;   }
+let primaryDate = date_published;
+if (collection === 'archives' && date_written) primaryDate = date_written;
+if (collection === 'lab'      && date_built)   primaryDate = date_built;
+if (collection === 'gallery'  && date_made)    primaryDate = date_made;
+if (collection === 'library'  && date_added)   primaryDate = date_added;
 
-const secondaryLabel = collection === 'library' ? 'added' : 'planted';
-const secondaryDate  = collection === 'library' ? (date_added ?? date_published) : date_published;
-
-const showTimestamps = primaryDate && secondaryDate && primaryDate.getTime() !== secondaryDate.getTime();
+const fmt = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+const isGallery = collection === 'gallery';
+const isLibrary = collection === 'library';
+const hasImage = !!cover_image;
+// Library cards show cover as a corner thumbnail, not full-width
+const showFullImage = hasImage && !isGallery && !isLibrary;
+const showCoverThumb = hasImage && isLibrary;
 ---
-<article class="card">
+<article class:list={['card', { 'card--gallery': isGallery && hasImage }]}
+         style={isGallery && hasImage ? `background-image: url(${cover_image}); background-size: cover; background-position: center;` : ''}>
   <a href={href} class="card-link">
-    {cover_image && (
+    {showFullImage && (
       <div class="card-image">
         <img src={cover_image} alt={title} loading="lazy" />
       </div>
     )}
-    <div class="card-body">
-      <div class="card-meta">
-        {type && <span class="pill">{type}</span>}
-        {stage && <GrowthPill stage={stage} />}
-        {rating !== undefined && <StarRating rating={rating} />}
-      </div>
-      <h3 class="card-title">{title}</h3>
-      {creator && <p class="card-creator">{creator}{year ? ` · ${year}` : ''}</p>}
-      {description && <p class="card-description">{description}</p>}
-      {showTimestamps && (
-        <Timestamps
-          primaryLabel={primaryLabel}
-          primaryDate={primaryDate}
-          secondaryLabel={secondaryLabel}
-          secondaryDate={secondaryDate}
-        />
+    <div class:list={['card-body', { 'card-body--gallery': isGallery && hasImage }]}>
+      {showCoverThumb && (
+        <img class="card-cover-thumb" src={cover_image} alt={title} loading="lazy" />
       )}
+      {type && <span class="pill card-type-pill">{type}</span>}
+      <h3 class="card-title">{title}</h3>
+      {creator && (
+        <p class="card-creator">{creator}{year ? ` · ${year}` : ''}</p>
+      )}
+      {preview && <p class="card-description">{preview}</p>}
+      {rating !== undefined && <StarRating rating={rating} />}
+      <div class="card-footer">
+        {primaryDate && <span class="card-date">{fmt(primaryDate)}</span>}
+        {stage && <GrowthPill stage={stage} forceColor={isGallery && hasImage ? 'rgba(255,255,255,0.9)' : undefined} />}
+      </div>
     </div>
   </a>
 </article>
@@ -74,40 +92,105 @@ const showTimestamps = primaryDate && secondaryDate && primaryDate.getTime() !==
 <style>
   .card {
     background: var(--color-card);
-    border: var(--border);
+    border: 0.5px solid var(--color-border);
     border-radius: var(--radius-card);
     overflow: hidden;
     transition: border-color 0.15s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
   }
   .card:hover { border-color: var(--color-accent); }
-  .card-link { display: block; text-decoration: none; color: inherit; }
+
+  .card-link {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    text-decoration: none;
+    color: inherit;
+  }
+
   .card-image img {
     width: 100%;
-    max-height: 180px;
-    object-fit: cover;
     display: block;
-    border-radius: var(--radius-card) var(--radius-card) 0 0;
+    object-fit: cover;
+    max-height: 200px;
   }
-  .card-body { padding: var(--space-lg); display: flex; flex-direction: column; gap: var(--space-sm); }
-  .card-meta { display: flex; flex-wrap: wrap; gap: var(--space-xs); align-items: center; }
+
+  .card-body {
+    padding: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    flex: 1;
+    position: relative;
+  }
+
+  .card-cover-thumb {
+    position: absolute;
+    top: var(--space-lg);
+    right: var(--space-lg);
+    width: 52px;
+    height: 72px;
+    object-fit: cover;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+
   .card-title {
     font-family: var(--font-serif);
     font-size: var(--text-md);
     color: var(--color-fg);
     line-height: var(--leading-tight);
   }
+  /* leave room for the cover thumbnail */
+  .card-cover-thumb ~ * .card-title,
+  :has(.card-cover-thumb) .card-title {
+    padding-right: 68px;
+  }
+
   .card-creator {
     font-family: var(--font-body);
     font-size: var(--text-sm);
     color: var(--color-muted);
   }
+
   .card-description {
     font-family: var(--font-body);
     font-size: var(--text-sm);
     color: var(--color-muted);
+    line-height: var(--leading-base);
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
+
+  .card-footer {
+    margin-top: auto;
+    padding-top: var(--space-sm);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .card-date {
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    color: var(--color-muted);
+    letter-spacing: 0.03em;
+  }
+
+  /* gallery variant — image fills the whole card */
+  .card--gallery {
+    border: none;
+    min-height: 260px;
+  }
+  .card-body--gallery {
+    background: linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 60%);
+    border-radius: 0 0 var(--radius-card) var(--radius-card);
+  }
+  .card--gallery .card-title { color: #fff; }
+  .card--gallery .card-date  { color: rgba(255,255,255,0.7); }
+  .card--gallery .pill       { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.3); color: #fff; }
 </style>

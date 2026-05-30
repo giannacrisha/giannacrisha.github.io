@@ -13,10 +13,11 @@ export async function getStaticPaths() {
 const { entry } = Astro.props;
 const { Content } = await entry.render();
 const { title, type, date_written, date_published, growth_stage, tags } = entry.data;
+const published = date_published ?? date_written;
 const isPoem = type === 'poem';
 ---
 <Garden title={title}>
-  <div class="content-wrapper">
+  <div class="page-wrapper">
     <article class="archive-article">
       <nav class="breadcrumb" aria-label="Breadcrumb">
         <a href="/archives">archives</a>
@@ -66,9 +67,7 @@ const isPoem = type === 'poem';
     margin-bottom: var(--space-lg);
   }
   .tags { display: flex; gap: var(--space-sm); flex-wrap: wrap; margin-top: var(--space-md); }
-  .prose { margin-top: var(--space-xxl); }
-  .prose-poem {
-    text-align: center;
-    line-height: var(--leading-poem);
+  .prose {
+    margin-top: var(--space-xxl);
   }
 </style>

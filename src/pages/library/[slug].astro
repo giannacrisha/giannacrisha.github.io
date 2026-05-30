@@ -15,7 +15,7 @@ const { Content } = await entry.render();
 const { title, creator, year, type, date_added, rating, cover_image } = entry.data;
 ---
 <Garden title={title}>
-  <div class="content-wrapper">
+  <div class="page-wrapper">
     <article class="library-article">
       <nav class="breadcrumb" aria-label="Breadcrumb">
         <a href="/library">library</a>
@@ -61,7 +61,9 @@ const { title, creator, year, type, date_added, rating, cover_image } = entry.da
   .entry-title { font-family: var(--font-serif); font-size: var(--text-xl); color: var(--color-fg); line-height: var(--leading-tight); }
   .creator-row { display: flex; flex-wrap: wrap; gap: var(--space-sm); align-items: center; font-family: var(--font-body); font-size: var(--text-sm); color: var(--color-muted); }
   .year-sep { color: var(--color-accent); }
-  .prose { margin-top: var(--space-xxl); }
+  .prose {
+    margin-top: var(--space-xxl);
+  }
   @media (max-width: 600px) {
     .library-layout { grid-template-columns: 1fr; }
   }

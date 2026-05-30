@@ -32,7 +32,7 @@ const { groups } = Astro.props;
           data-value={opt.value}
           aria-pressed="false"
         >
-          {opt.stage && <GrowthIcon stage={opt.stage} size={11} />}
+          {opt.stage && <GrowthIcon stage={opt.stage} size={11} color="currentColor" />}
           {opt.label}
         </button>
       ))}
@@ -41,30 +41,40 @@ const { groups } = Astro.props;
 </div>
 
 <style>
-  .filter-bar { display: flex; flex-wrap: wrap; gap: var(--space-lg); margin-bottom: var(--space-xxl); }
-  .filter-group { display: flex; flex-wrap: wrap; gap: var(--space-sm); }
+  .filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-xxl);
+  }
+  .filter-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+  }
   .filter-pill {
     display: inline-flex;
     align-items: center;
     gap: var(--space-xs);
-    padding: 4px 12px;
+    padding: 5px 14px;
     border-radius: var(--radius-pill);
-    background: var(--color-pill-bg);
     border: 0.5px solid var(--color-accent-border);
+    background: var(--color-pill-bg);
+    color: var(--color-pill-text);
     font-family: var(--font-body);
     font-size: var(--text-xs);
-    color: var(--color-pill-text);
-    letter-spacing: 0.06em;
+    letter-spacing: 0.05em;
     cursor: pointer;
-    transition: background 0.12s ease, color 0.12s ease;
+    transition: background 0.1s, color 0.1s, border-color 0.1s;
   }
   .filter-pill[aria-pressed="true"] {
-    background: var(--color-accent);
-    color: var(--color-card);
-    border-color: var(--color-accent);
+    background: var(--color-fg);
+    color: var(--color-bg);
+    border-color: var(--color-fg);
   }
   .filter-pill:hover:not([aria-pressed="true"]) {
-    background: var(--color-accent-light);
+    border-color: var(--color-accent);
+    color: var(--color-fg);
   }
 </style>
 

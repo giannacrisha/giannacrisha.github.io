@@ -1,83 +1,522 @@
 ---
-// src/pages/about.astro
 import Garden from '../layouts/Garden.astro';
-import { site } from '../config/design';
 ---
-<Garden title="about">
-  <div class="site-wrapper">
-    <div class="about-layout">
-      <section class="about-section">
-        <h2 class="section-subhead">about</h2>
-        <div class="portrait-placeholder" aria-hidden="true"></div>
-        <p class="body-text">
-          Hi, I'm gi — a creatress who loves building, making, and designing.
-          This garden is where I gather everything: the projects, the writing, the art, the things I've watched and read.
-        </p>
+<Garden title="about – gi">
+  <div class="page-wrapper">
+    <div class="about">
+
+      <!-- hero -->
+      <header class="about-hero">
+        <h1 class="about-name">gianna crisha saludo</h1>
+        <p class="about-role">design, tech & society &mdash; ux · creative strategy · tech policy</p>
+      </header>
+
+      <!-- portrait + intro -->
+      <section class="about-intro">
+        <div class="portrait-placeholder" aria-label="portrait placeholder"></div>
+        <div class="intro-text">
+          <p>
+            my design is very human. at brandeis, i'm designing my major in design, tech, and society —
+            whether that's building interfaces or advocating for tech policy, i'm always thinking about
+            how the things we make shape the people who use them.
+          </p>
+          <p>
+            i'm studying anthropology, CS, and psychology. i co-founded the brandeis consulting club,
+            i'm leading DeisHacks 2027, i've gone into legislators' offices pitching the MA data privacy act,
+            and i create personal projects every day because i'm a #creatress.
+          </p>
+          <p>always down to connect, collaborate, or just talk design. xx</p>
+        </div>
       </section>
 
-      <section class="now-section">
-        <h2 class="section-subhead">now</h2>
+      <!-- migration history -->
+      <section class="about-section">
+        <h2 class="section-heading">where i've been</h2>
+        <p class="migration-intro">i've moved a lot. each place left something in me.</p>
+
+        <div class="migration-map">
+          <div id="migration-leaflet"></div>
+
+          <div class="migration-card">
+            <div class="migration-card-header">
+              <div class="migration-progress" id="migration-progress">
+                <span id="migration-step">1</span> / 5
+              </div>
+              <div class="migration-nav">
+                <button id="migration-prev" aria-label="previous city" disabled>
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <button id="migration-next" aria-label="next city">
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 2l5 5-5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+              </div>
+            </div>
+            <p class="migration-city-name" id="migration-city-name"></p>
+            <p class="migration-city-sub" id="migration-city-sub"></p>
+            <p class="migration-city-text" id="migration-city-text"></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- now -->
+      <section class="about-section">
+        <h2 class="section-heading">now</h2>
         <ul class="now-list">
-          <li>building this digital garden</li>
-          <li>reading — something good</li>
-          <li>thinking about how things grow</li>
+          <li>design & innovation lab student worker at brandeis</li>
+          <li>campus leader for lovable — building community around ai-native tools</li>
+          <li>board fellow at the weston art & innovation center</li>
+          <li>leading deishacks 2027</li>
+          <li>going into legislators' offices pitching the MA data privacy act with repro equity now</li>
         </ul>
       </section>
+
+      <!-- work -->
+      <section class="about-section">
+        <h2 class="section-heading">work</h2>
+        <div class="work-list">
+
+          <div class="work-item">
+            <div class="work-meta">
+              <span class="work-year">2026 &ndash; now</span>
+            </div>
+            <div class="work-detail">
+              <p class="work-title">design & innovation lab student worker</p>
+              <p class="work-place">brandeis university</p>
+            </div>
+          </div>
+
+          <div class="work-item">
+            <div class="work-meta">
+              <span class="work-year">2026 &ndash; now</span>
+            </div>
+            <div class="work-detail">
+              <p class="work-title">campus leader</p>
+              <p class="work-place">lovable</p>
+              <p class="work-desc">organized events with ~100 participants & building community around ai-native tools as part of the first cohort of a selective campus program</p>
+            </div>
+          </div>
+
+          <div class="work-item">
+            <div class="work-meta">
+              <span class="work-year">2025 &ndash; now</span>
+            </div>
+            <div class="work-detail">
+              <p class="work-title">board fellow</p>
+              <p class="work-place">weston art & innovation center</p>
+              <p class="work-desc">visualized a dataset of 7k records to inform fundraising strategies, optimizing CRM systems, and formulated design system</p>
+            </div>
+          </div>
+
+          <div class="work-item">
+            <div class="work-meta">
+              <span class="work-year">2025 &ndash; now</span>
+            </div>
+            <div class="work-detail">
+              <p class="work-title">student fundraiser</p>
+              <p class="work-place">brandeis institutional advancement</p>
+              <p class="work-desc">raised $40K+ in donations through outreach and aura</p>
+            </div>
+          </div>
+
+          <div class="work-item">
+            <div class="work-meta">
+              <span class="work-year">2025 &ndash; now</span>
+            </div>
+            <div class="work-detail">
+              <p class="work-title">admissions fellow</p>
+              <p class="work-place">brandeis admissions office</p>
+              <p class="work-desc">led 80+ tours for 1,000+ prospective students & designed materials used across the office</p>
+            </div>
+          </div>
+
+          <div class="work-item">
+            <div class="work-meta">
+              <span class="work-year">2024 &ndash; now</span>
+            </div>
+            <div class="work-detail">
+              <p class="work-title">marketing & startup champion</p>
+              <p class="work-place">brandeis innovation center</p>
+              <p class="work-desc">reached 2,000+ students through digital & traditional marketing, supported 20+ startups, designed materials for the Spark Program</p>
+            </div>
+          </div>
+
+          <div class="work-item">
+            <div class="work-meta">
+              <span class="work-year">2024</span>
+            </div>
+            <div class="work-detail">
+              <p class="work-title">lead designer</p>
+              <p class="work-place">earth moon magick</p>
+              <p class="work-desc">led design for 3 product lines that raised $18,143 with 249 backers — all now sold on amazon</p>
+            </div>
+          </div>
+
+          <div class="work-item">
+            <div class="work-meta">
+              <span class="work-year">2022 &ndash; 2023</span>
+            </div>
+            <div class="work-detail">
+              <p class="work-title">research intern, sadler-edepli lab</p>
+              <p class="work-place">new york university abu dhabi</p>
+              <p class="work-desc">confirmed lab findings on UHRF1 gene overexpression and hypomethylation in cancer genomes — quantitative analysis on 50+ zebrafish livers using ImageJ</p>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+
     </div>
   </div>
 </Garden>
 
 <style>
-  .about-layout {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+  .about {
+    max-width: 720px;
+    padding: var(--space-section) 0 calc(var(--space-section) * 2);
+    display: flex;
+    flex-direction: column;
     gap: var(--space-section);
-    padding: var(--space-section) 0;
   }
-  .section-subhead {
-    font-family: var(--font-serif);
-    font-size: var(--text-xxl);
+
+  /* hero */
+  .about-hero {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+  .about-name {
+    font-family: var(--font-display);
+    font-size: var(--text-hero);
     color: var(--color-fg);
-    margin-bottom: var(--space-xxl);
+    line-height: var(--leading-tight);
+  }
+  .about-role {
+    font-family: var(--font-body);
+    font-size: var(--text-lg);
+    color: var(--color-muted);
+  }
+
+  /* intro */
+  .about-intro {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: var(--space-xxl);
+    align-items: start;
   }
   .portrait-placeholder {
     width: 100%;
-    max-width: 280px;
-    aspect-ratio: 3/4;
+    aspect-ratio: 3 / 4;
     background: var(--color-accent-light);
     border-radius: var(--radius-card);
-    margin-bottom: var(--space-xl);
   }
-  .body-text {
-    font-family: var(--font-body);
-    font-size: var(--text-lg);
-    color: var(--color-fg);
-    line-height: var(--leading-loose);
-  }
-  .now-list {
+  .intro-text {
     display: flex;
     flex-direction: column;
     gap: var(--space-lg);
+    padding-top: var(--space-sm);
+  }
+  .intro-text p {
     font-family: var(--font-body);
-    font-size: var(--text-lg);
+    font-size: var(--text-md);
     color: var(--color-fg);
     line-height: var(--leading-loose);
   }
-  .now-list li {
+
+  /* sections */
+  .about-section {
     display: flex;
-    align-items: flex-start;
+    flex-direction: column;
+    gap: var(--space-xl);
+  }
+  .section-heading {
+    font-family: var(--font-serif);
+    font-size: var(--text-xxl);
+    color: var(--color-fg);
+    line-height: var(--leading-tight);
+  }
+
+  /* now list */
+  .now-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .now-list li {
+    font-family: var(--font-body);
+    font-size: var(--text-md);
+    color: var(--color-fg);
+    line-height: var(--leading-loose);
+    display: flex;
+    align-items: baseline;
     gap: var(--space-md);
   }
   .now-list li::before {
     content: '';
-    width: 6px;
-    height: 6px;
+    width: 5px;
+    height: 5px;
     border-radius: 50%;
     background: var(--color-accent);
     flex-shrink: 0;
-    margin-top: 10px;
+    position: relative;
+    top: -2px;
   }
+
+  /* work */
+  .work-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xxl);
+  }
+  .work-item {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: var(--space-xl);
+    align-items: start;
+  }
+  .work-year {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+    padding-top: 3px;
+  }
+  .work-title {
+    font-family: var(--font-body);
+    font-size: var(--text-md);
+    color: var(--color-fg);
+    line-height: var(--leading-tight);
+  }
+  .work-place {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+    margin-top: var(--space-xs);
+  }
+  .work-desc {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-fg);
+    line-height: var(--leading-loose);
+    margin-top: var(--space-sm);
+  }
+
+  /* migration map */
+  .migration-intro {
+    font-family: var(--font-body);
+    font-size: var(--text-md);
+    color: var(--color-muted);
+    font-style: italic;
+  }
+  .migration-map {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border-radius: var(--radius-card);
+    overflow: hidden;
+  }
+  #migration-leaflet {
+    height: 340px;
+    width: 100%;
+    z-index: 0;
+  }
+  .migration-card {
+    background: var(--color-bg);
+    padding: var(--space-xl);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+  .migration-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .migration-progress {
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    color: var(--color-muted);
+    letter-spacing: 0.06em;
+  }
+  .migration-nav {
+    display: flex;
+    gap: var(--space-sm);
+  }
+  .migration-nav button {
+    background: none;
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-fg);
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .migration-nav button:hover:not(:disabled) {
+    background: var(--color-accent-light);
+    border-color: var(--color-accent);
+  }
+  .migration-nav button:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+  .migration-city-name {
+    font-family: var(--font-serif);
+    font-size: var(--text-xl);
+    color: var(--color-fg);
+    line-height: var(--leading-tight);
+  }
+  .migration-city-sub {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-accent);
+    letter-spacing: 0.04em;
+  }
+  .migration-city-text {
+    font-family: var(--font-body);
+    font-size: var(--text-md);
+    color: var(--color-fg);
+    line-height: var(--leading-loose);
+  }
+
   @media (max-width: 700px) {
-    .about-layout { grid-template-columns: 1fr; }
+    .about-intro {
+      grid-template-columns: 1fr;
+    }
+    .portrait-placeholder {
+      max-width: 180px;
+    }
+    .work-item {
+      grid-template-columns: 1fr;
+      gap: var(--space-xs);
+    }
+    .about-name {
+      font-size: var(--text-section);
+    }
   }
 </style>
+
+<script is:inline>
+(function () {
+  const stops = [
+    {
+      name: 'manila',
+      sub: 'philippines — where it started',
+      lat: 14.5995, lng: 120.9842, zoom: 11,
+      text: 'i was born here. more details coming soon — this one deserves the right words.',
+    },
+    {
+      name: 'abu dhabi',
+      sub: 'uae — growing up between worlds',
+      lat: 24.4539, lng: 54.3773, zoom: 11,
+      text: 'i spent part of my childhood here, in a city that feels like it exists slightly outside of time. i did my research internship at NYU Abu Dhabi here years later — full circle.',
+    },
+    {
+      name: 'butuan',
+      sub: 'philippines — coming home',
+      lat: 8.9475, lng: 125.5406, zoom: 12,
+      text: 'moving back to the philippines after abu dhabi. butuan is a quieter city — known as the city of golden tara. more to come on this chapter.',
+    },
+    {
+      name: 'cagayan de oro',
+      sub: 'philippines — becoming myself',
+      lat: 8.4542, lng: 124.6319, zoom: 12,
+      text: 'i went to xavier university — ateneo de cagayan for senior high school here. i debated, made things, figured out who i was. grandfinalist at PDA world congress 2021. this city gave me a lot.',
+    },
+    {
+      name: 'boston',
+      sub: 'usa — right now ✦',
+      lat: 42.3601, lng: -71.0589, zoom: 12,
+      text: 'brandeis university, studying design, tech, and society. co-founding clubs, leading hackathons, going into legislators\' offices, building things every day. still figuring it all out — but happily.',
+    },
+  ];
+
+  let current = 0;
+  let map, markers;
+
+  function initMap(L) {
+    const nameEl  = document.getElementById('migration-city-name');
+    const subEl   = document.getElementById('migration-city-sub');
+    const textEl  = document.getElementById('migration-city-text');
+    const stepEl  = document.getElementById('migration-step');
+    const prevBtn = document.getElementById('migration-prev');
+    const nextBtn = document.getElementById('migration-next');
+
+    map = L.map('migration-leaflet', {
+      zoomControl: false,
+      scrollWheelZoom: false,
+      dragging: true,
+      attributionControl: true,
+    });
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>',
+      maxZoom: 19,
+    }).addTo(map);
+
+    function makeIcon(active) {
+      return L.divIcon({
+        className: '',
+        html: '<div style="width:12px;height:12px;border-radius:50%;background:' +
+          (active ? '#3d2f1f' : '#9C8B6E') +
+          ';border:2px solid #ffffff;box-shadow:0 0 0 3px rgba(156,139,110,0.3);"></div>',
+        iconSize: [12, 12],
+        iconAnchor: [6, 6],
+      });
+    }
+
+    markers = stops.map(s => L.marker([s.lat, s.lng], { icon: makeIcon(false) }).addTo(map));
+
+    function goTo(index) {
+      const s = stops[index];
+      map.flyTo([s.lat, s.lng], s.zoom, { duration: 1.6, easeLinearity: 0.4 });
+
+      nameEl.textContent = s.name;
+      subEl.textContent  = s.sub;
+      textEl.textContent = s.text;
+      stepEl.textContent = String(index + 1);
+
+      prevBtn.disabled = index === 0;
+      nextBtn.disabled = index === stops.length - 1;
+
+      markers.forEach(function(m, i) {
+        m.setIcon(makeIcon(i === index));
+      });
+
+      current = index;
+    }
+
+    const s0 = stops[0];
+    map.setView([s0.lat, s0.lng], s0.zoom);
+    goTo(0);
+
+    prevBtn.addEventListener('click', function() { if (current > 0) goTo(current - 1); });
+    nextBtn.addEventListener('click', function() { if (current < stops.length - 1) goTo(current + 1); });
+  }
+
+  function loadLeaflet() {
+    // inject CSS
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+    document.head.appendChild(link);
+
+    // inject JS
+    const script = document.createElement('script');
+    script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+    script.onload = function() { initMap(window.L); };
+    document.head.appendChild(script);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadLeaflet);
+  } else {
+    loadLeaflet();
+  }
+})();
+</script>

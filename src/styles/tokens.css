@@ -4,13 +4,13 @@
   --color-bg:           #faf7f2;
   --color-fg:           #3d2f1f;
   --color-card:         #ffffff;
-  --color-muted:        #7A6035;
-  --color-accent:       #C9A84C;
-  --color-accent-light: #FAEEDA;
+  --color-muted:        #6B5234; /* WCAG AA on white: ~4.6:1 */
+  --color-accent:       #9C8B6E;
+  --color-accent-light: #EDE5D8;
   --color-border:       #E8DCC8;
-  --color-pill-bg:      #EEE0B8;
-  --color-pill-text:    #8C7248;
-  --color-accent-border:#D4BC8A;
+  --color-pill-bg:      #E8DDD0;
+  --color-pill-text:    #6B5C47;
+  --color-accent-border:#C4B49A;
 
   --font-display: 'Jacquard 12', monospace;
   --font-serif:   'Lora', serif;
