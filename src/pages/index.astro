@@ -13,6 +13,42 @@ const [lab, archives, gallery, library] = await Promise.all([
   getCollection('library'),
 ]);
 
+// Featured entries for overlay widgets (up to 6)
+const featuredWidgets = [
+  ...lab.filter(e => e.data.featured).map(e => ({
+    title: e.data.title, slug: e.slug, collection: 'lab' as const,
+    type: 'project', preview: e.data.description ?? '',
+    date: e.data.date_published ?? e.data.date_built,
+  })),
+  ...archives.filter(e => e.data.featured).map(e => ({
+    title: e.data.title, slug: e.slug, collection: 'archives' as const,
+    type: e.data.type, preview: '',
+    date: e.data.date_published ?? e.data.date_written,
+  })),
+  ...gallery.filter(e => e.data.featured).map(e => ({
+    title: e.data.title, slug: e.slug, collection: 'gallery' as const,
+    type: e.data.medium, preview: e.data.caption ?? '',
+    date: e.data.date_published ?? e.data.date_made,
+  })),
+].slice(0, 6);
+
+// Widget positions: { top, left?, right?, rot, delay }
+const positions = [
+  { top: '12%', left: '4%',  rot: '-3deg', delay: '0s'   },
+  { top:  '8%', right: '4%', rot:  '2deg', delay: '0.6s' },
+  { top: '42%', left: '2%',  rot: '-2deg', delay: '1.1s' },
+  { top: '42%', right: '2%', rot:  '3deg', delay: '0.3s' },
+  { top: '72%', left: '5%',  rot:  '2deg', delay: '0.9s' },
+  { top: '68%', right: '5%', rot: '-2deg', delay: '0.5s' },
+];
+
+const colIcons: Record<string, string> = {
+  lab:      '/icons/lab-icon.png',
+  archives: '/icons/archive-icon.png',
+  gallery:  '/icons/gallery-icon.png',
+  library:  '/icons/lib-icon.png',
+};
+
 const allEntries = [
   ...lab.map(e => ({
     ...e, collection: 'lab' as const,
@@ -44,10 +80,37 @@ const allTopics = [...new Set(allEntries.flatMap(e => e.topics))].sort();
 
   <!-- ── Landing overlay (hidden for return visitors) ─────────────────── -->
   <div id="landing-overlay" class="landing-overlay">
+
+    <!-- cursor glow -->
+    <div id="cursor-glow" class="cursor-glow" aria-hidden="true"></div>
+
+    <!-- floating project widgets -->
+    {featuredWidgets.map((w, i) => {
+      const pos = positions[i];
+      const posStyle = `top:${pos.top};${'left' in pos ? `left:${pos.left}` : `right:${pos.right}`};--rot:${pos.rot};--float-delay:${pos.delay}`;
+      return (
+        <a
+          href={`/${w.collection}/${w.slug}`}
+          class="widget"
+          style={posStyle}
+          tabindex="-1"
+          aria-hidden="true"
+        >
+          <div class="widget-top">
+            <img src={colIcons[w.collection]} class="widget-icon" alt="" />
+            <span class="widget-type">{w.type}</span>
+          </div>
+          <p class="widget-title">{w.title}</p>
+          {w.preview && <p class="widget-preview">{w.preview.slice(0, 60)}{w.preview.length > 60 ? '…' : ''}</p>}
+        </a>
+      );
+    })}
+
+    <!-- hero -->
     <div class="hero-inner">
       <div class="hero-text">
-        <h1 class="hero-title">{site.name}</h1>
-        <p class="hero-bio">{site.description}</p>
+        <h1 class="hero-title" id="hero-title">{site.name}</h1>
+        <p class="hero-bio" id="hero-bio" aria-label={site.description}></p>
       </div>
       <div class="hero-cta">
         <button class="hero-enter" id="enter-btn">enter</button>
@@ -172,15 +235,103 @@ const allTopics = [...new Set(allEntries.flatMap(e => e.topics))].sort();
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
   }
   .landing-overlay.exiting {
-    animation: overlayExit 0.55s cubic-bezier(0.4, 0, 1, 1) forwards;
+    animation: overlayExit 0.6s cubic-bezier(0.4, 0, 1, 1) forwards;
+    pointer-events: none;
   }
   @keyframes overlayExit {
-    0%   { opacity: 1; }
-    100% { opacity: 0; }
+    to { opacity: 0; }
   }
 
+  /* ── Cursor glow ─────────────────────────────────────────────────────── */
+  .cursor-glow {
+    position: fixed;
+    top: 0; left: 0;
+    width: 320px; height: 320px;
+    margin: -160px 0 0 -160px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--color-accent-light) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.7;
+    transition: opacity 0.3s;
+  }
+
+  /* ── Floating widgets ────────────────────────────────────────────────── */
+  .widget {
+    position: absolute;
+    width: 172px;
+    background: var(--color-card);
+    border: 0.5px solid var(--color-border);
+    border-radius: var(--radius-card);
+    padding: var(--space-md) var(--space-lg);
+    text-decoration: none;
+    color: inherit;
+    transform: rotate(var(--rot, 0deg)) translateY(0px);
+    animation: widgetIn 0.7s ease both, widgetFloat 4s ease-in-out infinite;
+    animation-delay: var(--float-delay, 0s), var(--float-delay, 0s);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+  @keyframes widgetIn {
+    from { opacity: 0; transform: rotate(var(--rot, 0deg)) translateY(12px); }
+    to   { opacity: 1; transform: rotate(var(--rot, 0deg)) translateY(0); }
+  }
+  @keyframes widgetFloat {
+    0%, 100% { transform: rotate(var(--rot, 0deg)) translateY(0px); }
+    50%       { transform: rotate(var(--rot, 0deg)) translateY(-8px); }
+  }
+  .widget:hover {
+    border-color: var(--color-accent);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    transform: rotate(0deg) translateY(-4px) scale(1.02);
+    animation-play-state: paused;
+  }
+  .widget-top {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+  }
+  .widget-icon {
+    width: 16px;
+    height: 16px;
+    opacity: 0.6;
+  }
+  .widget-type {
+    font-family: var(--font-body);
+    font-size: 10px;
+    color: var(--color-accent);
+    letter-spacing: 0.07em;
+  }
+  .widget-title {
+    font-family: var(--font-serif);
+    font-size: var(--text-sm);
+    color: var(--color-fg);
+    line-height: var(--leading-tight);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .widget-preview {
+    font-family: var(--font-body);
+    font-size: 10px;
+    color: var(--color-muted);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  @media (max-width: 900px) { .widget { display: none; } }
+
+  /* ── Hero ────────────────────────────────────────────────────────────── */
   .hero-inner {
     text-align: center;
     max-width: 480px;
@@ -189,17 +340,19 @@ const allTopics = [...new Set(allEntries.flatMap(e => e.topics))].sort();
     flex-direction: column;
     align-items: center;
     gap: var(--space-xxl);
-    animation: heroIn 0.6s ease both;
+    animation: heroIn 0.7s ease both;
+    position: relative;
+    z-index: 3;
   }
   @keyframes heroIn {
-    from { opacity: 0; transform: translateY(16px); }
+    from { opacity: 0; transform: translateY(18px); }
     to   { opacity: 1; transform: translateY(0); }
   }
   .landing-overlay.exiting .hero-inner {
     animation: heroOut 0.4s ease forwards;
   }
   @keyframes heroOut {
-    to { opacity: 0; transform: translateY(-12px); }
+    to { opacity: 0; transform: translateY(-10px); }
   }
 
   .hero-text {
@@ -214,13 +367,43 @@ const allTopics = [...new Set(allEntries.flatMap(e => e.topics))].sort();
     color: var(--color-fg);
     line-height: var(--leading-tight);
     white-space: nowrap;
+    cursor: default;
   }
+  /* letter wave — applied via JS */
+  .hero-title .letter {
+    display: inline-block;
+    transition: transform 0.2s ease, color 0.2s ease;
+  }
+  .hero-title:hover .letter {
+    animation: letterWave 0.5s ease both;
+    animation-delay: calc(var(--li) * 35ms);
+  }
+  @keyframes letterWave {
+    0%   { transform: translateY(0); }
+    40%  { transform: translateY(-6px); color: var(--color-accent); }
+    100% { transform: translateY(0); }
+  }
+
   .hero-bio {
     font-family: var(--font-body);
     font-size: var(--text-lg);
     color: var(--color-muted);
     line-height: var(--leading-loose);
+    min-height: 1.6em;
   }
+  /* typewriter cursor */
+  .hero-bio::after {
+    content: '|';
+    color: var(--color-accent);
+    animation: blink 0.9s step-end infinite;
+    margin-left: 1px;
+  }
+  .hero-bio.typed::after { display: none; }
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0; }
+  }
+
   .hero-enter {
     display: inline-block;
     font-family: var(--font-body);
@@ -232,9 +415,13 @@ const allTopics = [...new Set(allEntries.flatMap(e => e.topics))].sort();
     border-radius: var(--radius-pill);
     padding: 7px 22px;
     cursor: pointer;
-    transition: background 0.15s, transform 0.1s;
+    transition: background 0.15s, transform 0.12s, box-shadow 0.15s;
   }
-  .hero-enter:hover  { background: var(--color-accent); }
+  .hero-enter:hover {
+    background: var(--color-accent);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
+  }
   .hero-enter:active { transform: scale(0.96); }
   .hero-cta {
     display: flex;
@@ -242,7 +429,14 @@ const allTopics = [...new Set(allEntries.flatMap(e => e.topics))].sort();
     align-items: center;
     gap: var(--space-sm);
   }
-  .hero-chevron { color: var(--color-accent); }
+  .hero-chevron {
+    color: var(--color-accent);
+    animation: chevronBounce 2s ease-in-out infinite;
+  }
+  @keyframes chevronBounce {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(4px); }
+  }
 
   /* ── Garden content ───────────────────────────────────────────────────── */
   .garden-page {
@@ -380,6 +574,50 @@ const allTopics = [...new Set(allEntries.flatMap(e => e.topics))].sort();
       return;
     }
 
+    // ── Cursor glow ───────────────────────────────────────────────────────
+    var glow = document.getElementById('cursor-glow');
+    var cx = window.innerWidth / 2, cy = window.innerHeight / 2;
+    var tx = cx, ty = cy;
+    if (glow) {
+      glow.style.transform = 'translate(' + cx + 'px,' + cy + 'px)';
+      document.addEventListener('mousemove', function (e) { tx = e.clientX; ty = e.clientY; });
+      (function animateGlow() {
+        cx += (tx - cx) * 0.1;
+        cy += (ty - cy) * 0.1;
+        glow.style.transform = 'translate(' + cx + 'px,' + cy + 'px)';
+        if (overlay.style.display !== 'none') requestAnimationFrame(animateGlow);
+      })();
+    }
+
+    // ── Letter wave on title ──────────────────────────────────────────────
+    var titleEl = document.getElementById('hero-title');
+    if (titleEl) {
+      var text = titleEl.textContent || '';
+      titleEl.innerHTML = text.split('').map(function (ch, i) {
+        return ch === ' '
+          ? ' '
+          : '<span class="letter" style="--li:' + i + '">' + ch + '</span>';
+      }).join('');
+    }
+
+    // ── Typewriter on description ─────────────────────────────────────────
+    var bioEl = document.getElementById('hero-bio');
+    var fullText = bioEl ? (bioEl.getAttribute('aria-label') || '') : '';
+    if (bioEl && fullText) {
+      var idx = 0;
+      setTimeout(function () {
+        var timer = setInterval(function () {
+          idx++;
+          bioEl.textContent = fullText.slice(0, idx);
+          if (idx >= fullText.length) {
+            clearInterval(timer);
+            bioEl.classList.add('typed');
+          }
+        }, 38);
+      }, 600);
+    }
+
+    // ── Enter button ──────────────────────────────────────────────────────
     document.getElementById('enter-btn')?.addEventListener('click', function () {
       overlay.classList.add('exiting');
       overlay.addEventListener('animationend', function () {
