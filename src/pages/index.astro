@@ -256,10 +256,10 @@ const allTopics = [...new Set(allEntries.flatMap(e => e.topics))].sort();
   .cursor-glow {
     position: fixed;
     top: 0; left: 0;
-    width: 320px; height: 320px;
-    margin: -160px 0 0 -160px;
+    width: 180px; height: 180px;
+    margin: -90px 0 0 -90px;
     border-radius: 50%;
-    background: radial-gradient(circle, color-mix(in srgb, var(--color-accent) 22%, transparent) 0%, transparent 65%);
+    background: radial-gradient(circle, rgba(255,255,255,0.55) 0%, transparent 65%);
     pointer-events: none;
     z-index: 1;
     opacity: 1;
@@ -376,19 +376,15 @@ const allTopics = [...new Set(allEntries.flatMap(e => e.topics))].sort();
     white-space: nowrap;
     cursor: default;
   }
-  /* letter wave — applied via JS */
-  .hero-title .letter {
+  /* letter hover — :global because spans are JS-created (no astro scope attr) */
+  :global(.hero-title .letter) {
     display: inline-block;
-    transition: transform 0.2s ease, color 0.2s ease;
+    transition: transform 0.18s ease, color 0.18s ease;
+    cursor: default;
   }
-  .hero-title:hover .letter {
-    animation: letterWave 0.5s ease both;
-    animation-delay: calc(var(--li) * 35ms);
-  }
-  @keyframes letterWave {
-    0%   { transform: translateY(0); }
-    40%  { transform: translateY(-6px); color: var(--color-accent); }
-    100% { transform: translateY(0); }
+  :global(.hero-title .letter:hover) {
+    transform: translateY(-6px);
+    color: var(--color-accent);
   }
 
   .hero-bio {
