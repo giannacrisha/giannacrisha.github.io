@@ -259,7 +259,7 @@ const allTopics = [...new Set(allEntries.flatMap(e => e.topics))].sort();
     width: 180px; height: 180px;
     margin: -90px 0 0 -90px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(255,255,255,0.55) 0%, transparent 65%);
+    background: radial-gradient(circle, color-mix(in srgb, var(--color-accent) 22%, transparent) 0%, transparent 65%);
     pointer-events: none;
     z-index: 1;
     opacity: 1;
@@ -379,11 +379,11 @@ const allTopics = [...new Set(allEntries.flatMap(e => e.topics))].sort();
   /* letter hover — :global because spans are JS-created (no astro scope attr) */
   :global(.hero-title .letter) {
     display: inline-block;
-    transition: transform 0.18s ease, color 0.18s ease;
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.3s ease;
     cursor: default;
   }
   :global(.hero-title .letter:hover) {
-    transform: translateY(-6px);
+    transform: translateY(-7px);
     color: var(--color-accent);
   }
 
