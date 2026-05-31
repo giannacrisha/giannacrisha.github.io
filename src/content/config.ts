@@ -15,6 +15,7 @@ const lab = defineCollection({
     tools:          z.array(z.string()).optional(),
     cover_image:    z.string().optional(),
     link:           z.string().url().optional(),
+    topics:         z.array(z.string()).optional(),
     growth_stage:   stageEnum,
     featured:       z.boolean().default(false),
   }),
@@ -27,7 +28,8 @@ const archives = defineCollection({
     type:           contentEnum,
     date_written:   z.date(),
     date_published: z.date().optional(), // defaults to date_written if omitted
-    tags:           z.array(z.string()).optional(),
+    tags:           z.array(z.string()).nullish(),
+    topics:         z.array(z.string()).optional(),
     note:           z.string().optional(),
     growth_stage:   stageEnum,
     featured:       z.boolean().default(false),
@@ -43,6 +45,7 @@ const gallery = defineCollection({
     date_published: z.date().optional(), // defaults to date_made if omitted
     image:          z.string(),
     caption:        z.string().optional(),
+    topics:         z.array(z.string()).optional(),
     growth_stage:   stageEnum,
   }),
 });

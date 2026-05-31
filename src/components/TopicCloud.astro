@@ -1,0 +1,54 @@
+---
+// src/components/TopicCloud.astro
+interface Props {
+  topics: string[];
+}
+const { topics } = Astro.props;
+if (topics.length === 0) return;
+---
+
+<div class="topic-cloud" id="topic-cloud" role="group" aria-label="Filter by topic">
+  <button class="topic-pill active" data-topic="all">all topics</button>
+  {topics.map(t => (
+    <button class="topic-pill" data-topic={t}>{t}</button>
+  ))}
+</div>
+
+<style>
+  .topic-cloud {
+    display: flex;
+    gap: var(--space-sm);
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+    margin-bottom: var(--space-xl);
+  }
+  .topic-cloud::-webkit-scrollbar { display: none; }
+
+  .topic-pill {
+    flex-shrink: 0;
+    padding: 6px 18px;
+    border-radius: var(--radius-pill);
+    border: 0.5px solid var(--color-accent-border);
+    background: var(--color-pill-bg);
+    color: var(--color-pill-text);
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.12s;
+    white-space: nowrap;
+  }
+  .topic-pill:hover:not(.active) {
+    border-color: var(--color-accent);
+    color: var(--color-fg);
+  }
+  .topic-pill.active {
+    background: var(--color-fg);
+    color: #fff;
+    border-color: var(--color-fg);
+  }
+  .topic-pill:active {
+    transform: scale(0.93);
+  }
+</style>

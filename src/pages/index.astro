@@ -1,6 +1,8 @@
 ---
-import Base from '../layouts/Base.astro';
+// src/pages/index.astro — garden + landing overlay
+import Garden from '../layouts/Garden.astro';
 import Card from '../components/Card.astro';
+import TopicCloud from '../components/TopicCloud.astro';
 import { getCollection } from 'astro:content';
 import { site } from '../config/design';
 
@@ -12,83 +14,173 @@ const [lab, archives, gallery, library] = await Promise.all([
 ]);
 
 const allEntries = [
-  ...lab.map(e => ({ ...e, collection: 'lab' as const, date: e.data.date_published })),
-  ...archives.map(e => ({ ...e, collection: 'archives' as const, date: e.data.date_published })),
-  ...gallery.map(e => ({ ...e, collection: 'gallery' as const, date: e.data.date_published })),
-  ...library.map(e => ({ ...e, collection: 'library' as const, date: e.data.date_added })),
-].sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 6);
----
-<Base title={site.name}>
-  <main class="landing">
-    <!-- hero gate -->
-    <section class="hero">
-      <div class="hero-inner">
-        <div class="hero-text">
-          <h1 class="hero-title">{site.name}</h1>
-          <p class="hero-bio">{site.description}</p>
-        </div>
-        <div class="hero-cta">
-          <a href="/garden" class="hero-enter" id="enter-link">enter</a>
-          <svg class="hero-chevron" width="20" height="20" viewBox="0 0 20 20"
-               fill="none" aria-hidden="true">
-            <path d="M5 8l5 5 5-5" stroke="currentColor"
-                  stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-      </div>
-    </section>
+  ...lab.map(e => ({
+    ...e, collection: 'lab' as const,
+    date: e.data.date_published ?? e.data.date_built,
+    topics: e.data.topics ?? [],
+  })),
+  ...archives.map(e => ({
+    ...e, collection: 'archives' as const,
+    date: e.data.date_published ?? e.data.date_written,
+    topics: e.data.topics ?? [],
+  })),
+  ...gallery.map(e => ({
+    ...e, collection: 'gallery' as const,
+    date: e.data.date_published ?? e.data.date_made,
+    topics: e.data.topics ?? [],
+  })),
+  ...library.map(e => ({
+    ...e, collection: 'library' as const,
+    date: e.data.date_added,
+    topics: [],
+  })),
+].sort((a, b) => b.date.getTime() - a.date.getTime());
 
-    <!-- recently planted -->
-    <section class="recent-section">
-      <div class="page-wrapper">
-        <h2 class="recent-title">recently planted</h2>
-        <div class="recent-scroll">
-          {allEntries.map(entry => {
-            const data = entry.data as any;
-            return (
-              <div class="grid-item">
-                <Card
-                  title={data.title}
-                  slug={entry.slug}
-                  collection={entry.collection}
-                  type={data.type}
-                  stage={data.growth_stage}
-                  date_published={data.date_published ?? data.date_added}
-                  date_written={data.date_written}
-                  date_built={data.date_built}
-                  date_made={data.date_made}
-                  date_added={data.date_added}
-                  cover_image={data.cover_image ?? data.image}
-                  rating={data.rating}
-                  description={data.description}
-                  body={entry.body}
-                  creator={data.creator}
-                  year={data.year}
-                />
+// Derive all unique topics across entries, sorted alphabetically
+const allTopics = [...new Set(allEntries.flatMap(e => e.topics))].sort();
+---
+
+<Garden title={site.name} description={site.description}>
+
+  <!-- ── Landing overlay (hidden for return visitors) ─────────────────── -->
+  <div id="landing-overlay" class="landing-overlay">
+    <div class="hero-inner">
+      <div class="hero-text">
+        <h1 class="hero-title">{site.name}</h1>
+        <p class="hero-bio">{site.description}</p>
+      </div>
+      <div class="hero-cta">
+        <button class="hero-enter" id="enter-btn">enter</button>
+        <svg class="hero-chevron" width="20" height="20" viewBox="0 0 20 20"
+             fill="none" aria-hidden="true">
+          <path d="M5 8l5 5 5-5" stroke="currentColor"
+                stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Garden content (always in DOM for SEO) ───────────────────────── -->
+  <div class="garden-page" id="garden-content">
+    <div class="page-wrapper">
+
+      <header class="garden-header">
+        <h1 class="garden-title">the garden</h1>
+        <p class="garden-desc">a growing collection of things i've made, written, and found</p>
+      </header>
+
+      {allTopics.length > 0 && <TopicCloud topics={allTopics} />}
+
+      <!-- Filter + sort chips -->
+      <div class="garden-controls" id="garden-controls">
+        <div class="chip-wrap">
+          <button class="control-chip" id="filters-btn" aria-expanded="false" aria-haspopup="true">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+              <path d="M1 2.5h11M3 6.5h7M5 10.5h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+            </svg>
+            filters
+          </button>
+          <div class="dropdown" id="filters-dropdown" aria-hidden="true">
+            <div class="dropdown-section">
+              <span class="dropdown-label">growth stage</span>
+              <div class="dropdown-pills">
+                <button class="dpill active" data-filter-param="stage" data-filter-value="all">all</button>
+                <button class="dpill" data-filter-param="stage" data-filter-value="dust">dust</button>
+                <button class="dpill" data-filter-param="stage" data-filter-value="spark">spark</button>
+                <button class="dpill" data-filter-param="stage" data-filter-value="star">star</button>
               </div>
-            );
-          })}
+            </div>
+            <div class="dropdown-section">
+              <span class="dropdown-label">area</span>
+              <div class="dropdown-pills">
+                <button class="dpill active" data-filter-param="collection" data-filter-value="all">all</button>
+                <button class="dpill" data-filter-param="collection" data-filter-value="archives">archives</button>
+                <button class="dpill" data-filter-param="collection" data-filter-value="lab">lab</button>
+                <button class="dpill" data-filter-param="collection" data-filter-value="gallery">gallery</button>
+                <button class="dpill" data-filter-param="collection" data-filter-value="library">library</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="chip-wrap">
+          <button class="control-chip" id="sort-btn" aria-expanded="false" aria-haspopup="true">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+              <path d="M1 2.5h5M1 6.5h8M1 10.5h11" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+            </svg>
+            sort
+          </button>
+          <div class="dropdown" id="sort-dropdown" aria-hidden="true">
+            <div class="dropdown-section">
+              <div class="dropdown-pills">
+                <button class="dpill active" data-sort-value="newest">most recent</button>
+                <button class="dpill" data-sort-value="oldest">oldest first</button>
+                <button class="dpill" data-sort-value="stage">by growth stage</button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </section>
-  </main>
-</Base>
+
+      <!-- Masonry grid -->
+      <div class="masonry" id="garden-masonry">
+        {allEntries.map((entry, i) => {
+          const data = entry.data as any;
+          return (
+            <div
+              class="masonry-item"
+              data-filter={JSON.stringify({ collection: entry.collection, stage: data.growth_stage })}
+              data-topics={JSON.stringify(entry.topics)}
+              data-date={entry.date.getTime()}
+              data-stage={data.growth_stage ?? ''}
+              style={`--i: ${i}`}
+            >
+              <Card
+                title={data.title}
+                slug={entry.slug}
+                collection={entry.collection}
+                type={data.type}
+                stage={data.growth_stage}
+                date_published={data.date_published ?? data.date_added}
+                date_written={data.date_written}
+                date_built={data.date_built}
+                date_made={data.date_made}
+                date_added={data.date_added}
+                cover_image={data.cover_image ?? data.image}
+                rating={data.rating}
+                description={data.description}
+                body={entry.body}
+                creator={data.creator}
+                year={data.year}
+              />
+            </div>
+          );
+        })}
+      </div>
+
+    </div>
+  </div>
+</Garden>
 
 <style>
-  .landing {
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    background: #faf7f2;
+  /* ── Landing overlay ──────────────────────────────────────────────────── */
+  .landing-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 500;
     background: var(--color-bg);
-  }
-  .hero {
-    flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
   }
+  .landing-overlay.exiting {
+    animation: overlayExit 0.55s cubic-bezier(0.4, 0, 1, 1) forwards;
+  }
+  @keyframes overlayExit {
+    0%   { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
   .hero-inner {
     text-align: center;
     max-width: 480px;
@@ -97,7 +189,19 @@ const allEntries = [
     flex-direction: column;
     align-items: center;
     gap: var(--space-xxl);
+    animation: heroIn 0.6s ease both;
   }
+  @keyframes heroIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .landing-overlay.exiting .hero-inner {
+    animation: heroOut 0.4s ease forwards;
+  }
+  @keyframes heroOut {
+    to { opacity: 0; transform: translateY(-12px); }
+  }
+
   .hero-text {
     display: flex;
     flex-direction: column;
@@ -124,101 +228,277 @@ const allEntries = [
     color: var(--color-bg);
     background: var(--color-fg);
     letter-spacing: 0.1em;
-    text-decoration: none;
     border: none;
     border-radius: var(--radius-pill);
-    padding: 6px 20px;
-    transition: background 0.15s, color 0.15s;
+    padding: 7px 22px;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
   }
-  .hero-enter:hover {
-    background: var(--color-accent);
-  }
+  .hero-enter:hover  { background: var(--color-accent); }
+  .hero-enter:active { transform: scale(0.96); }
   .hero-cta {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: var(--space-sm);
   }
-  .hero-chevron {
-    color: var(--color-accent);
-  }
+  .hero-chevron { color: var(--color-accent); }
 
-  .recent-section {
-    flex-shrink: 0;
-    padding: 0 var(--space-xl) var(--space-xl);
+  /* ── Garden content ───────────────────────────────────────────────────── */
+  .garden-page {
+    min-height: 100vh;
   }
-  .recent-section .page-wrapper {
-    padding: 0;
-    overflow: hidden;
+  .garden-header {
+    padding: var(--space-section) 0 var(--space-xxl);
   }
-  .recent-title {
+  .garden-title {
     font-family: var(--font-display);
-    font-size: var(--text-section);
+    font-size: var(--text-hero);
     color: var(--color-fg);
     line-height: var(--leading-tight);
     margin-bottom: var(--space-lg);
   }
-  .recent-scroll {
-    display: flex;
-    flex-direction: row;
-    gap: var(--space-xl);
-    overflow-x: auto;
-    overflow-y: visible;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    /* hide scrollbar visually */
-    scrollbar-width: none;
-    padding-bottom: var(--space-lg);
+  .garden-desc {
+    font-family: var(--font-body);
+    font-size: var(--text-xl);
+    color: var(--color-muted);
+    line-height: var(--leading-loose);
+    max-width: 600px;
   }
-  .recent-scroll::-webkit-scrollbar { display: none; }
-  .grid-item {
-    flex: 0 0 300px;
-    scroll-snap-align: start;
-    display: flex;
-    flex-direction: column;
-  }
-  .grid-item > * { flex: 1; }
 
+  /* ── Filter chips (same style as CollectionFilters) ───────────────────── */
+  .garden-controls {
+    display: flex;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-xxl);
+  }
+  .chip-wrap { position: relative; }
+  .control-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: 5px 14px;
+    border-radius: var(--radius-pill);
+    border: 0.5px solid var(--color-accent-border);
+    background: var(--color-card);
+    color: var(--color-fg);
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: border-color 0.12s, background 0.12s;
+  }
+  .control-chip:hover,
+  .control-chip[aria-expanded="true"] {
+    border-color: var(--color-fg);
+    background: var(--color-fg);
+    color: #fff;
+  }
+  .control-chip[aria-expanded="true"] svg { stroke: #fff; }
+  .dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    min-width: 220px;
+    background: var(--color-card);
+    border: 0.5px solid var(--color-border);
+    border-radius: var(--radius-card);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    z-index: 200;
+    padding: var(--space-lg);
+    flex-direction: column;
+    gap: var(--space-lg);
+  }
+  .dropdown.open { display: flex; }
+  .dropdown-section { display: flex; flex-direction: column; gap: var(--space-sm); }
+  .dropdown-label {
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    color: var(--color-muted);
+    letter-spacing: 0.08em;
+  }
+  .dropdown-pills { display: flex; flex-wrap: wrap; gap: var(--space-xs); }
+  .dpill {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: var(--radius-pill);
+    border: 0.5px solid var(--color-accent-border);
+    background: var(--color-pill-bg);
+    color: var(--color-pill-text);
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: background 0.1s, color 0.1s, border-color 0.1s;
+  }
+  .dpill.active { background: var(--color-fg); color: #fff; border-color: var(--color-fg); }
+  .dpill:hover:not(.active) { border-color: var(--color-accent); color: var(--color-fg); }
+
+  /* ── Masonry ──────────────────────────────────────────────────────────── */
+  .masonry {
+    columns: 3;
+    column-gap: var(--space-xl);
+    padding-bottom: var(--space-section);
+  }
+  .masonry-item {
+    break-inside: avoid;
+    margin-bottom: var(--space-xl);
+    animation: cardIn 0.4s ease both;
+    animation-delay: calc(var(--i, 0) * 28ms);
+  }
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .masonry-item.item-hiding {
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  .masonry-item.item-in {
+    animation: cardIn 0.3s ease both;
+  }
+
+  @media (max-width: 900px) { .masonry { columns: 2; } }
   @media (max-width: 600px) {
-    .grid-item { flex: 0 0 260px; }
+    .masonry { columns: 1; }
+    .garden-title { font-size: var(--text-section); }
+    .garden-desc  { font-size: var(--text-md); }
   }
 </style>
 
-<script>
-  const link = document.getElementById('enter-link');
+<script is:inline>
+  // ── Overlay ─────────────────────────────────────────────────────────────
+  (function () {
+    var overlay = document.getElementById('landing-overlay');
+    if (!overlay) return;
 
-  link?.addEventListener('click', (e) => {
-    e.preventDefault();
+    if (localStorage.getItem('gi-garden-entered')) {
+      overlay.style.display = 'none';
+      return;
+    }
 
-    const x = (e as MouseEvent).clientX;
-    const y = (e as MouseEvent).clientY;
+    document.getElementById('enter-btn')?.addEventListener('click', function () {
+      overlay.classList.add('exiting');
+      overlay.addEventListener('animationend', function () {
+        overlay.style.display = 'none';
+        localStorage.setItem('gi-garden-entered', '1');
+      }, { once: true });
+    });
+  })();
 
-    // Distance from click to the farthest viewport corner
-    const maxDist = Math.hypot(
-      Math.max(x, window.innerWidth  - x),
-      Math.max(y, window.innerHeight - y)
-    );
+  // ── State ────────────────────────────────────────────────────────────────
+  var activeFilters = { stage: 'all', collection: 'all' };
+  var activeTopic   = 'all';
+  var activeSort    = 'newest';
+  var stageOrder    = { dust: 1, spark: 2, star: 3 };
 
-    const burst = document.createElement('div');
-    burst.style.cssText = `
-      position: fixed;
-      inset: 0;
-      z-index: 9999;
-      pointer-events: none;
-      background: #ffffff;
-      clip-path: circle(0px at ${x}px ${y}px);
-    `;
-    document.body.appendChild(burst);
+  // ── Apply all (filter + topic + sort) ───────────────────────────────────
+  function applyAll() {
+    var items = Array.from(document.querySelectorAll('.masonry-item'));
 
-    // Force reflow so the starting state is painted before we animate
-    burst.getBoundingClientRect();
+    items.forEach(function (item, idx) {
+      var f      = JSON.parse(item.dataset.filter || '{}');
+      var topics = JSON.parse(item.dataset.topics || '[]');
 
-    burst.style.transition = `clip-path 0.75s cubic-bezier(0.4, 0, 1, 1)`;
-    burst.style.clipPath = `circle(${maxDist * 1.05}px at ${x}px ${y}px)`;
+      var topicOk = activeTopic === 'all' || topics.indexOf(activeTopic) !== -1;
+      var stageOk = activeFilters.stage === 'all' || f.stage === activeFilters.stage;
+      var colOk   = activeFilters.collection === 'all' || f.collection === activeFilters.collection;
+      var visible = topicOk && stageOk && colOk;
 
-    burst.addEventListener('transitionend', () => {
-      sessionStorage.setItem('garden-entered', '1');
-      window.location.href = '/garden';
-    }, { once: true });
+      if (visible) {
+        item.style.display = '';
+        item.classList.remove('item-hiding');
+        item.classList.remove('item-in');
+        void item.offsetWidth;
+        item.style.animationDelay = idx * 28 + 'ms';
+        item.classList.add('item-in');
+      } else {
+        item.classList.add('item-hiding');
+        item.addEventListener('transitionend', function handler() {
+          if (item.classList.contains('item-hiding')) {
+            item.style.display = 'none';
+            item.classList.remove('item-hiding');
+          }
+          item.removeEventListener('transitionend', handler);
+        });
+      }
+    });
+  }
+
+  function applySort() {
+    var container = document.getElementById('garden-masonry');
+    if (!container) return;
+    var items = Array.from(container.querySelectorAll('.masonry-item'));
+    items.sort(function (a, b) {
+      var ad  = Number(a.dataset.date), bd = Number(b.dataset.date);
+      var as_ = stageOrder[a.dataset.stage] || 0;
+      var bs_ = stageOrder[b.dataset.stage] || 0;
+      if (activeSort === 'newest') return bd - ad;
+      if (activeSort === 'oldest') return ad - bd;
+      if (activeSort === 'stage')  return bs_ - as_;
+      return 0;
+    });
+    items.forEach(function (i) { container.appendChild(i); });
+    applyAll();
+  }
+
+  // ── Topic cloud ──────────────────────────────────────────────────────────
+  document.querySelectorAll('#topic-cloud .topic-pill').forEach(function (pill) {
+    pill.addEventListener('click', function () {
+      activeTopic = pill.dataset.topic;
+      document.querySelectorAll('#topic-cloud .topic-pill').forEach(function (p) {
+        p.classList.toggle('active', p === pill);
+      });
+      applyAll();
+    });
   });
+
+  // ── Filter chips ─────────────────────────────────────────────────────────
+  document.querySelectorAll('.dpill[data-filter-param]').forEach(function (pill) {
+    pill.addEventListener('click', function () {
+      activeFilters[pill.dataset.filterParam] = pill.dataset.filterValue;
+      pill.closest('.dropdown-pills').querySelectorAll('.dpill')
+        .forEach(function (p) { p.classList.toggle('active', p === pill); });
+      applyAll();
+    });
+  });
+
+  document.querySelectorAll('.dpill[data-sort-value]').forEach(function (pill) {
+    pill.addEventListener('click', function () {
+      activeSort = pill.dataset.sortValue;
+      pill.closest('.dropdown-pills').querySelectorAll('.dpill')
+        .forEach(function (p) { p.classList.toggle('active', p === pill); });
+      applySort();
+    });
+  });
+
+  // ── Dropdown toggles ─────────────────────────────────────────────────────
+  function initDropdown(btnId, dropId) {
+    var btn  = document.getElementById(btnId);
+    var drop = document.getElementById(dropId);
+    if (!btn || !drop) return;
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var open = drop.classList.toggle('open');
+      btn.setAttribute('aria-expanded', String(open));
+      drop.setAttribute('aria-hidden', String(!open));
+      document.querySelectorAll('.dropdown').forEach(function (d) {
+        if (d !== drop) d.classList.remove('open');
+      });
+      document.querySelectorAll('.control-chip').forEach(function (b) {
+        if (b !== btn) b.setAttribute('aria-expanded', 'false');
+      });
+    });
+  }
+
+  document.addEventListener('click', function () {
+    document.querySelectorAll('.dropdown').forEach(function (d) { d.classList.remove('open'); });
+    document.querySelectorAll('.control-chip').forEach(function (b) { b.setAttribute('aria-expanded', 'false'); });
+  });
+
+  initDropdown('filters-btn', 'filters-dropdown');
+  initDropdown('sort-btn',    'sort-dropdown');
 </script>

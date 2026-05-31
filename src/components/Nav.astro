@@ -1,7 +1,7 @@
 ---
 // src/components/Nav.astro
 const current = Astro.url.pathname;
-const gardenActive = ['/garden','/lab','/archives','/gallery','/library'].some(p => current.startsWith(p));
+const gardenActive = ['/','/lab','/archives','/gallery','/library'].some(p => current.startsWith(p));
 const sublinks = [
   { href: '/lab',      label: 'lab',      desc: 'design and code projects',    icon: '/icons/lab-icon.png'     },
   { href: '/archives', label: 'archives', desc: 'essays, poems, thoughts',     icon: '/icons/archive-icon.png' },
@@ -17,7 +17,7 @@ const sublinks = [
     <ul class="nav-links">
       <!-- the garden with hover dropdown -->
       <li class="nav-item nav-item--garden">
-        <a href="/garden" class:list={['nav-link', { active: gardenActive }]}>
+        <a href="/" class:list={['nav-link', { active: gardenActive }]}>
           the garden
           <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true" class="caret">
             <path d="M2 3.5l3 3 3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -54,7 +54,7 @@ const sublinks = [
 
   <!-- mobile menu -->
   <div class="nav-mobile-menu" id="nav-mobile-menu" aria-hidden="true">
-    <a href="/garden" class="mobile-link">the garden</a>
+    <a href="/" class="mobile-link">the garden</a>
     {sublinks.map(l => (
       <a href={l.href} class="mobile-link mobile-link--sub">{l.label}</a>
     ))}
