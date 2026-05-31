@@ -671,6 +671,7 @@ const allTopics = [...new Set(allEntries.flatMap(e => e.topics))].sort();
         el.addEventListener('pointerdown', function(e) {
           e.preventDefault();
           dragW = pw;
+          pw.wasDragged = false;
           pw.dragOX = e.clientX - pw.x;
           pw.dragOY = e.clientY - pw.y;
           pw.lastX = e.clientX; pw.lastY = e.clientY;
@@ -682,12 +683,16 @@ const allTopics = [...new Set(allEntries.flatMap(e => e.topics))].sort();
           pw.vx = e.clientX - pw.lastX; pw.vy = e.clientY - pw.lastY;
           pw.lastX = e.clientX; pw.lastY = e.clientY;
           pw.x = e.clientX - pw.dragOX; pw.y = e.clientY - pw.dragOY;
+          pw.wasDragged = true;
           el.style.transform = 'translate(' + pw.x + 'px,' + pw.y + 'px) rotate(' + pw.rot + 'deg)';
         });
         el.addEventListener('pointerup', function() {
           if (dragW !== pw) return;
           dragW = null;
           el.style.zIndex = '2'; el.style.cursor = 'grab';
+        });
+        el.addEventListener('click', function(e) {
+          if (pw.wasDragged) { e.preventDefault(); pw.wasDragged = false; }
         });
       });
       runPhysics();
