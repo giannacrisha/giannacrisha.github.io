@@ -259,10 +259,10 @@ const allTopics = [...new Set(allEntries.flatMap(e => e.topics))].sort();
     width: 320px; height: 320px;
     margin: -160px 0 0 -160px;
     border-radius: 50%;
-    background: radial-gradient(circle, var(--color-accent-light) 0%, transparent 70%);
+    background: radial-gradient(circle, color-mix(in srgb, var(--color-accent) 22%, transparent) 0%, transparent 65%);
     pointer-events: none;
     z-index: 1;
-    opacity: 0.7;
+    opacity: 1;
     transition: opacity 0.3s;
   }
 
@@ -336,7 +336,7 @@ const allTopics = [...new Set(allEntries.flatMap(e => e.topics))].sort();
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-  @media (max-width: 900px) { .widget { display: none; } }
+  @media (max-width: 768px) { .widget { display: none; } }
 
   /* ── Hero ────────────────────────────────────────────────────────────── */
   .hero-inner {
@@ -576,71 +576,85 @@ const allTopics = [...new Set(allEntries.flatMap(e => e.topics))].sort();
     var overlay = document.getElementById('landing-overlay');
     if (!overlay) return;
 
-    if (localStorage.getItem('gi-garden-entered')) {
-      overlay.style.display = 'none';
-      return;
-    }
-
-    // ── Cursor glow ───────────────────────────────────────────────────────
+    // ── Cursor glow (always active while overlay is open) ─────────────────
     var glow = document.getElementById('cursor-glow');
     var cx = window.innerWidth / 2, cy = window.innerHeight / 2;
     var tx = cx, ty = cy;
-    if (glow) {
-      glow.style.transform = 'translate(' + cx + 'px,' + cy + 'px)';
-      document.addEventListener('mousemove', function (e) { tx = e.clientX; ty = e.clientY; });
-      (function animateGlow() {
+    var glowRunning = false;
+    document.addEventListener('mousemove', function (e) { tx = e.clientX; ty = e.clientY; });
+    function startGlow() {
+      if (glowRunning || !glow) return;
+      glowRunning = true;
+      (function loop() {
         cx += (tx - cx) * 0.1;
         cy += (ty - cy) * 0.1;
         glow.style.transform = 'translate(' + cx + 'px,' + cy + 'px)';
-        if (overlay.style.display !== 'none') requestAnimationFrame(animateGlow);
+        if (overlay.style.display !== 'none') requestAnimationFrame(loop);
+        else glowRunning = false;
       })();
     }
 
-    // ── Letter wave on title ──────────────────────────────────────────────
+    // ── Letter wave on title (one-time) ───────────────────────────────────
     var titleEl = document.getElementById('hero-title');
-    if (titleEl) {
-      var text = titleEl.textContent || '';
-      titleEl.innerHTML = text.split('').map(function (ch, i) {
-        return ch === ' '
-          ? ' '
-          : '<span class="letter" style="--li:' + i + '">' + ch + '</span>';
+    if (titleEl && !titleEl.querySelector('.letter')) {
+      titleEl.innerHTML = (titleEl.textContent || '').split('').map(function (ch, i) {
+        return ch === ' ' ? ' ' : '<span class="letter" style="--li:' + i + '">' + ch + '</span>';
       }).join('');
     }
 
-    // ── Typewriter on description ─────────────────────────────────────────
+    // ── Typewriter ────────────────────────────────────────────────────────
     var bioEl = document.getElementById('hero-bio');
     var fullText = bioEl ? (bioEl.getAttribute('aria-label') || '') : '';
-    if (bioEl && fullText) {
+    var typeTimer = null;
+    function startTypewriter() {
+      if (!bioEl || !fullText) return;
+      clearInterval(typeTimer);
+      bioEl.textContent = '';
+      bioEl.classList.remove('typed');
       var idx = 0;
       setTimeout(function () {
-        var timer = setInterval(function () {
+        typeTimer = setInterval(function () {
           idx++;
           bioEl.textContent = fullText.slice(0, idx);
-          if (idx >= fullText.length) {
-            clearInterval(timer);
-            bioEl.classList.add('typed');
-          }
+          if (idx >= fullText.length) { clearInterval(typeTimer); bioEl.classList.add('typed'); }
         }, 38);
       }, 600);
     }
 
-    // ── Enter button ──────────────────────────────────────────────────────
-    document.getElementById('enter-btn')?.addEventListener('click', function () {
+    // ── Show overlay ──────────────────────────────────────────────────────
+    function showOverlay() {
+      overlay.style.display = 'flex';
+      overlay.classList.remove('exiting', 'entering');
+      void overlay.offsetWidth;
+      overlay.classList.add('entering');
+      startGlow();
+      startTypewriter();
+    }
+
+    // ── Hide overlay ──────────────────────────────────────────────────────
+    function hideOverlay() {
+      overlay.classList.remove('entering');
       overlay.classList.add('exiting');
       overlay.addEventListener('animationend', function () {
         overlay.style.display = 'none';
         localStorage.setItem('gi-garden-entered', '1');
       }, { once: true });
-    });
+    }
 
-    // ── Logo click — fade overlay back in ────────────────────────────────
+    // ── Init ──────────────────────────────────────────────────────────────
+    if (localStorage.getItem('gi-garden-entered')) {
+      overlay.style.display = 'none';
+    } else {
+      startGlow();
+      startTypewriter();
+    }
+
+    document.getElementById('enter-btn')?.addEventListener('click', hideOverlay);
+
     document.querySelector('.nav-logo')?.addEventListener('click', function (e) {
       e.preventDefault();
       localStorage.removeItem('gi-garden-entered');
-      overlay.style.display = 'flex';
-      overlay.classList.remove('exiting', 'entering');
-      void overlay.offsetWidth; // reflow
-      overlay.classList.add('entering');
+      showOverlay();
     });
   })();
 
