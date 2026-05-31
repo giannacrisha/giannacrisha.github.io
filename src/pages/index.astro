@@ -244,6 +244,13 @@ const allTopics = [...new Set(allEntries.flatMap(e => e.topics))].sort();
   @keyframes overlayExit {
     to { opacity: 0; }
   }
+  .landing-overlay.entering {
+    animation: overlayEnter 0.45s ease forwards;
+  }
+  @keyframes overlayEnter {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
 
   /* ── Cursor glow ─────────────────────────────────────────────────────── */
   .cursor-glow {
@@ -624,6 +631,16 @@ const allTopics = [...new Set(allEntries.flatMap(e => e.topics))].sort();
         overlay.style.display = 'none';
         localStorage.setItem('gi-garden-entered', '1');
       }, { once: true });
+    });
+
+    // ── Logo click — fade overlay back in ────────────────────────────────
+    document.querySelector('.nav-logo')?.addEventListener('click', function (e) {
+      e.preventDefault();
+      localStorage.removeItem('gi-garden-entered');
+      overlay.style.display = 'flex';
+      overlay.classList.remove('exiting', 'entering');
+      void overlay.offsetWidth; // reflow
+      overlay.classList.add('entering');
     });
   })();
 
