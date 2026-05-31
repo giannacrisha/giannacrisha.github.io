@@ -1,25 +1,29 @@
 ---
 // src/pages/gallery/index.astro
 import Garden from '../../layouts/Garden.astro';
-import FilterBar from '../../components/FilterBar.astro';
+import CollectionFilters from '../../components/CollectionFilters.astro';
 import GrowthPill from '../../components/GrowthPill.astro';
 import { getCollection } from 'astro:content';
 
 const entries = await getCollection('gallery');
-const sorted = entries.sort((a, b) => b.data.date_published.getTime() - a.data.date_published.getTime());
+const sorted = entries.sort((a, b) => {
+  const ad = (a.data.date_published ?? a.data.date_made).getTime();
+  const bd = (b.data.date_published ?? b.data.date_made).getTime();
+  return bd - ad;
+});
 
 // Derive mediums dynamically
 const mediums = [...new Set(entries.map(e => e.data.medium))];
 
-const filterGroups = [
+const filters = [
   {
     param: 'stage',
     label: 'stage',
     options: [
       { value: 'all', label: 'all' },
-      { value: 'dust', label: 'dust', stage: 'dust' as const },
-      { value: 'spark', label: 'spark', stage: 'spark' as const },
-      { value: 'star', label: 'star', stage: 'star' as const },
+      { value: 'dust', label: 'dust' },
+      { value: 'spark', label: 'spark' },
+      { value: 'star', label: 'star' },
     ],
   },
   {
@@ -38,12 +42,14 @@ const filterGroups = [
       <h1 class="section-header">gallery</h1>
       <p class="page-desc">artwork and visual work</p>
     </div>
-    <FilterBar groups={filterGroups} />
+    <CollectionFilters filters={filters} />
     <div class="masonry">
       {sorted.map(entry => (
         <div
           class="masonry-item"
           data-filter={JSON.stringify({ stage: entry.data.growth_stage, medium: entry.data.medium })}
+          data-date={(entry.data.date_published ?? entry.data.date_made).getTime()}
+          data-stage={entry.data.growth_stage}
         >
           <a href={`/gallery/${entry.slug}`} class="gallery-card">
             <div class="gallery-image-wrap">

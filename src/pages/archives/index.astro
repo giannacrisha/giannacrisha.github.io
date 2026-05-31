@@ -2,13 +2,17 @@
 // src/pages/archives/index.astro
 import Garden from '../../layouts/Garden.astro';
 import Card from '../../components/Card.astro';
-import FilterBar from '../../components/FilterBar.astro';
+import CollectionFilters from '../../components/CollectionFilters.astro';
 import { getCollection } from 'astro:content';
 
 const entries = await getCollection('archives');
-const sorted = entries.sort((a, b) => b.data.date_published.getTime() - a.data.date_published.getTime());
+const sorted = entries.sort((a, b) => {
+  const ad = (a.data.date_published ?? a.data.date_written).getTime();
+  const bd = (b.data.date_published ?? b.data.date_written).getTime();
+  return bd - ad;
+});
 
-const filterGroups = [
+const filters = [
   {
     param: 'type',
     label: 'type',
@@ -24,9 +28,9 @@ const filterGroups = [
     label: 'stage',
     options: [
       { value: 'all', label: 'all' },
-      { value: 'dust', label: 'dust', stage: 'dust' as const },
-      { value: 'spark', label: 'spark', stage: 'spark' as const },
-      { value: 'star', label: 'star', stage: 'star' as const },
+      { value: 'dust', label: 'dust' },
+      { value: 'spark', label: 'spark' },
+      { value: 'star', label: 'star' },
     ],
   },
 ];
@@ -37,11 +41,13 @@ const filterGroups = [
       <h1 class="section-header">archives</h1>
       <p class="page-desc">essays, poems, thoughts</p>
     </div>
-    <FilterBar groups={filterGroups} />
+    <CollectionFilters filters={filters} />
     <div class="card-grid">
       {sorted.map(entry => (
         <div
           data-filter={JSON.stringify({ type: entry.data.type, stage: entry.data.growth_stage })}
+          data-date={(entry.data.date_published ?? entry.data.date_written).getTime()}
+          data-stage={entry.data.growth_stage}
         >
           <Card
             title={entry.data.title}

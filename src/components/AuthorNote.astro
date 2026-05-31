@@ -1,0 +1,35 @@
+---
+interface Props { note: string; }
+const { note } = Astro.props;
+---
+<aside class="author-note">
+  <span class="author-note-label">a note from gi</span>
+  <p class="author-note-text">{note}</p>
+</aside>
+
+<style>
+  .author-note {
+    border-left: 2px solid var(--color-accent);
+    padding: var(--space-md) var(--space-lg);
+    margin: var(--space-xl) 0;
+    background: var(--color-accent-light);
+    border-radius: 0 var(--radius-input) var(--radius-input) 0;
+    max-width: var(--width-content);
+  }
+  .author-note-label {
+    display: block;
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    color: var(--color-accent);
+    letter-spacing: 0.08em;
+    margin-bottom: var(--space-sm);
+  }
+  .author-note-text {
+    font-family: var(--font-body);
+    font-size: var(--text-md);
+    color: var(--color-muted);
+    line-height: var(--leading-base);
+    margin: 0;
+    font-style: italic;
+  }
+</style>

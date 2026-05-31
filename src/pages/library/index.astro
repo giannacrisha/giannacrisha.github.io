@@ -2,13 +2,13 @@
 // src/pages/library/index.astro
 import Garden from '../../layouts/Garden.astro';
 import Card from '../../components/Card.astro';
-import FilterBar from '../../components/FilterBar.astro';
+import CollectionFilters from '../../components/CollectionFilters.astro';
 import { getCollection } from 'astro:content';
 
 const entries = await getCollection('library');
 const sorted = entries.sort((a, b) => b.data.date_added.getTime() - a.data.date_added.getTime());
 
-const filterGroups = [
+const filters = [
   {
     param: 'type',
     label: 'type',
@@ -28,10 +28,13 @@ const filterGroups = [
       <h1 class="section-header">library</h1>
       <p class="page-desc">films, books, albums, shows</p>
     </div>
-    <FilterBar groups={filterGroups} />
+    <CollectionFilters filters={filters} showSort={false} />
     <div class="card-grid">
       {sorted.map(entry => (
-        <div data-filter={JSON.stringify({ type: entry.data.type })}>
+        <div
+          data-filter={JSON.stringify({ type: entry.data.type })}
+          data-date={entry.data.date_added.getTime()}
+        >
           <Card
             title={entry.data.title}
             slug={entry.slug}

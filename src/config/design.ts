@@ -100,7 +100,7 @@ export const mediaTypes = {
 
 export const site = {
   name:        "gi's digital garden",
-  description: 'a creatress who loves building, making, and designing',
+  description: 'gi is an designer, anthropologist, and creative technologist. she thinks majors and minors are outdated and learns whatever she finds interesting. after finding out about digital gardens, she started growing hers on may 2026.',
   url:         'https://giannacrisha.github.io',
   author:      'gi',
   rssTitle:    "gi's garden — archives",

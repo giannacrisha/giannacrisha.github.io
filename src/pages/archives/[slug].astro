@@ -3,6 +3,8 @@
 import Garden from '../../layouts/Garden.astro';
 import GrowthPill from '../../components/GrowthPill.astro';
 import Timestamps from '../../components/Timestamps.astro';
+import AuthorNote from '../../components/AuthorNote.astro';
+import Recommended from '../../components/Recommended.astro';
 import { getCollection } from 'astro:content';
 
 export async function getStaticPaths() {
@@ -12,37 +14,63 @@ export async function getStaticPaths() {
 
 const { entry } = Astro.props;
 const { Content } = await entry.render();
-const { title, type, date_written, date_published, growth_stage, tags } = entry.data;
+const { title, type, date_written, date_published, growth_stage, tags, note } = entry.data;
 const published = date_published ?? date_written;
 const isPoem = type === 'poem';
+
+const allEntries = await getCollection('archives');
+const related = allEntries
+  .filter(e => e.slug !== entry.slug && e.data.type === type)
+  .sort((a, b) => {
+    const dateA = a.data.date_published ?? a.data.date_written;
+    const dateB = b.data.date_published ?? b.data.date_written;
+    return new Date(dateB).getTime() - new Date(dateA).getTime();
+  })
+  .slice(0, 3);
 ---
 <Garden title={title}>
-  <div class="page-wrapper">
-    <article class="archive-article">
-      <nav class="breadcrumb" aria-label="Breadcrumb">
-        <a href="/archives">archives</a>
-        <span aria-hidden="true">/</span>
-      </nav>
-      <div class="entry-meta">
-        <span class="pill">{type}</span>
-        <GrowthPill stage={growth_stage} />
-      </div>
-      <h1 class="entry-title">{title}</h1>
-      <Timestamps
-        primaryLabel="written"
-        primaryDate={date_written}
-        secondaryLabel="planted"
-        secondaryDate={date_published}
-      />
-      {tags && tags.length > 0 && (
-        <div class="tags">
-          {tags.map(tag => <span class="pill">{tag}</span>)}
+  <div class="content-with-sidebar">
+
+    <div class="content-main">
+      <article class:list={['archive-article', { 'poem-page': isPoem }]}>
+
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          <a href="/garden">garden</a>
+          <span class="breadcrumb-sep" aria-hidden="true">/</span>
+          <a href="/archives">archives</a>
+          <span class="breadcrumb-sep" aria-hidden="true">/</span>
+        </nav>
+
+        <div class="entry-meta">
+          <span class="pill">{type}</span>
+          <GrowthPill stage={growth_stage} />
         </div>
-      )}
-      <div class:list={['prose', { 'prose-poem': isPoem }]}>
-        <Content />
-      </div>
-    </article>
+        <h1 class="entry-title">{title}</h1>
+        <Timestamps
+          primaryLabel="written"
+          primaryDate={date_written}
+          secondaryLabel="planted"
+          secondaryDate={published}
+        />
+        {tags && tags.length > 0 && (
+          <div class="tags">
+            {tags.map(tag => <span class="pill">{tag}</span>)}
+          </div>
+        )}
+
+        {note && <AuthorNote note={note} />}
+
+        <div class:list={['prose', { 'prose-poem': isPoem }]}>
+          <Content />
+        </div>
+
+      </article>
+    </div>
+
+    <div class="content-sidebar">
+      <Recommended entries={related} />
+    </div>
+
   </div>
 </Garden>
 
@@ -50,14 +78,16 @@ const isPoem = type === 'poem';
   .archive-article { padding: var(--space-section) 0; }
   .breadcrumb {
     display: flex;
+    align-items: center;
     gap: var(--space-sm);
     font-family: var(--font-body);
     font-size: var(--text-xs);
     color: var(--color-muted);
     margin-bottom: var(--space-xl);
   }
-  .breadcrumb a { color: var(--color-muted); }
+  .breadcrumb a { color: var(--color-muted); text-decoration: none; }
   .breadcrumb a:hover { color: var(--color-fg); }
+  .breadcrumb-sep { color: var(--color-accent-border); font-size: 10px; }
   .entry-meta { display: flex; gap: var(--space-sm); flex-wrap: wrap; margin-bottom: var(--space-lg); }
   .entry-title {
     font-family: var(--font-serif);
@@ -67,7 +97,5 @@ const isPoem = type === 'poem';
     margin-bottom: var(--space-lg);
   }
   .tags { display: flex; gap: var(--space-sm); flex-wrap: wrap; margin-top: var(--space-md); }
-  .prose {
-    margin-top: var(--space-xxl);
-  }
+  .prose { margin-top: var(--space-xxl); }
 </style>

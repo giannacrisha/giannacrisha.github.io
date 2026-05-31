@@ -28,6 +28,7 @@ const archives = defineCollection({
     date_written:   z.date(),
     date_published: z.date().optional(), // defaults to date_written if omitted
     tags:           z.array(z.string()).optional(),
+    note:           z.string().optional(),
     growth_stage:   stageEnum,
     featured:       z.boolean().default(false),
   }),

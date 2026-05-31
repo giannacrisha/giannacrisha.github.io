@@ -54,7 +54,7 @@ if (collection === 'lab'      && date_built)   primaryDate = date_built;
 if (collection === 'gallery'  && date_made)    primaryDate = date_made;
 if (collection === 'library'  && date_added)   primaryDate = date_added;
 
-const fmt = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+const fmt = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 const isGallery = collection === 'gallery';
 const isLibrary = collection === 'library';
 const hasImage = !!cover_image;

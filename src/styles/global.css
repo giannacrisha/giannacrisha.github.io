@@ -244,24 +244,58 @@ ul, ol {
 
 /* poem variant — used in archives for type=poem */
 .prose-poem {
-  text-align: left;
-  line-height: var(--leading-poem);
   font-family: var(--font-serif);
   font-style: italic;
   font-size: var(--text-xl);
-  white-space: pre-wrap;
+  line-height: var(--leading-poem);
+  text-align: left;
+  max-width: var(--width-content);
 }
 .prose-poem p {
-  margin-top: var(--space-xxl);
-}
-.prose-poem p:first-child {
   margin-top: 0;
+  margin-bottom: var(--space-lg);
+}
+.prose-poem p:last-child {
+  margin-bottom: 0;
+}
+
+/* tighter spacing on poem pages */
+.poem-page .entry-title {
+  margin-bottom: var(--space-lg);
+}
+.poem-page .page-meta {
+  margin-bottom: var(--space-xl);
+}
+
+/* sidebar layout for all entry pages */
+.content-with-sidebar {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-xxl);
+  max-width: var(--width-site);
+  margin: 0 auto;
+  padding: 0 var(--space-xl);
+}
+@media (min-width: 900px) {
+  .content-with-sidebar {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    align-items: start;
+    padding: 0 var(--space-xl);
+  }
+}
+.content-main {
+  min-width: 0;
+}
+.content-sidebar {
+  position: sticky;
+  top: calc(56px + var(--space-xl));
 }
 
 .card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: var(--space-xl);
+  padding-bottom: var(--space-section);
 }
 
 @media (max-width: 767px) {
