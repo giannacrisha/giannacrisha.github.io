@@ -7,7 +7,8 @@
     "start": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "sync": "node scripts/sync-content.mjs"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.0.0",
