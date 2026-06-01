@@ -1,0 +1,14 @@
+# This site is deployed via Vercel — GitHub Pages is not used.
+# This workflow replaces the default Jekyll build to prevent false failures.
+name: GitHub Pages (skip)
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  skip:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deployed via Vercel
+        run: echo "✓ Deployment is handled by Vercel. No GitHub Pages build needed."
