@@ -1,5 +1,14 @@
 /* src/styles/global.css */
 /* No emoji anywhere in this codebase. All visual indicators use SVG. */
+
+/* Pixel-art icons */
+img[src$="-icon.png"],
+img[src^="/icons/"],
+img[src^="/key"],
+img[src^="/keyhole"] {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;

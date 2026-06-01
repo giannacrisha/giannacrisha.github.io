@@ -3,6 +3,7 @@
 import Garden from '../layouts/Garden.astro';
 import Card from '../components/Card.astro';
 import TopicCloud from '../components/TopicCloud.astro';
+import GrowthPill from '../components/GrowthPill.astro';
 import { getCollection } from 'astro:content';
 import { site } from '../config/design';
 
@@ -49,31 +50,26 @@ const colIcons: Record<string, string> = {
   library:  '/icons/lib-icon.png',
 };
 
-const allEntries = [
-  ...lab.map(e => ({
-    ...e, collection: 'lab' as const,
-    date: e.data.date_published ?? e.data.date_built,
-    topics: e.data.topics ?? [],
-  })),
-  ...archives.map(e => ({
-    ...e, collection: 'archives' as const,
-    date: e.data.date_published ?? e.data.date_written,
-    topics: e.data.topics ?? [],
-  })),
-  ...gallery.map(e => ({
-    ...e, collection: 'gallery' as const,
-    date: e.data.date_published ?? e.data.date_made,
-    topics: e.data.topics ?? [],
-  })),
-  ...library.map(e => ({
-    ...e, collection: 'library' as const,
-    date: e.data.date_added,
-    topics: [],
-  })),
-].sort((a, b) => b.date.getTime() - a.date.getTime());
+const labSorted      = [...lab]     .sort((a,b)=>(b.data.date_published??b.data.date_built).getTime()-(a.data.date_published??a.data.date_built).getTime());
+const archivesSorted = [...archives].sort((a,b)=>(b.data.date_published??b.data.date_written).getTime()-(a.data.date_published??a.data.date_written).getTime());
+const gallerySorted  = [...gallery] .sort((a,b)=>(b.data.date_published??b.data.date_made).getTime()-(a.data.date_published??a.data.date_made).getTime());
+const librarySorted  = [...library] .sort((a,b)=>b.data.date_added.getTime()-a.data.date_added.getTime());
 
-// Derive all unique topics across entries, sorted alphabetically
-const allTopics = [...new Set(allEntries.flatMap(e => e.topics))].sort();
+// All unique topics (lab + archives + gallery)
+const allTopics = [...new Set([
+  ...lab.flatMap(e=>e.data.topics??[]),
+  ...archives.flatMap(e=>e.data.topics??[]),
+  ...gallery.flatMap(e=>e.data.topics??[]),
+])].sort();
+
+// Book spine color from title hash
+function bookColor(s: string) {
+  const p = ['#c9b99a','#b5c4b1','#b5a8c0','#c4b1b1','#a8bec4','#c4bdb5','#b1c4b5','#c4b5a8'];
+  let h = 0; for (const c of s) h = c.charCodeAt(0)+((h<<5)-h);
+  return p[Math.abs(h)%p.length];
+}
+
+const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
 ---
 
 <Garden title={site.name} description={site.description}>
@@ -134,109 +130,168 @@ const allTopics = [...new Set(allEntries.flatMap(e => e.topics))].sort();
         </p>
         <div class="garden-links">
           <a class="garden-link-btn" href="https://maggieappleton.com/garden-history" target="_blank" rel="noopener">what is a digital garden? ↗</a>
-          <button class="garden-link-btn" id="btn-story">the story of my digital garden</button>
+          <button class="garden-link-btn" id="btn-story">the story</button>
+          <button class="garden-link-btn" id="btn-design">the design</button>
         </div>
       </header>
 
       <!-- ── Modals ────────────────────────────────────────────────────── -->
       <div id="modal-backdrop" class="modal-backdrop" aria-hidden="true" role="dialog" aria-modal="true">
         <div class="modal" id="modal-box">
-          <button class="modal-close" id="modal-close" aria-label="Close">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            </svg>
-          </button>
+          <div class="modal-traffic">
+            <button class="traffic-dot traffic-red" id="modal-close" aria-label="Close">
+              <svg class="traffic-icon" width="8" height="8" viewBox="0 0 8 8" fill="none" aria-hidden="true">
+                <path d="M1.5 1.5l5 5M6.5 1.5l-5 5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+              </svg>
+            </button>
+            <div class="traffic-dot traffic-yellow" aria-hidden="true">
+              <svg class="traffic-icon" width="8" height="2" viewBox="0 0 8 2" fill="none" aria-hidden="true">
+                <path d="M1 1h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="traffic-dot traffic-green" aria-hidden="true">
+              <svg class="traffic-icon" width="8" height="8" viewBox="0 0 8 8" fill="none" aria-hidden="true">
+                <path d="M1 4h6M4 1v6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+              </svg>
+            </div>
+          </div>
           <div id="modal-body" class="modal-body"></div>
         </div>
       </div>
 
-      {allTopics.length > 0 && <TopicCloud topics={allTopics} />}
+      <!-- Minimized modal tabbar -->
+      <div class="modal-tabbar" id="modal-tabbar"></div>
 
-      <!-- Filter + sort chips -->
-      <div class="garden-controls" id="garden-controls">
-        <div class="chip-wrap">
-          <button class="control-chip" id="filters-btn" aria-expanded="false" aria-haspopup="true">
-            <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
-              <path d="M1 2.5h11M3 6.5h7M5 10.5h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-            </svg>
-            filters
-          </button>
-          <div class="dropdown" id="filters-dropdown" aria-hidden="true">
-            <div class="dropdown-section">
-              <span class="dropdown-label">growth stage</span>
-              <div class="dropdown-pills">
-                <button class="dpill active" data-filter-param="stage" data-filter-value="all">all</button>
-                <button class="dpill" data-filter-param="stage" data-filter-value="dust">dust</button>
-                <button class="dpill" data-filter-param="stage" data-filter-value="spark">spark</button>
-                <button class="dpill" data-filter-param="stage" data-filter-value="star">star</button>
-              </div>
-            </div>
-            <div class="dropdown-section">
-              <span class="dropdown-label">area</span>
-              <div class="dropdown-pills">
-                <button class="dpill active" data-filter-param="collection" data-filter-value="all">all</button>
-                <button class="dpill" data-filter-param="collection" data-filter-value="archives">archives</button>
-                <button class="dpill" data-filter-param="collection" data-filter-value="lab">lab</button>
-                <button class="dpill" data-filter-param="collection" data-filter-value="gallery">gallery</button>
-                <button class="dpill" data-filter-param="collection" data-filter-value="library">library</button>
+      <!-- ── Garden bar: topics + filters + sort ──────────────────────────── -->
+      <div class="garden-bar">
+        {allTopics.length > 0 && (
+          <div class="topic-pills" id="topic-cloud" role="group" aria-label="Filter by topic">
+            <button class="topic-pill active" data-topic="all">all</button>
+            {allTopics.map(t => <button class="topic-pill" data-topic={t}>{t}</button>)}
+          </div>
+        )}
+        <div class="bar-controls">
+          <div class="chip-wrap">
+            <button class="control-chip" id="filters-btn" aria-expanded="false" aria-haspopup="true">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+                <path d="M1 2.5h11M3 6.5h7M5 10.5h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+              </svg>
+              filters
+            </button>
+            <div class="dropdown" id="filters-dropdown" aria-hidden="true">
+              <div class="dropdown-section">
+                <span class="dropdown-label">growth stage</span>
+                <div class="dropdown-pills">
+                  <button class="dpill active" data-filter-param="stage" data-filter-value="all">all</button>
+                  <button class="dpill" data-filter-param="stage" data-filter-value="dust">dust</button>
+                  <button class="dpill" data-filter-param="stage" data-filter-value="spark">spark</button>
+                  <button class="dpill" data-filter-param="stage" data-filter-value="star">star</button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-
-        <div class="chip-wrap">
-          <button class="control-chip" id="sort-btn" aria-expanded="false" aria-haspopup="true">
-            <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
-              <path d="M1 2.5h5M1 6.5h8M1 10.5h11" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-            </svg>
-            sort
-          </button>
-          <div class="dropdown" id="sort-dropdown" aria-hidden="true">
-            <div class="dropdown-section">
-              <div class="dropdown-pills">
-                <button class="dpill active" data-sort-value="newest">most recent</button>
-                <button class="dpill" data-sort-value="oldest">oldest first</button>
-                <button class="dpill" data-sort-value="stage">by growth stage</button>
+          <div class="chip-wrap">
+            <button class="control-chip" id="sort-btn" aria-expanded="false" aria-haspopup="true">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+                <path d="M1 2.5h5M1 6.5h8M1 10.5h11" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+              </svg>
+              sort
+            </button>
+            <div class="dropdown" id="sort-dropdown" aria-hidden="true">
+              <div class="dropdown-section">
+                <div class="dropdown-pills">
+                  <button class="dpill active" data-sort-value="newest">most recent</button>
+                  <button class="dpill" data-sort-value="oldest">oldest first</button>
+                  <button class="dpill" data-sort-value="stage">by growth stage</button>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Masonry grid -->
-      <div class="masonry" id="garden-masonry">
-        {allEntries.map((entry, i) => {
-          const data = entry.data as any;
-          return (
-            <div
-              class="masonry-item"
-              data-filter={JSON.stringify({ collection: entry.collection, stage: data.growth_stage })}
-              data-topics={JSON.stringify(entry.topics)}
-              data-date={entry.date.getTime()}
-              data-stage={data.growth_stage ?? ''}
-              style={`--i: ${i}`}
-            >
-              <Card
-                title={data.title}
-                slug={entry.slug}
-                collection={entry.collection}
-                type={data.type}
-                stage={data.growth_stage}
-                date_published={data.date_published ?? data.date_added}
-                date_written={data.date_written}
-                date_built={data.date_built}
-                date_made={data.date_made}
-                date_added={data.date_added}
-                cover_image={data.cover_image ?? data.image}
-                rating={data.rating}
-                description={data.description}
-                body={entry.body}
-                creator={data.creator}
-                year={data.year}
-              />
-            </div>
-          );
-        })}
+      <!-- ── Shelf sections ─────────────────────────────────────────────── -->
+      <div id="garden-shelf">
+
+        <!-- Lab -->
+        <section class="shelf-section" id="section-lab" data-collection="lab">
+          <h2 class="shelf-label"><a href="/lab" class="shelf-label-link">lab</a></h2>
+          <div class="shelf-row">
+            {labSorted.map(entry => (
+              <div class="shelf-item" data-topics={JSON.stringify(entry.data.topics??[])} data-stage={entry.data.growth_stage??''} data-date={(entry.data.date_published??entry.data.date_built).getTime()}>
+                <Card title={entry.data.title} slug={entry.slug} collection="lab" type={entry.data.type} stage={entry.data.growth_stage} date_published={entry.data.date_published??entry.data.date_built} date_built={entry.data.date_built} cover_image={entry.data.cover_image} description={entry.data.description} body={entry.body} />
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <!-- Gallery -->
+        <section class="shelf-section" id="section-gallery" data-collection="gallery">
+          <h2 class="shelf-label"><a href="/gallery" class="shelf-label-link">gallery</a></h2>
+          <div class="shelf-row shelf-row--gallery">
+            {gallerySorted.map(entry => {
+              const d = entry.data;
+              const date = d.date_published ?? d.date_made;
+              return (
+                <div class="shelf-item" data-topics={JSON.stringify(d.topics??[])} data-stage={d.growth_stage??''} data-date={date.getTime()}>
+                  <a href={`/gallery/${entry.slug}`} class="frame-card">
+                    <div class="frame-img-wrap">
+                      {d.image
+                        ? <img class="frame-img" src={d.image} alt={d.title} loading="lazy" />
+                        : <div class="frame-empty">no image</div>
+                      }
+                      <div class="frame-overlay">
+                        <div class="frame-stage"><GrowthPill stage={d.growth_stage} forceColor="rgba(255,255,255,0.9)" /></div>
+                        <div class="frame-bottom">
+                          <div class="frame-title-row">
+                            <span class="frame-title">{d.title}</span>
+                            <span class="frame-year">{d.date_made.getFullYear()}</span>
+                          </div>
+                          {d.caption && <p class="frame-caption">{d.caption}</p>}
+                        </div>
+                      </div>
+                    </div>
+                  </a>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        <!-- Archives -->
+        <section class="shelf-section" id="section-archives" data-collection="archives">
+          <h2 class="shelf-label"><a href="/archives" class="shelf-label-link">archives</a></h2>
+          <div class="shelf-row">
+            {archivesSorted.map(entry => (
+              <div class="shelf-item" data-topics={JSON.stringify(entry.data.topics??[])} data-stage={entry.data.growth_stage??''} data-date={(entry.data.date_published??entry.data.date_written).getTime()}>
+                <Card title={entry.data.title} slug={entry.slug} collection="archives" type={entry.data.type} stage={entry.data.growth_stage} date_published={entry.data.date_published??entry.data.date_written} date_written={entry.data.date_written} description={entry.data.description} body={entry.body} />
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <!-- Library -->
+        <section class="shelf-section" id="section-library" data-collection="library">
+          <h2 class="shelf-label"><a href="/library" class="shelf-label-link">library</a></h2>
+          <div class="shelf-row shelf-row--library">
+            {librarySorted.map(entry => {
+              const d = entry.data;
+              return (
+                <div class="shelf-item" data-topics="[]" data-stage="" data-date={d.date_added.getTime()}>
+                  <a href={`/library/${entry.slug}`} class="book-card" style={`--book-color:${bookColor(d.title)}`}>
+                    {d.cover_image
+                      ? <img class="book-cover" src={d.cover_image} alt={d.title} loading="lazy" />
+                      : <div class="book-spine"></div>
+                    }
+                    <p class="book-title">{d.title}</p>
+                    <p class="book-author">{d.creator}</p>
+                  </a>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
       </div>
 
     </div>
@@ -481,6 +536,12 @@ const allTopics = [...new Set(allEntries.flatMap(e => e.topics))].sort();
     color: var(--color-fg);
     line-height: var(--leading-tight);
   }
+  :global(:root[data-theme="dark"]) .garden-title {
+    color: #ffffff;
+  }
+  :global(:root[data-theme="dark"]) .garden-def {
+    color: var(--color-fg); /* cream */
+  }
   .garden-phonetic {
     font-family: var(--font-body);
     font-size: var(--text-md);
@@ -555,22 +616,41 @@ const allTopics = [...new Set(allEntries.flatMap(e => e.topics))].sort();
   .modal-backdrop.open .modal {
     transform: translateY(0);
   }
-  .modal-close {
+  .modal-traffic {
     position: absolute;
     top: var(--space-lg);
-    right: var(--space-lg);
-    background: none;
-    border: none;
-    color: var(--color-muted);
-    cursor: pointer;
-    padding: 4px;
+    left: var(--space-lg);
+    display: flex;
+    align-items: center;
+    gap: 7px;
     z-index: 1;
-    transition: color 0.15s;
   }
-  .modal-close:hover { color: var(--color-fg); }
+  .traffic-dot {
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    border: none;
+    cursor: default;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    padding: 0;
+    transition: filter 0.15s;
+  }
+  .traffic-red    { background: #ff6059; cursor: pointer; }
+  .traffic-yellow { background: #ffbd2e; cursor: pointer; }
+  .traffic-green  { background: #28c841; }
+  .traffic-icon {
+    color: rgba(0,0,0,0.4);
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .modal-traffic:hover .traffic-icon { opacity: 1; }
+  .traffic-red:hover { filter: brightness(0.9); }
   .modal-body {
     overflow-y: auto;
-    padding: var(--space-xxl);
+    padding: calc(var(--space-xxl) + 8px) var(--space-xxl) var(--space-xxl);
   }
   .modal-body iframe {
     width: 100%;
@@ -578,6 +658,74 @@ const allTopics = [...new Set(allEntries.flatMap(e => e.topics))].sort();
     border: none;
     border-radius: var(--radius-card);
   }
+  /* ── Minimized modal tabbar ──────────────────────────────────────────── */
+  .modal-tabbar {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 801;
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    pointer-events: none;
+  }
+  :global(.modal-tab-item) {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 10px 9px 14px;
+    background: var(--color-card);
+    border: 0.5px solid var(--color-border);
+    border-bottom: none;
+    border-radius: 10px 10px 0 0;
+    box-shadow: 0 -2px 16px rgba(0,0,0,0.08);
+    cursor: pointer;
+    pointer-events: auto;
+    transform: translateY(100%);
+    transition: transform 0.28s cubic-bezier(0.4,0,0.2,1), box-shadow 0.18s;
+    min-width: 140px;
+    max-width: 200px;
+  }
+  :global(.modal-tab-item.tab-visible) {
+    transform: translateY(0);
+  }
+  :global(.modal-tab-item:hover) {
+    box-shadow: 0 -4px 22px rgba(0,0,0,0.13);
+  }
+  :global(.modal-tab-label) {
+    flex: 1;
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    color: var(--color-muted);
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left;
+  }
+  :global(.modal-tab-close) {
+    flex-shrink: 0;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #ff6059;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  :global(.modal-tab-item:hover .modal-tab-close) {
+    opacity: 1;
+  }
+  :global(.modal-tab-close svg) {
+    display: block;
+  }
+
   /* story modal prose — :global() because content is JS-injected */
   :global(.story-title) {
     font-family: var(--font-display);
@@ -630,11 +778,121 @@ const allTopics = [...new Set(allEntries.flatMap(e => e.topics))].sort();
     text-underline-offset: 3px;
   }
 
-  /* ── Filter chips (same style as CollectionFilters) ───────────────────── */
-  .garden-controls {
+  /* ── Design system modal ─────────────────────────────────────────────── */
+  :global(.design-body) { padding-top: var(--space-sm); display: flex; flex-direction: column; gap: var(--space-xxl); }
+  :global(.ds-section) { display: flex; flex-direction: column; gap: var(--space-md); }
+  :global(.ds-label) {
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+    padding-bottom: var(--space-sm);
+    border-bottom: 0.5px solid var(--color-border);
+  }
+  :global(.ds-swatches) { display: flex; flex-wrap: wrap; gap: var(--space-lg); }
+  :global(.ds-swatch) {
+    display: flex; flex-direction: column; gap: 4px; align-items: center;
+    font-family: var(--font-body); font-size: var(--text-xs); color: var(--color-muted);
+  }
+  :global(.ds-swatch-block) { width: 48px; height: 48px; border-radius: 8px; }
+  :global(.ds-swatch code) {
+    font-family: var(--font-body); font-size: 10px; color: var(--color-muted);
+    background: var(--color-accent-light); padding: 1px 5px; border-radius: 4px;
+  }
+  :global(.ds-type-row) {
+    display: flex; flex-direction: column; gap: 4px;
+    padding-bottom: var(--space-md); border-bottom: 0.5px solid var(--color-border);
+  }
+  :global(.ds-type-row code) { font-family: var(--font-body); font-size: var(--text-xs); color: var(--color-muted); }
+  :global(.ds-type-display) { font-family: var(--font-display); font-size: var(--text-xxl); color: var(--color-fg); }
+  :global(.ds-type-serif) { font-family: var(--font-serif); font-size: var(--text-lg); color: var(--color-fg); }
+  :global(.ds-type-body) { font-family: var(--font-body); font-size: var(--text-md); color: var(--color-fg); line-height: 1.7; }
+  :global(.ds-scale) {
+    display: flex; align-items: baseline; gap: var(--space-lg); flex-wrap: wrap;
+    font-family: var(--font-body); color: var(--color-muted);
+  }
+  :global(.ds-spacing-row) { display: flex; align-items: flex-end; gap: var(--space-xl); flex-wrap: wrap; }
+  :global(.ds-sp-item) { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  :global(.ds-sp-block) { background: var(--color-accent); border-radius: 2px; }
+  :global(.ds-sp-item code) { font-family: var(--font-body); font-size: 10px; color: var(--color-muted); white-space: nowrap; }
+  :global(.ds-components) { display: flex; flex-direction: column; gap: var(--space-xl); }
+  :global(.ds-comp-group) { display: flex; flex-direction: column; gap: var(--space-sm); }
+  :global(.ds-comp-name) { font-family: var(--font-body); font-size: var(--text-xs); color: var(--color-muted); letter-spacing: 0.08em; }
+  :global(.ds-comp-row) { display: flex; flex-wrap: wrap; gap: var(--space-sm); align-items: center; }
+
+  /* Component demos — replicate actual styles for JS-injected elements */
+  :global(.ds-comp-row .topic-pill) {
+    flex-shrink: 0;
+    padding: 4px 14px;
+    border-radius: var(--radius-pill);
+    border: 0.5px solid var(--color-accent-border);
+    background: var(--color-pill-bg);
+    color: var(--color-pill-text);
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    letter-spacing: 0.04em;
+    cursor: default;
+    white-space: nowrap;
+  }
+  :global(.ds-comp-row .topic-pill.active) {
+    background: var(--color-fg);
+    color: var(--color-bg);
+    border-color: var(--color-fg);
+  }
+  :global(:root[data-theme="dark"]) :global(.ds-comp-row .topic-pill.active) {
+    background: #ffffff;
+    color: #1a1a1a;
+    border-color: #ffffff;
+  }
+  :global(.ds-comp-row .garden-link-btn) {
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+    cursor: default;
+    text-decoration: underline;
+    text-decoration-color: var(--color-accent-border);
+    text-underline-offset: 3px;
+  }
+
+  /* ── Garden bar (topics + controls in one row) ───────────────────────── */
+  .garden-bar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xl);
+    margin-bottom: var(--space-xxl);
+    flex-wrap: wrap;
+  }
+  .topic-pills {
+    display: flex;
+    gap: var(--space-xs);
+    flex-wrap: wrap;
+    flex: 1;
+  }
+  .topic-pill {
+    flex-shrink: 0;
+    padding: 4px 14px;
+    border-radius: var(--radius-pill);
+    border: 0.5px solid var(--color-accent-border);
+    background: var(--color-pill-bg);
+    color: var(--color-pill-text);
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s, border-color 0.12s;
+    white-space: nowrap;
+  }
+  .topic-pill:hover:not(.active) { border-color: var(--color-accent); color: var(--color-fg); }
+  .topic-pill.active { background: var(--color-fg); color: var(--color-bg); border-color: var(--color-fg); }
+  :global(:root[data-theme="dark"]) .topic-pill.active { background: #ffffff; color: #1a1a1a; border-color: #ffffff; }
+  .bar-controls {
     display: flex;
     gap: var(--space-sm);
-    margin-bottom: var(--space-xxl);
+    flex-shrink: 0;
   }
   .chip-wrap { position: relative; }
   .control-chip {
@@ -700,36 +958,200 @@ const allTopics = [...new Set(allEntries.flatMap(e => e.topics))].sort();
   .dpill.active { background: var(--color-fg); color: #fff; border-color: var(--color-fg); }
   .dpill:hover:not(.active) { border-color: var(--color-accent); color: var(--color-fg); }
 
-  /* ── Masonry ──────────────────────────────────────────────────────────── */
-  .masonry {
-    columns: 3;
-    column-gap: var(--space-xl);
+  /* ── Shelf sections ───────────────────────────────────────────────────── */
+  #garden-shelf {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xxl);
     padding-bottom: var(--space-section);
   }
-  .masonry-item {
-    break-inside: avoid;
-    margin-bottom: var(--space-xl);
-    animation: cardIn 0.4s ease both;
-    animation-delay: calc(var(--i, 0) * 28ms);
+  .shelf-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    overflow: hidden;
   }
-  @keyframes cardIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to   { opacity: 1; transform: translateY(0); }
+  .shelf-label-link {
+    color: inherit;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
   }
-  .masonry-item.item-hiding {
-    transition: opacity 0.15s ease, transform 0.15s ease;
+  .shelf-label-link::after {
+    content: '→';
+    font-size: 1em;
+    transition: transform 0.15s;
+  }
+  .shelf-label-link:hover::after {
+    transform: translateX(3px);
+  }
+  .shelf-label {
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+  .shelf-row {
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    overflow-y: visible;
+    scrollbar-width: none;
+    padding-bottom: var(--space-lg);
+    padding-top: var(--space-xs);
+  }
+  .shelf-row::-webkit-scrollbar { display: none; }
+  .shelf-item {
+    flex-shrink: 0;
+    width: 200px;
+    max-width: 200px;
+    overflow: hidden;
+    margin-right: var(--space-lg);
+    transition: opacity 0.2s ease, max-width 0.28s ease 0.08s, margin-right 0.28s ease 0.08s;
+  }
+  .shelf-item.item-hiding {
     opacity: 0;
-    transform: scale(0.97);
+    max-width: 0 !important;
+    margin-right: 0 !important;
+    pointer-events: none;
   }
-  .masonry-item.item-in {
-    animation: cardIn 0.3s ease both;
+  .shelf-row--gallery .shelf-item,
+  .shelf-row--library .shelf-item { width: auto; max-width: 2000px; }
+
+  /* ── Frame card (gallery) ─────────────────────────────────────────────── */
+  .frame-card {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+  }
+  .frame-img-wrap {
+    position: relative;
+    display: inline-block;
+    border-radius: 8px;
+    overflow: hidden;
+    max-height: 240px;
+    box-shadow: inset 0 -60px 40px -10px rgba(0,0,0,0.5);
+  }
+  .frame-img {
+    display: block;
+    max-height: 240px;
+    width: auto;
+    transition: transform 0.25s;
+  }
+  .frame-card:hover .frame-img { transform: scale(1.03); }
+  .frame-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: var(--space-sm) var(--space-md);
+    background: linear-gradient(to bottom, rgba(0,0,0,0.18) 0%, transparent 35%, transparent 55%, rgba(0,0,0,0.55) 100%);
+    border-radius: 8px;
+  }
+  .frame-stage {
+    align-self: flex-end;
+    background: rgba(0,0,0,0.3);
+    padding: 2px 8px;
+    border-radius: 20px;
+  }
+  .frame-bottom {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .frame-title-row {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-sm);
+  }
+  .frame-title {
+    font-family: var(--font-serif);
+    font-size: var(--text-md);
+    font-weight: 700;
+    color: #fff;
+    line-height: var(--leading-tight);
+  }
+  .frame-year {
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    color: rgba(255,255,255,0.75);
+    white-space: nowrap;
+  }
+  .frame-caption {
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    color: rgba(255,255,255,0.8);
+    margin: 0;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .frame-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 180px;
+    height: 220px;
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    color: var(--color-muted);
+    background: var(--color-card);
+    border-radius: 8px;
   }
 
-  @media (max-width: 900px) { .masonry { columns: 2; } }
+  /* ── Book card (library) ──────────────────────────────────────────────── */
+  .book-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    text-decoration: none;
+    width: 200px;
+    transition: transform 0.2s;
+  }
+  .book-card:hover { transform: translateY(-4px); }
+  .book-cover {
+    width: 200px;
+    height: 300px;
+    object-fit: cover;
+    border-radius: 3px 6px 6px 3px;
+    display: block;
+  }
+  .book-spine {
+    width: 200px;
+    height: 300px;
+    background: var(--book-color, #c9b99a);
+    border-radius: 3px 6px 6px 3px;
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 20px 14px;
+    overflow: hidden;
+  }
+  .book-title {
+    font-family: var(--font-serif);
+    font-size: var(--text-md);
+    font-weight: 700;
+    color: var(--color-fg);
+    line-height: var(--leading-tight);
+    margin: 0;
+  }
+  .book-author {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+    margin: 0;
+  }
+
   @media (max-width: 600px) {
-    .masonry { columns: 1; }
     .garden-title { font-size: var(--text-section); }
-    .garden-desc  { font-size: var(--text-md); }
+    .shelf-item { width: 160px; }
+    .frame-img { max-height: 220px; }
   }
 </style>
 
@@ -1024,8 +1446,15 @@ const allTopics = [...new Set(allEntries.flatMap(e => e.topics))].sort();
 
     // ── Modal ──────────────────────────────────────────────────────────────
     (function () {
-      var backdrop = document.getElementById('modal-backdrop');
-      var body     = document.getElementById('modal-body');
+      var backdrop  = document.getElementById('modal-backdrop');
+      var body      = document.getElementById('modal-body');
+      var tabbar    = document.getElementById('modal-tabbar');
+
+      // tabs map: id → { content, title, el }
+      var tabs = {};
+      var currentId = '';
+      var currentContent = '';
+      var currentTitle   = '';
 
       var storyHTML = `
         <h2 class="story-title">the story of my digital garden</h2>
@@ -1053,22 +1482,204 @@ const allTopics = [...new Set(allEntries.flatMap(e => e.topics))].sort();
           knowledge webs and second brains out there, but this is me being okay with the wet paint.</p>
         </div>`;
 
-      function openModal(content) {
+      function openModal(content, title, id) {
+        currentContent = content;
+        currentTitle   = title || 'modal';
+        currentId      = id   || title || 'modal';
         body.innerHTML = content;
         backdrop.removeAttribute('aria-hidden');
         backdrop.classList.add('open');
         document.body.style.overflow = 'hidden';
+        // remove this tab from bar if it was minimized
+        removeTab(currentId);
       }
 
       function closeModal() {
         backdrop.classList.remove('open');
         backdrop.setAttribute('aria-hidden', 'true');
         document.body.style.overflow = '';
-        setTimeout(function () { body.innerHTML = ''; }, 300);
+        setTimeout(function () { body.innerHTML = ''; currentContent = ''; currentTitle = ''; currentId = ''; }, 300);
       }
 
+      function minimizeModal() {
+        if (!currentContent) return;
+        backdrop.classList.remove('open');
+        backdrop.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+        addTab(currentId, currentTitle, currentContent);
+        currentContent = ''; currentTitle = ''; currentId = '';
+      }
+
+      function addTab(id, title, content) {
+        if (tabs[id]) return; // already there
+        var el = document.createElement('div');
+        el.className = 'modal-tab-item';
+        el.dataset.tabId = id;
+        el.innerHTML =
+          '<span class="modal-tab-label">' + title + '</span>' +
+          '<button class="modal-tab-close" aria-label="Close ' + title + '">' +
+            '<svg width="6" height="6" viewBox="0 0 6 6" fill="none">' +
+              '<path d="M0.5 0.5l5 5M5.5 0.5l-5 5" stroke="rgba(0,0,0,0.5)" stroke-width="1.1" stroke-linecap="round"/>' +
+            '</svg>' +
+          '</button>';
+        tabs[id] = { content: content, title: title, el: el };
+        tabbar.appendChild(el);
+        // animate in
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () { el.classList.add('tab-visible'); });
+        });
+
+        // click label area → restore
+        el.querySelector('.modal-tab-label').addEventListener('click', function () {
+          var t = tabs[id];
+          if (t) { removeTab(id); openModal(t.content, t.title, id); }
+        });
+        // click close → discard
+        el.querySelector('.modal-tab-close').addEventListener('click', function (e) {
+          e.stopPropagation();
+          removeTab(id);
+        });
+      }
+
+      function removeTab(id) {
+        var t = tabs[id];
+        if (!t) return;
+        t.el.classList.remove('tab-visible');
+        setTimeout(function () { t.el.remove(); }, 300);
+        delete tabs[id];
+      }
+
+      // Yellow dot → minimize
+      document.querySelector('.traffic-yellow')?.addEventListener('click', function () {
+        if (!backdrop.classList.contains('open')) return;
+        minimizeModal();
+      });
+
+      var designHTML = `
+        <h2 class="story-title">the design</h2>
+        <div class="design-body">
+
+          <section class="ds-section">
+            <h3 class="ds-label">color — light</h3>
+            <div class="ds-swatches">
+              <div class="ds-swatch"><div class="ds-swatch-block" style="background:#faf7f2;border:1px solid #e0d8cc"></div><span>bg</span><code>#faf7f2</code></div>
+              <div class="ds-swatch"><div class="ds-swatch-block" style="background:#3d2f1f"></div><span>fg</span><code>#3d2f1f</code></div>
+              <div class="ds-swatch"><div class="ds-swatch-block" style="background:#ffffff;border:1px solid #e0d8cc"></div><span>card</span><code>#ffffff</code></div>
+              <div class="ds-swatch"><div class="ds-swatch-block" style="background:#6B5234"></div><span>muted</span><code>#6B5234</code></div>
+              <div class="ds-swatch"><div class="ds-swatch-block" style="background:#9C8B6E"></div><span>accent</span><code>#9C8B6E</code></div>
+              <div class="ds-swatch"><div class="ds-swatch-block" style="background:#EDE5D8"></div><span>accent-light</span><code>#EDE5D8</code></div>
+              <div class="ds-swatch"><div class="ds-swatch-block" style="background:#E8DCC8"></div><span>border</span><code>#E8DCC8</code></div>
+            </div>
+          </section>
+
+          <section class="ds-section">
+            <h3 class="ds-label">color — dark</h3>
+            <div class="ds-swatches">
+              <div class="ds-swatch"><div class="ds-swatch-block" style="background:#1a1a1a"></div><span>bg</span><code>#1a1a1a</code></div>
+              <div class="ds-swatch"><div class="ds-swatch-block" style="background:#e8e0d0"></div><span>fg</span><code>#e8e0d0</code></div>
+              <div class="ds-swatch"><div class="ds-swatch-block" style="background:#242424"></div><span>card</span><code>#242424</code></div>
+              <div class="ds-swatch"><div class="ds-swatch-block" style="background:#9a8f7e"></div><span>muted</span><code>#9a8f7e</code></div>
+              <div class="ds-swatch"><div class="ds-swatch-block" style="background:#b5a07a"></div><span>accent</span><code>#b5a07a</code></div>
+              <div class="ds-swatch"><div class="ds-swatch-block" style="background:#2a2820"></div><span>accent-light</span><code>#2a2820</code></div>
+              <div class="ds-swatch"><div class="ds-swatch-block" style="background:#333333"></div><span>border</span><code>#333333</code></div>
+            </div>
+          </section>
+
+          <section class="ds-section">
+            <h3 class="ds-label">live palette (current theme)</h3>
+            <div class="ds-swatches" id="ds-live-swatches">
+              <div class="ds-swatch"><div class="ds-swatch-block ds-live" data-var="--color-bg" style="border:1px solid var(--color-border)"></div><span>bg</span></div>
+              <div class="ds-swatch"><div class="ds-swatch-block ds-live" data-var="--color-fg"></div><span>fg</span></div>
+              <div class="ds-swatch"><div class="ds-swatch-block ds-live" data-var="--color-card" style="border:1px solid var(--color-border)"></div><span>card</span></div>
+              <div class="ds-swatch"><div class="ds-swatch-block ds-live" data-var="--color-muted"></div><span>muted</span></div>
+              <div class="ds-swatch"><div class="ds-swatch-block ds-live" data-var="--color-accent"></div><span>accent</span></div>
+              <div class="ds-swatch"><div class="ds-swatch-block ds-live" data-var="--color-accent-light"></div><span>accent-light</span></div>
+              <div class="ds-swatch"><div class="ds-swatch-block ds-live" data-var="--color-border"></div><span>border</span></div>
+            </div>
+          </section>
+
+          <section class="ds-section">
+            <h3 class="ds-label">typography</h3>
+            <div class="ds-type-row"><span class="ds-type-display">gi's garden</span><code>display · Jacquard 12</code></div>
+            <div class="ds-type-row"><span class="ds-type-serif">The quick brown fox tends the garden.</span><code>serif · Lora</code></div>
+            <div class="ds-type-row"><span class="ds-type-body">Body text at its intended size, showing rhythm and readability across all contexts.</span><code>body · Atkinson Hyperlegible Next</code></div>
+            <div class="ds-scale">
+              <span style="font-size:11px">xs 11</span>
+              <span style="font-size:12px">sm 12</span>
+              <span style="font-size:14px">base 14</span>
+              <span style="font-size:16px">md 16</span>
+              <span style="font-size:18px">lg 18</span>
+              <span style="font-size:24px">xl 24</span>
+              <span style="font-size:36px">xxl 36</span>
+            </div>
+          </section>
+
+          <section class="ds-section">
+            <h3 class="ds-label">spacing</h3>
+            <div class="ds-spacing-row">
+              <div class="ds-sp-item"><div class="ds-sp-block" style="width:4px;height:4px"></div><code>xs 4px</code></div>
+              <div class="ds-sp-item"><div class="ds-sp-block" style="width:8px;height:8px"></div><code>sm 8px</code></div>
+              <div class="ds-sp-item"><div class="ds-sp-block" style="width:12px;height:12px"></div><code>md 12px</code></div>
+              <div class="ds-sp-item"><div class="ds-sp-block" style="width:16px;height:16px"></div><code>lg 16px</code></div>
+              <div class="ds-sp-item"><div class="ds-sp-block" style="width:24px;height:24px"></div><code>xl 24px</code></div>
+              <div class="ds-sp-item"><div class="ds-sp-block" style="width:40px;height:40px"></div><code>xxl 40px</code></div>
+              <div class="ds-sp-item"><div class="ds-sp-block" style="width:64px;height:64px"></div><code>section 64px</code></div>
+            </div>
+          </section>
+
+          <section class="ds-section">
+            <h3 class="ds-label">components</h3>
+            <div class="ds-components">
+              <div class="ds-comp-group">
+                <span class="ds-comp-name">topic pills</span>
+                <div class="ds-comp-row">
+                  <button class="topic-pill active" style="pointer-events:none">all</button>
+                  <button class="topic-pill" style="pointer-events:none">art</button>
+                  <button class="topic-pill" style="pointer-events:none">tech</button>
+                </div>
+              </div>
+              <div class="ds-comp-group">
+                <span class="ds-comp-name">growth stages</span>
+                <div class="ds-comp-row" style="gap:16px">
+                  <span class="growth-pill" style="color:#9C8B6E">● dust</span>
+                  <span class="growth-pill" style="color:#C4B49A">✦ spark</span>
+                  <span class="growth-pill" style="color:#5C4D3A">★ star</span>
+                </div>
+              </div>
+              <div class="ds-comp-group">
+                <span class="ds-comp-name">link buttons</span>
+                <div class="ds-comp-row">
+                  <button class="garden-link-btn" style="pointer-events:none">the story</button>
+                  <button class="garden-link-btn" style="pointer-events:none">the design ↗</button>
+                </div>
+              </div>
+              <div class="ds-comp-group">
+                <span class="ds-comp-name">border radius</span>
+                <div class="ds-comp-row">
+                  <div style="width:48px;height:48px;background:var(--color-accent-light);border-radius:8px;border:1px solid var(--color-border)"></div>
+                  <div style="width:48px;height:48px;background:var(--color-accent-light);border-radius:12px;border:1px solid var(--color-border)"></div>
+                  <div style="width:48px;height:48px;background:var(--color-accent-light);border-radius:20px;border:1px solid var(--color-border)"></div>
+                  <div style="width:48px;height:48px;background:var(--color-accent-light);border-radius:999px;border:1px solid var(--color-border)"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </div>`;
+
       document.getElementById('btn-story')?.addEventListener('click', function () {
-        openModal(storyHTML);
+        openModal(storyHTML, 'the story', 'story');
+      });
+
+      document.getElementById('btn-design')?.addEventListener('click', function () {
+        openModal(designHTML, 'the design', 'design');
+        // Apply live CSS var values to live swatch blocks
+        setTimeout(function () {
+          document.querySelectorAll('.ds-live').forEach(function (el) {
+            var v = el.getAttribute('data-var');
+            if (v) el.style.background = 'var(' + v + ')';
+          });
+        }, 50);
       });
 
       document.getElementById('modal-close')?.addEventListener('click', closeModal);
@@ -1090,76 +1701,120 @@ const allTopics = [...new Set(allEntries.flatMap(e => e.topics))].sort();
   })();
 
   // ── State ────────────────────────────────────────────────────────────────
-  var activeFilters = { stage: 'all', collection: 'all' };
-  var activeTopic   = 'all';
-  var activeSort    = 'newest';
-  var stageOrder    = { dust: 1, spark: 2, star: 3 };
+  var activeStage  = 'all';
+  var activeTopics = new Set(); // empty = show all
+  var activeSort   = 'newest';
+  var stageOrder   = { dust: 1, spark: 2, star: 3 };
+  var sectionTimers = new Map();
 
-  // ── Apply all (filter + topic + sort) ───────────────────────────────────
+  // ── Animated section show/hide (fade then height collapse) ───────────────
+  function setSection(section, visible) {
+    clearTimeout(sectionTimers.get(section));
+    if (visible) {
+      var startH = section.scrollHeight || 0;
+      section.style.transition = 'none';
+      section.style.height     = startH === 0 ? '0px' : section.style.height || '';
+      section.style.opacity    = section.style.opacity || '0';
+      section.style.overflow   = 'hidden';
+      section.style.display    = '';
+      // measure natural height
+      var targetH = section.scrollHeight;
+      requestAnimationFrame(function () {
+        section.style.transition = 'opacity 0.22s ease, height 0.32s ease';
+        section.style.opacity    = '1';
+        section.style.height     = targetH + 'px';
+        var t = setTimeout(function () {
+          section.style.height     = '';
+          section.style.overflow   = '';
+          section.style.transition = '';
+        }, 340);
+        sectionTimers.set(section, t);
+      });
+    } else {
+      var h = section.scrollHeight;
+      section.style.transition = 'none';
+      section.style.height     = h + 'px';
+      section.style.overflow   = 'hidden';
+      requestAnimationFrame(function () {
+        section.style.transition = 'opacity 0.2s ease, height 0.32s ease 0.16s';
+        section.style.opacity    = '0';
+        section.style.height     = '0px';
+        var t = setTimeout(function () {
+          section.style.display    = 'none';
+          section.style.height     = '';
+          section.style.overflow   = '';
+          section.style.transition = '';
+        }, 520);
+        sectionTimers.set(section, t);
+      });
+    }
+  }
+
+  // ── Apply filters + sort to every shelf row ───────────────────────────────
   function applyAll() {
-    var items = Array.from(document.querySelectorAll('.masonry-item'));
+    document.querySelectorAll('.shelf-section').forEach(function (section) {
+      var row   = section.querySelector('.shelf-row');
+      if (!row) return;
+      var items = Array.from(row.querySelectorAll('.shelf-item'));
 
-    items.forEach(function (item, idx) {
-      var f      = JSON.parse(item.dataset.filter || '{}');
-      var topics = JSON.parse(item.dataset.topics || '[]');
+      // Sort within the row
+      items.sort(function (a, b) {
+        var ad = Number(a.dataset.date), bd = Number(b.dataset.date);
+        var as_ = stageOrder[a.dataset.stage] || 0;
+        var bs_ = stageOrder[b.dataset.stage] || 0;
+        if (activeSort === 'newest') return bd - ad;
+        if (activeSort === 'oldest') return ad - bd;
+        if (activeSort === 'stage')  return bs_ - as_;
+        return 0;
+      });
+      items.forEach(function (i) { row.appendChild(i); });
 
-      var topicOk = activeTopic === 'all' || topics.indexOf(activeTopic) !== -1;
-      var stageOk = activeFilters.stage === 'all' || f.stage === activeFilters.stage;
-      var colOk   = activeFilters.collection === 'all' || f.collection === activeFilters.collection;
-      var visible = topicOk && stageOk && colOk;
+      // Filter each item
+      var anyVisible = false;
+      items.forEach(function (item) {
+        var topics  = JSON.parse(item.dataset.topics || '[]');
+        var topicOk = activeTopics.size === 0 ||
+          topics.some(function (t) { return activeTopics.has(t); });
+        var stageOk = activeStage === 'all' || item.dataset.stage === activeStage;
+        var visible = topicOk && stageOk;
+        item.classList.toggle('item-hiding', !visible);
+        if (visible) anyVisible = true;
+      });
 
-      if (visible) {
-        item.style.display = '';
-        item.classList.remove('item-hiding');
-        item.classList.remove('item-in');
-        void item.offsetWidth;
-        item.style.animationDelay = idx * 28 + 'ms';
-        item.classList.add('item-in');
-      } else {
-        item.classList.add('item-hiding');
-        item.addEventListener('transitionend', function handler() {
-          if (item.classList.contains('item-hiding')) {
-            item.style.display = 'none';
-            item.classList.remove('item-hiding');
-          }
-          item.removeEventListener('transitionend', handler);
-        });
-      }
+      setSection(section, anyVisible);
     });
   }
 
-  function applySort() {
-    var container = document.getElementById('garden-masonry');
-    if (!container) return;
-    var items = Array.from(container.querySelectorAll('.masonry-item'));
-    items.sort(function (a, b) {
-      var ad  = Number(a.dataset.date), bd = Number(b.dataset.date);
-      var as_ = stageOrder[a.dataset.stage] || 0;
-      var bs_ = stageOrder[b.dataset.stage] || 0;
-      if (activeSort === 'newest') return bd - ad;
-      if (activeSort === 'oldest') return ad - bd;
-      if (activeSort === 'stage')  return bs_ - as_;
-      return 0;
-    });
-    items.forEach(function (i) { container.appendChild(i); });
-    applyAll();
-  }
-
-  // ── Topic cloud ──────────────────────────────────────────────────────────
+  // ── Topic pills (multi-select) ────────────────────────────────────────────
   document.querySelectorAll('#topic-cloud .topic-pill').forEach(function (pill) {
     pill.addEventListener('click', function () {
-      activeTopic = pill.dataset.topic;
+      var topic = pill.dataset.topic;
+      if (topic === 'all') {
+        activeTopics.clear();
+      } else {
+        if (activeTopics.has(topic)) {
+          activeTopics.delete(topic);
+        } else {
+          activeTopics.add(topic);
+        }
+      }
+      // Sync pill active states
       document.querySelectorAll('#topic-cloud .topic-pill').forEach(function (p) {
-        p.classList.toggle('active', p === pill);
+        var t = p.dataset.topic;
+        if (t === 'all') {
+          p.classList.toggle('active', activeTopics.size === 0);
+        } else {
+          p.classList.toggle('active', activeTopics.has(t));
+        }
       });
       applyAll();
     });
   });
 
-  // ── Filter chips ─────────────────────────────────────────────────────────
+  // ── Filter + sort pills ───────────────────────────────────────────────────
   document.querySelectorAll('.dpill[data-filter-param]').forEach(function (pill) {
     pill.addEventListener('click', function () {
-      activeFilters[pill.dataset.filterParam] = pill.dataset.filterValue;
+      activeStage = pill.dataset.filterValue;
       pill.closest('.dropdown-pills').querySelectorAll('.dpill')
         .forEach(function (p) { p.classList.toggle('active', p === pill); });
       applyAll();
@@ -1171,7 +1826,7 @@ const allTopics = [...new Set(allEntries.flatMap(e => e.topics))].sort();
       activeSort = pill.dataset.sortValue;
       pill.closest('.dropdown-pills').querySelectorAll('.dpill')
         .forEach(function (p) { p.classList.toggle('active', p === pill); });
-      applySort();
+      applyAll();
     });
   });
 

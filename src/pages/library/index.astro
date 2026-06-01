@@ -1,26 +1,10 @@
 ---
 // src/pages/library/index.astro
 import Garden from '../../layouts/Garden.astro';
-import Card from '../../components/Card.astro';
-import CollectionFilters from '../../components/CollectionFilters.astro';
 import { getCollection } from 'astro:content';
 
 const entries = await getCollection('library');
 const sorted = entries.sort((a, b) => b.data.date_added.getTime() - a.data.date_added.getTime());
-
-const filters = [
-  {
-    param: 'type',
-    label: 'type',
-    options: [
-      { value: 'all', label: 'all' },
-      { value: 'film', label: 'film' },
-      { value: 'book', label: 'book' },
-      { value: 'album', label: 'album' },
-      { value: 'show', label: 'show' },
-    ],
-  },
-];
 ---
 <Garden title="library">
   <div class="page-wrapper">
@@ -28,28 +12,26 @@ const filters = [
       <h1 class="section-header">library</h1>
       <p class="page-desc">films, books, albums, shows</p>
     </div>
-    <CollectionFilters filters={filters} showSort={false} />
-    <div class="card-grid">
-      {sorted.map(entry => (
-        <div
-          data-filter={JSON.stringify({ type: entry.data.type })}
-          data-date={entry.data.date_added.getTime()}
-        >
-          <Card
-            title={entry.data.title}
-            slug={entry.slug}
-            collection="library"
-            type={entry.data.type}
-            date_published={entry.data.date_added}
-            date_added={entry.data.date_added}
-            cover_image={entry.data.cover_image}
-            rating={entry.data.rating}
-            creator={entry.data.creator}
-            year={entry.data.year}
-            body={entry.body}
-          />
-        </div>
-      ))}
+    <div class="book-grid">
+      {sorted.map(entry => {
+        const d = entry.data;
+        const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(d.title + ' ' + d.creator)}`;
+        return (
+          <div class="book-card">
+            <a href={`/library/${entry.slug}`} class="book-cover-wrap">
+              {d.cover_image
+                ? <img class="book-cover" src={d.cover_image} alt={d.title} loading="lazy" />
+                : <div class="book-cover book-cover--placeholder" />
+              }
+              <a href={googleUrl} target="_blank" rel="noopener noreferrer" class="google-overlay">
+                View on Google <span aria-hidden="true">↗</span>
+              </a>
+            </a>
+            <p class="book-title">{d.title}</p>
+            <p class="book-author">{d.creator}</p>
+          </div>
+        );
+      })}
     </div>
   </div>
 </Garden>
@@ -57,4 +39,74 @@ const filters = [
 <style>
   .page-header { padding: var(--space-section) 0 var(--space-xxl); }
   .page-desc { font-family: var(--font-body); font-size: var(--text-md); color: var(--color-muted); margin-top: var(--space-sm); }
+
+  .book-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: var(--space-xxl) var(--space-xl);
+    padding-bottom: var(--space-section);
+  }
+
+  .book-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .book-cover-wrap {
+    position: relative;
+    display: block;
+    border-radius: 4px 8px 8px 4px;
+    overflow: hidden;
+  }
+
+  .book-cover {
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
+    display: block;
+    border-radius: 4px 8px 8px 4px;
+  }
+
+  .book-cover--placeholder {
+    background: var(--color-surface);
+    aspect-ratio: 2 / 3;
+  }
+
+  .google-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.45);
+    color: #fff;
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    text-decoration: none;
+    opacity: 0;
+    transition: opacity 0.18s;
+    border-radius: 4px 8px 8px 4px;
+  }
+
+  .book-cover-wrap:hover .google-overlay {
+    opacity: 1;
+  }
+
+  .book-title {
+    font-family: var(--font-serif);
+    font-size: var(--text-md);
+    font-weight: 700;
+    color: var(--color-fg);
+    margin: 0;
+    line-height: var(--leading-tight);
+  }
+
+  .book-author {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+    margin: 0;
+  }
 </style>

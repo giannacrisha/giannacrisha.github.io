@@ -52,8 +52,17 @@ const sublinks = [
     </button>
   </div>
 
-  <!-- mobile menu -->
-  <div class="nav-mobile-menu" id="nav-mobile-menu" aria-hidden="true">
+  <!-- mobile backdrop -->
+  <div class="nav-mobile-backdrop" id="nav-backdrop" aria-hidden="true"></div>
+
+  <!-- mobile drawer -->
+  <div class="nav-mobile-menu" id="nav-mobile-menu" aria-hidden="true" role="dialog" aria-label="Navigation menu">
+    <button class="mobile-close" id="nav-close" aria-label="close menu">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <line x1="4" y1="4" x2="16" y2="16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="16" y1="4" x2="4"  y2="16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </button>
     <a href="/" class="mobile-link">the garden</a>
     {sublinks.map(l => (
       <a href={l.href} class="mobile-link mobile-link--sub">{l.label}</a>
@@ -159,6 +168,7 @@ const sublinks = [
     flex-shrink: 0;
     opacity: 0.7;
     transition: opacity 0.12s;
+    image-rendering: pixelated;
   }
   .dropdown-link:hover .dropdown-link-icon,
   .dropdown-link.active .dropdown-link-icon {
@@ -194,24 +204,59 @@ const sublinks = [
     padding: 4px;
   }
 
-  /* mobile menu */
+  /* mobile drawer */
   .nav-mobile-menu {
-    display: none;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(80vw, 300px);
+    background: #f5f0e8;
+    display: flex;
     flex-direction: column;
-    background: #ffffff;
-    border-top: var(--border);
+    padding: var(--space-xxl) var(--space-xl);
+    gap: var(--space-sm);
+    z-index: 200;
+    transform: translateX(100%);
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: -8px 0 32px rgba(0,0,0,0.08);
   }
-  .nav-mobile-menu.open { display: flex; }
+  .nav-mobile-menu.open {
+    transform: translateX(0);
+  }
+  .nav-mobile-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.25);
+    z-index: 199;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .nav-mobile-backdrop.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .mobile-close {
+    align-self: flex-end;
+    background: none;
+    border: none;
+    color: var(--color-fg);
+    cursor: pointer;
+    padding: 4px;
+    margin-bottom: var(--space-lg);
+  }
   .mobile-link {
-    padding: 12px var(--space-xl);
+    padding: var(--space-sm) 0;
     font-family: var(--font-body);
     font-size: var(--text-md);
     color: var(--color-fg);
     text-decoration: none;
-    border-bottom: var(--border);
+    border-bottom: 1px solid rgba(0,0,0,0.08);
   }
+  .mobile-link:last-child { border-bottom: none; }
   .mobile-link--sub {
-    padding-left: calc(var(--space-xl) + var(--space-lg));
+    padding-left: var(--space-lg);
     font-size: var(--text-sm);
     color: var(--color-muted);
   }
@@ -223,11 +268,33 @@ const sublinks = [
 </style>
 
 <script>
-  const btn  = document.getElementById('hamburger');
-  const menu = document.getElementById('nav-mobile-menu');
-  btn?.addEventListener('click', () => {
-    const open = menu?.classList.toggle('open');
-    btn.setAttribute('aria-expanded', String(open));
-    menu?.setAttribute('aria-hidden', String(!open));
+  const btn      = document.getElementById('hamburger');
+  const menu     = document.getElementById('nav-mobile-menu');
+  const backdrop = document.getElementById('nav-backdrop');
+  const closeBtn = document.getElementById('nav-close');
+
+  function openMenu() {
+    menu?.classList.add('open');
+    backdrop?.classList.add('open');
+    btn?.setAttribute('aria-expanded', 'true');
+    menu?.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeMenu() {
+    menu?.classList.remove('open');
+    backdrop?.classList.remove('open');
+    btn?.setAttribute('aria-expanded', 'false');
+    menu?.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  btn?.addEventListener('click', openMenu);
+  closeBtn?.addEventListener('click', closeMenu);
+  backdrop?.addEventListener('click', closeMenu);
+
+  // Close on Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeMenu();
   });
 </script>

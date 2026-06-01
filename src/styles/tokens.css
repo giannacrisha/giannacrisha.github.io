@@ -1,5 +1,6 @@
 /* src/styles/tokens.css */
 /* Auto-mirrors src/config/design.ts — edit values there, not here */
+
 :root {
   --color-bg:           #faf7f2;
   --color-fg:           #3d2f1f;
@@ -45,4 +46,20 @@
   --radius-pill:   20px;
   --radius-input:  8px;
   --border:        0.5px solid var(--color-border);
+}
+
+/* Dark mode — must come after :root to win the cascade */
+:root[data-theme="dark"] {
+  --color-bg:           #1a1a1a;
+  --color-fg:           #e8e0d0;
+  --color-title:        #ffffff;
+  --color-card:         #242424;
+  --color-muted:        #9a8f7e;
+  --color-accent:       #b5a07a;
+  --color-accent-light: #2a2820;
+  --color-border:       #333333;
+  --color-pill-bg:      #2e2c28;
+  --color-pill-text:    #c8b898;
+  --color-accent-border:#4a4840;
+  --color-surface:      #242424;
 }
