@@ -81,8 +81,8 @@ const allTopics = [...new Set(allEntries.flatMap(e => e.topics))].sort();
   <!-- ── Landing overlay (hidden for return visitors) ─────────────────── -->
   <div id="landing-overlay" class="landing-overlay">
 
-    <!-- cursor glow -->
-    <div id="cursor-glow" class="cursor-glow" aria-hidden="true"></div>
+    <!-- sparkle trail canvas -->
+    <canvas id="sparkle-canvas" aria-hidden="true"></canvas>
 
     <!-- floating project widgets -->
     {featuredWidgets.map((w, i) => {
@@ -113,12 +113,9 @@ const allTopics = [...new Set(allEntries.flatMap(e => e.topics))].sort();
         <p class="hero-bio" id="hero-bio" aria-label={site.description}></p>
       </div>
       <div class="hero-cta">
-        <button class="hero-enter" id="enter-btn">enter</button>
-        <svg class="hero-chevron" width="20" height="20" viewBox="0 0 20 20"
-             fill="none" aria-hidden="true">
-          <path d="M5 8l5 5 5-5" stroke="currentColor"
-                stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+        <button class="hero-enter" id="enter-btn" aria-label="Enter the garden">
+          <img class="keyhole-svg" src="/keyhole.png" alt="" aria-hidden="true" draggable="false"/>
+        </button>
       </div>
     </div>
   </div>
@@ -128,9 +125,30 @@ const allTopics = [...new Set(allEntries.flatMap(e => e.topics))].sort();
     <div class="page-wrapper">
 
       <header class="garden-header">
-        <h1 class="garden-title">the garden</h1>
-        <p class="garden-desc">a growing collection of things i've made, written, and found</p>
+        <div class="garden-title-row">
+          <h1 class="garden-title">the garden</h1>
+          <span class="garden-phonetic">[gahr-dn] &nbsp;/ ˈɡɑːr.dən /</span>
+        </div>
+        <p class="garden-def">
+          a collection of imperfect notes, essays, and ideas growing slowly over time.
+        </p>
+        <div class="garden-links">
+          <a class="garden-link-btn" href="https://maggieappleton.com/garden-history" target="_blank" rel="noopener">what is a digital garden? ↗</a>
+          <button class="garden-link-btn" id="btn-story">the story of my digital garden</button>
+        </div>
       </header>
+
+      <!-- ── Modals ────────────────────────────────────────────────────── -->
+      <div id="modal-backdrop" class="modal-backdrop" aria-hidden="true" role="dialog" aria-modal="true">
+        <div class="modal" id="modal-box">
+          <button class="modal-close" id="modal-close" aria-label="Close">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </button>
+          <div id="modal-body" class="modal-body"></div>
+        </div>
+      </div>
 
       {allTopics.length > 0 && <TopicCloud topics={allTopics} />}
 
@@ -238,11 +256,12 @@ const allTopics = [...new Set(allEntries.flatMap(e => e.topics))].sort();
     overflow: hidden;
   }
   .landing-overlay.exiting {
-    animation: overlayExit 0.6s cubic-bezier(0.4, 0, 1, 1) forwards;
+    animation: overlayExit 0.8s ease forwards;
     pointer-events: none;
   }
   @keyframes overlayExit {
-    to { opacity: 0; }
+    from { opacity: 1; }
+    to   { opacity: 0; }
   }
   .landing-overlay.entering {
     animation: overlayEnter 0.45s ease forwards;
@@ -252,18 +271,14 @@ const allTopics = [...new Set(allEntries.flatMap(e => e.topics))].sort();
     to   { opacity: 1; }
   }
 
-  /* ── Cursor glow ─────────────────────────────────────────────────────── */
-  .cursor-glow {
+  /* ── Sparkle trail canvas ────────────────────────────────────────────── */
+  #sparkle-canvas {
     position: fixed;
-    top: 0; left: 0;
-    width: 180px; height: 180px;
-    margin: -90px 0 0 -90px;
-    border-radius: 50%;
-    background: radial-gradient(circle, color-mix(in srgb, var(--color-accent) 22%, transparent) 0%, transparent 65%);
+    inset: 0;
+    width: 100%;
+    height: 100%;
     pointer-events: none;
     z-index: 1;
-    opacity: 1;
-    transition: opacity 0.3s;
   }
 
   /* ── Floating widgets ────────────────────────────────────────────────── */
@@ -409,37 +424,41 @@ const allTopics = [...new Set(allEntries.flatMap(e => e.topics))].sort();
   }
 
   .hero-enter {
-    display: inline-block;
-    font-family: var(--font-body);
-    font-size: var(--text-sm);
-    color: var(--color-bg);
-    background: var(--color-fg);
-    letter-spacing: 0.1em;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
     border: none;
-    border-radius: var(--radius-pill);
-    padding: 7px 22px;
+    padding: 0;
     cursor: pointer;
-    transition: background 0.15s, transform 0.12s, box-shadow 0.15s;
+    color: var(--color-fg);
+    opacity: 0.75;
+    transition: opacity 0.2s, transform 0.2s;
   }
   .hero-enter:hover {
-    background: var(--color-accent);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-    transform: translateY(-2px);
+    opacity: 1;
+    transform: scale(1.1);
+    cursor: url('/key.png') 16 16, pointer;
   }
-  .hero-enter:active { transform: scale(0.96); }
+  .keyhole-svg {
+    width: 52px;
+    height: 52px;
+    display: block;
+    transition: transform 0.1s;
+  }
+  .hero-enter.spinning .keyhole-svg {
+    animation: keyholeSpin 1.1s ease-in-out forwards;
+  }
+  @keyframes keyholeSpin {
+    0%   { transform: rotate(0deg); }
+    45%  { transform: rotate(90deg); }
+    100% { transform: rotate(0deg); }
+  }
   .hero-cta {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: var(--space-sm);
-  }
-  .hero-chevron {
-    color: var(--color-accent);
-    animation: chevronBounce 2s ease-in-out infinite;
-  }
-  @keyframes chevronBounce {
-    0%, 100% { transform: translateY(0); }
-    50%       { transform: translateY(4px); }
   }
 
   /* ── Garden content ───────────────────────────────────────────────────── */
@@ -449,19 +468,166 @@ const allTopics = [...new Set(allEntries.flatMap(e => e.topics))].sort();
   .garden-header {
     padding: var(--space-section) 0 var(--space-xxl);
   }
+  .garden-title-row {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-lg);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-md);
+  }
   .garden-title {
     font-family: var(--font-display);
     font-size: var(--text-hero);
     color: var(--color-fg);
     line-height: var(--leading-tight);
-    margin-bottom: var(--space-lg);
   }
-  .garden-desc {
+  .garden-phonetic {
     font-family: var(--font-body);
-    font-size: var(--text-xl);
+    font-size: var(--text-md);
+    color: var(--color-muted);
+    letter-spacing: 0.02em;
+  }
+  .garden-def {
+    font-family: var(--font-body);
+    font-size: var(--text-lg);
     color: var(--color-muted);
     line-height: var(--leading-loose);
-    max-width: 600px;
+    max-width: 560px;
+    padding-left: var(--space-xl);
+    margin-bottom: var(--space-lg);
+  }
+  .garden-links {
+    display: flex;
+    gap: var(--space-lg);
+    padding-left: var(--space-xl);
+    flex-wrap: wrap;
+  }
+  .garden-link-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-color: var(--color-accent-border);
+    text-underline-offset: 3px;
+    transition: color 0.15s, text-decoration-color 0.15s;
+  }
+  .garden-link-btn:hover {
+    color: var(--color-fg);
+    text-decoration-color: var(--color-accent);
+  }
+
+  /* ── Modals ──────────────────────────────────────────────────────────── */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 800;
+    background: rgba(0,0,0,0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-xl);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+  .modal-backdrop.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .modal {
+    background: var(--color-card);
+    border: 0.5px solid var(--color-border);
+    border-radius: var(--radius-card);
+    box-shadow: 0 8px 48px rgba(0,0,0,0.14);
+    width: 100%;
+    max-width: 680px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    transform: translateY(12px);
+    transition: transform 0.2s ease;
+  }
+  .modal-backdrop.open .modal {
+    transform: translateY(0);
+  }
+  .modal-close {
+    position: absolute;
+    top: var(--space-lg);
+    right: var(--space-lg);
+    background: none;
+    border: none;
+    color: var(--color-muted);
+    cursor: pointer;
+    padding: 4px;
+    z-index: 1;
+    transition: color 0.15s;
+  }
+  .modal-close:hover { color: var(--color-fg); }
+  .modal-body {
+    overflow-y: auto;
+    padding: var(--space-xxl);
+  }
+  .modal-body iframe {
+    width: 100%;
+    height: 60vh;
+    border: none;
+    border-radius: var(--radius-card);
+  }
+  /* story modal prose — :global() because content is JS-injected */
+  :global(.story-title) {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    color: var(--color-fg);
+    margin: 0 0 var(--space-xl);
+    padding-bottom: var(--space-lg);
+    border-bottom: 0.5px solid var(--color-border);
+  }
+  :global(.story-body) {
+    padding-top: var(--space-sm);
+  }
+  :global(.story-body p) {
+    font-family: var(--font-body);
+    font-size: var(--text-md);
+    line-height: 1.9;
+    color: var(--color-fg);
+    margin: 0 0 var(--space-xl);
+  }
+  :global(.story-body p:first-of-type) {
+    font-size: calc(var(--text-md) * 1.05);
+  }
+  :global(.story-body blockquote) {
+    margin: var(--space-xl) 0;
+    padding: var(--space-lg) var(--space-xl);
+    border-left: 2px solid var(--color-accent);
+    background: var(--color-accent-light);
+    border-radius: 0 var(--radius-card) var(--radius-card) 0;
+  }
+  :global(.story-body blockquote p) {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: var(--text-md);
+    line-height: 1.75;
+    color: var(--color-fg);
+    margin-bottom: var(--space-sm);
+  }
+  :global(.story-body blockquote cite) {
+    display: block;
+    font-family: var(--font-body);
+    font-style: normal;
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+    margin-top: var(--space-sm);
+  }
+  :global(.story-body a) {
+    color: var(--color-fg);
+    text-decoration: underline;
+    text-decoration-color: var(--color-accent);
+    text-underline-offset: 3px;
   }
 
   /* ── Filter chips (same style as CollectionFilters) ───────────────────── */
@@ -573,21 +739,97 @@ const allTopics = [...new Set(allEntries.flatMap(e => e.topics))].sort();
     var overlay = document.getElementById('landing-overlay');
     if (!overlay) return;
 
-    // ── Cursor glow (always active while overlay is open) ─────────────────
-    var glow = document.getElementById('cursor-glow');
-    var cx = window.innerWidth / 2, cy = window.innerHeight / 2;
-    var tx = cx, ty = cy;
-    var glowRunning = false;
-    document.addEventListener('mousemove', function (e) { tx = e.clientX; ty = e.clientY; });
+    // ── Sparkle trail ─────────────────────────────────────────────────────
+    var sparkCanvas = document.getElementById('sparkle-canvas');
+    var sparkCtx = sparkCanvas ? sparkCanvas.getContext('2d') : null;
+    var particles = [];
+    var mouseX = window.innerWidth / 2, mouseY = window.innerHeight / 2;
+    var sparkRunning = false;
+
+    function resizeSparkCanvas() {
+      if (!sparkCanvas) return;
+      sparkCanvas.width  = window.innerWidth;
+      sparkCanvas.height = window.innerHeight;
+    }
+    resizeSparkCanvas();
+    window.addEventListener('resize', resizeSparkCanvas);
+
+    var prevMouseX = mouseX, prevMouseY = mouseY;
+    document.addEventListener('mousemove', function (e) {
+      mouseX = e.clientX; mouseY = e.clientY;
+    });
+
+    function spawnParticle(x, y) {
+      var size = 6 + Math.random() * 9;           // big stars: 6–15px
+      // tiny random nudge so trail has texture, not a single line
+      var scatter = 8;
+      particles.push({
+        x:  x + (Math.random() - 0.5) * scatter,
+        y:  y + (Math.random() - 0.5) * scatter,
+        vx: (Math.random() - 0.5) * 0.6,          // drift sideways gently
+        vy: -0.4 - Math.random() * 0.8,            // float upward slowly
+        size: size,
+        life: 1,
+        decay: 0.012 + Math.random() * 0.012,      // linger ~60–80 frames
+        twinkle: Math.random() * Math.PI * 2,
+      });
+    }
+
     function startGlow() {
-      if (glowRunning || !glow) return;
-      glowRunning = true;
+      if (sparkRunning || !sparkCtx) return;
+      sparkRunning = true;
       (function loop() {
-        cx += (tx - cx) * 0.1;
-        cy += (ty - cy) * 0.1;
-        glow.style.transform = 'translate(' + cx + 'px,' + cy + 'px)';
-        if (overlay.style.display !== 'none') requestAnimationFrame(loop);
-        else glowRunning = false;
+        if (overlay.style.display === 'none') {
+          sparkCtx.clearRect(0, 0, sparkCanvas.width, sparkCanvas.height);
+          particles.length = 0;
+          sparkRunning = false;
+          return;
+        }
+
+        // Spawn along the path between last and current mouse position
+        var dx = mouseX - prevMouseX, dy = mouseY - prevMouseY;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        // one particle every ~6px of movement; minimum 1 if mouse moved at all
+        if (dist > 0) {
+          var steps = Math.max(1, Math.round(dist / 6));
+          for (var s = 0; s < steps; s++) {
+            var t = steps === 1 ? 0 : s / (steps - 1);
+            spawnParticle(prevMouseX + dx * t, prevMouseY + dy * t);
+          }
+        }
+        prevMouseX = mouseX; prevMouseY = mouseY;
+
+        sparkCtx.clearRect(0, 0, sparkCanvas.width, sparkCanvas.height);
+        for (var i = particles.length - 1; i >= 0; i--) {
+          var p = particles[i];
+          p.x      += p.vx;
+          p.y      += p.vy;
+          p.life   -= p.decay;
+          p.twinkle += 0.25;
+          if (p.life <= 0) { particles.splice(i, 1); continue; }
+
+          var flicker = Math.max(0, p.life + Math.sin(p.twinkle) * 0.12);
+          var sz = p.size * Math.sqrt(flicker);    // shrink gracefully
+
+          sparkCtx.save();
+          sparkCtx.globalAlpha = Math.min(1, flicker);
+          sparkCtx.fillStyle = '#ffffff';
+
+          // ✦ 4-pointed star: tall vertical + wide horizontal cross
+          sparkCtx.fillRect(p.x - sz * 0.14, p.y - sz,       sz * 0.28, sz * 2);
+          sparkCtx.fillRect(p.x - sz,        p.y - sz * 0.14, sz * 2,   sz * 0.28);
+
+          // × diagonal arms at 50% opacity
+          sparkCtx.globalAlpha = Math.min(1, flicker * 0.5);
+          sparkCtx.translate(p.x, p.y);
+          sparkCtx.rotate(Math.PI / 4);
+          var dz = sz * 0.7;
+          sparkCtx.fillRect(-dz * 0.14, -dz, dz * 0.28, dz * 2);
+          sparkCtx.fillRect(-dz,        -dz * 0.14, dz * 2, dz * 0.28);
+
+          sparkCtx.restore();
+        }
+        requestAnimationFrame(loop);
       })();
     }
 
@@ -624,6 +866,7 @@ const allTopics = [...new Set(allEntries.flatMap(e => e.topics))].sort();
       overlay.classList.remove('exiting', 'entering');
       void overlay.offsetWidth;
       overlay.classList.add('entering');
+      document.getElementById('enter-btn')?.classList.remove('spinning');
       startGlow();
       startTypewriter();
       if (physicsInited) runPhysics();
@@ -634,10 +877,11 @@ const allTopics = [...new Set(allEntries.flatMap(e => e.topics))].sort();
     function hideOverlay() {
       overlay.classList.remove('entering');
       overlay.classList.add('exiting');
-      overlay.addEventListener('animationend', function () {
+      setTimeout(function () {
         overlay.style.display = 'none';
+        overlay.classList.remove('exiting');
         localStorage.setItem('gi-garden-entered', '1');
-      }, { once: true });
+      }, 820);
     }
 
     // ── Init ──────────────────────────────────────────────────────────────
@@ -770,7 +1014,73 @@ const allTopics = [...new Set(allEntries.flatMap(e => e.topics))].sort();
       physicsRaf = requestAnimationFrame(loop);
     }
 
-    document.getElementById('enter-btn')?.addEventListener('click', hideOverlay);
+    document.getElementById('enter-btn')?.addEventListener('click', function () {
+      var btn = document.getElementById('enter-btn');
+      if (!btn || btn.classList.contains('spinning')) return;
+      btn.classList.add('spinning');
+      // wait for spin to finish, then hide overlay
+      setTimeout(hideOverlay, 1050);
+    });
+
+    // ── Modal ──────────────────────────────────────────────────────────────
+    (function () {
+      var backdrop = document.getElementById('modal-backdrop');
+      var body     = document.getElementById('modal-body');
+
+      var storyHTML = `
+        <h2 class="story-title">the story of my digital garden</h2>
+        <div class="story-body">
+          <p>I've struggled with perfectionism and people-pleasing for a lot of my life. I grew up wanting
+          to be everyone's everything and never wanting to put out something that wasn't already perfect.
+          So I mostly just never put anything out.</p>
+          <p>I have a lot of projects and thoughts I keep in a very private journal. The things that I
+          would love to share if I just had a little courage, or if I just didn't care as much about
+          what others thought. Things that would gather dust until they were too outdated to ever post.</p>
+          <p>I tried doing it in LinkedIn (professional panic), Instagram (felt too personal), a
+          Wordpress blog (close, but the pressure of "posting" still got to me). I needed a space
+          where the bar was lower—where things could exist without being finished.</p>
+          <p>While browsing the World Wide Web, I found the concept of Digital Gardening through
+          <a href="https://maggieappleton.com" target="_blank" rel="noopener">Maggie Appleton's</a> website.
+          A way of thinking about personal websites less like a broadcast and more like a living
+          workspace—somewhere ideas could grow slowly, visibly, without shame.</p>
+          <blockquote>
+            <p>"Digital gardening is… both intimate and public, weird and welcoming. It's less
+            performative than a blog, but more intentional and thoughtful than a Twitter feed. It wants
+            to build personal knowledge over time, rather than engage in banter and quippy conversations."</p>
+            <cite>— Maggie Appleton</cite>
+          </blockquote>
+          <p>Currently this digital garden is a dirt patch compared to other sprawling personal
+          knowledge webs and second brains out there, but this is me being okay with the wet paint.</p>
+        </div>`;
+
+      function openModal(content) {
+        body.innerHTML = content;
+        backdrop.removeAttribute('aria-hidden');
+        backdrop.classList.add('open');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeModal() {
+        backdrop.classList.remove('open');
+        backdrop.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+        setTimeout(function () { body.innerHTML = ''; }, 300);
+      }
+
+      document.getElementById('btn-story')?.addEventListener('click', function () {
+        openModal(storyHTML);
+      });
+
+      document.getElementById('modal-close')?.addEventListener('click', closeModal);
+
+      backdrop?.addEventListener('click', function (e) {
+        if (e.target === backdrop) closeModal();
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && backdrop.classList.contains('open')) closeModal();
+      });
+    })();
 
     document.querySelector('.nav-logo')?.addEventListener('click', function (e) {
       e.preventDefault();
