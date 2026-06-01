@@ -15,18 +15,24 @@ const sorted = entries.sort((a, b) => b.data.date_added.getTime() - a.data.date_
     <div class="book-grid">
       {sorted.map(entry => {
         const d = entry.data;
-        const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(d.title + ' ' + d.creator)}`;
         return (
           <div class="book-card">
-            <a href={`/library/${entry.slug}`} class="book-cover-wrap">
+            <div class="book-cover-wrap">
               {d.cover_image
                 ? <img class="book-cover" src={d.cover_image} alt={d.title} loading="lazy" />
                 : <div class="book-cover book-cover--placeholder" />
               }
-              <a href={googleUrl} target="_blank" rel="noopener noreferrer" class="google-overlay">
-                View on Google <span aria-hidden="true">↗</span>
-              </a>
-            </a>
+              {d.status && (
+                <span class:list={['book-status', `book-status--${d.status.replace(' ', '-')}`]}>
+                  {d.status}
+                </span>
+              )}
+              {d.link && (
+                <a href={d.link} target="_blank" rel="noopener noreferrer" class="cover-overlay" aria-label={`View ${d.title}`}>
+                  <span class="cover-pill">view ↗</span>
+                </a>
+              )}
+            </div>
             <p class="book-title">{d.title}</p>
             <p class="book-author">{d.creator}</p>
           </div>
@@ -66,6 +72,7 @@ const sorted = entries.sort((a, b) => b.data.date_added.getTime() - a.data.date_
     object-fit: cover;
     display: block;
     border-radius: 4px 8px 8px 4px;
+    transition: filter 0.2s ease;
   }
 
   .book-cover--placeholder {
@@ -73,25 +80,76 @@ const sorted = entries.sort((a, b) => b.data.date_added.getTime() - a.data.date_
     aspect-ratio: 2 / 3;
   }
 
-  .google-overlay {
+  /* status badge — upper right corner */
+  .book-status {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-family: var(--font-body);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    line-height: 1;
+    pointer-events: none;
+    backdrop-filter: blur(6px);
+  }
+
+  .book-status--read {
+    background: rgba(155, 190, 155, 0.88);
+    color: #1e3a1e;
+  }
+  .book-status--in-progress {
+    background: rgba(240, 210, 140, 0.92);
+    color: #4a3300;
+  }
+  .book-status--to-read {
+    background: rgba(255, 255, 255, 0.75);
+    color: #5a4a38;
+  }
+
+  /* darkening overlay + pill — only rendered when link exists */
+  .cover-overlay {
     position: absolute;
     inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(0, 0, 0, 0.45);
-    color: #fff;
-    font-family: var(--font-body);
-    font-size: var(--text-sm);
-    font-weight: 500;
+    background: rgba(0, 0, 0, 0);
     text-decoration: none;
-    opacity: 0;
-    transition: opacity 0.18s;
     border-radius: 4px 8px 8px 4px;
+    transition: background 0.2s ease;
   }
 
-  .book-cover-wrap:hover .google-overlay {
+  .book-cover-wrap:hover .book-cover {
+    filter: brightness(0.65);
+  }
+
+  .book-cover-wrap:hover .cover-overlay {
+    background: rgba(0, 0, 0, 0.15);
+  }
+
+  .cover-pill {
+    background: #ffffff;
+    color: #3d2f1f;
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    padding: 6px 16px;
+    border-radius: 999px;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    pointer-events: none;
+  }
+
+  .book-cover-wrap:hover .cover-pill {
     opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
   }
 
   .book-title {

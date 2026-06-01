@@ -4,6 +4,7 @@ import Garden from '../../layouts/Garden.astro';
 import GrowthPill from '../../components/GrowthPill.astro';
 import Timestamps from '../../components/Timestamps.astro';
 import Recommended from '../../components/Recommended.astro';
+import MinimizePageBtn from '../../components/MinimizePageBtn.astro';
 import { getCollection } from 'astro:content';
 
 export async function getStaticPaths() {
@@ -37,6 +38,7 @@ const related = allEntries
           <span class="breadcrumb-sep" aria-hidden="true">/</span>
           <a href="/lab">lab</a>
           <span class="breadcrumb-sep" aria-hidden="true">/</span>
+          <MinimizePageBtn title={title} />
         </nav>
 
         {cover_image && (
@@ -96,6 +98,7 @@ const related = allEntries
   .breadcrumb a { color: var(--color-muted); text-decoration: none; }
   .breadcrumb a:hover { color: var(--color-fg); }
   .breadcrumb-sep { color: var(--color-accent-border); font-size: 10px; }
+  .breadcrumb :global(.minimize-page-btn) { margin-left: auto; }
   .cover-image { margin-bottom: var(--space-xxl); }
   .cover-image img { width: 100%; max-height: 400px; object-fit: cover; border-radius: var(--radius-card); }
   .entry-title { font-family: var(--font-serif); font-size: var(--text-xxl); color: var(--color-fg); line-height: var(--leading-tight); margin-bottom: var(--space-lg); }

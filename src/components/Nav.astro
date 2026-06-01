@@ -3,10 +3,10 @@
 const current = Astro.url.pathname;
 const gardenActive = ['/','/lab','/archives','/gallery','/library'].some(p => current.startsWith(p));
 const sublinks = [
-  { href: '/lab',      label: 'lab',      desc: 'design and code projects',    icon: '/icons/lab-icon.png'     },
-  { href: '/archives', label: 'archives', desc: 'essays, poems, thoughts',     icon: '/icons/archive-icon.png' },
-  { href: '/gallery',  label: 'gallery',  desc: 'artwork and visual work',     icon: '/icons/gallery-icon.png' },
-  { href: '/library',  label: 'library',  desc: 'films, books, shows', icon: '/icons/lib-icon.png'     },
+  { href: '/lab',      label: 'lab',      desc: 'design and code projects', icon: '/icons/lab-icon.png'     },
+  { href: '/archives', label: 'archives', desc: 'essays, poems, thoughts',  icon: '/icons/archive-icon.png' },
+  { href: '/gallery',  label: 'gallery',  desc: 'artwork and visual work',  icon: '/icons/gallery-icon.png' },
+  { href: '/library',  label: 'library',  desc: 'films, books, shows',      icon: '/icons/lib-icon.png'     },
 ];
 ---
 <nav class="site-nav">
@@ -38,7 +38,13 @@ const sublinks = [
         </div>
       </li>
       <li class="nav-item">
+        <a href="/community" class:list={['nav-link', { active: current.startsWith('/community') }]}>community</a>
+      </li>
+      <li class="nav-item">
         <a href="/about" class:list={['nav-link', { active: current.startsWith('/about') }]}>about</a>
+      </li>
+      <li class="nav-item">
+        <a href="/now" class:list={['nav-link', { active: current.startsWith('/now') }]}>now</a>
       </li>
     </ul>
 
@@ -67,7 +73,9 @@ const sublinks = [
     {sublinks.map(l => (
       <a href={l.href} class="mobile-link mobile-link--sub">{l.label}</a>
     ))}
+    <a href="/community" class="mobile-link">community</a>
     <a href="/about" class="mobile-link">about</a>
+    <a href="/now" class="mobile-link">now</a>
   </div>
 </nav>
 
@@ -76,7 +84,7 @@ const sublinks = [
     position: sticky;
     top: 0;
     z-index: 50;
-    background: transparent;
+    background: var(--color-bg);
     border-bottom: none;
   }
   .nav-inner {

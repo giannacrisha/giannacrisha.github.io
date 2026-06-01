@@ -4,6 +4,7 @@ creator: Carlos Ruiz Zafón
 year: 2001
 type: book
 date_added: 2026-06-01
+status: read
 rating: 0
 cover_image: /library/shadow-of-the-wind.jpg
 featured: false

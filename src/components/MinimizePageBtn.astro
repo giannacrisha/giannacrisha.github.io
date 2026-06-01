@@ -1,0 +1,133 @@
+---
+// src/components/MinimizePageBtn.astro
+// Drop this near the top of any detail page.
+// Props: title (tab label) — defaults to the document title.
+interface Props {
+  title?: string;
+}
+const { title } = Astro.props;
+---
+
+<button
+  class="minimize-page-btn"
+  aria-label="Minimize page to tab"
+  data-page-title={title ?? ''}
+  data-page-url={Astro.url.pathname}
+  id="minimize-page-btn"
+>
+  <!-- minus icon -->
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+    <line x1="2" y1="7" x2="12" y2="7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+  </svg>
+  minimize
+</button>
+
+<style is:global>
+  .minimize-page-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px 5px 10px;
+    border-radius: 999px;
+    border: 0.5px solid var(--color-border);
+    background: var(--color-card);
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    color: var(--color-muted);
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: background 0.15s, color 0.15s;
+  }
+  .minimize-page-btn:hover {
+    background: var(--color-accent-light);
+    color: var(--color-fg);
+  }
+
+  /* ── Minimize animation ───────────────────────── */
+  @keyframes page-shrink-to-tab {
+    0% {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+      transform-origin: center bottom;
+    }
+    60% {
+      opacity: 0.7;
+    }
+    100% {
+      transform: scale(0.05) translateY(60vh);
+      opacity: 0;
+      transform-origin: center bottom;
+    }
+  }
+
+  body.minimizing {
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  body.minimizing main {
+    animation: page-shrink-to-tab 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    will-change: transform, opacity;
+  }
+
+  /* Nav fades out during minimize */
+  body.minimizing .site-nav,
+  body.minimizing footer {
+    transition: opacity 0.25s ease;
+    opacity: 0;
+  }
+</style>
+
+<script is:inline>
+(function () {
+  var btn = document.getElementById('minimize-page-btn');
+  if (!btn) return;
+
+  btn.addEventListener('click', function () {
+    var rawTitle = btn.getAttribute('data-page-title') || document.title;
+    var url = btn.getAttribute('data-page-url') || window.location.pathname;
+    var title = rawTitle || document.title.replace(/\s*[–|]\s*gi.*$/, '').trim();
+    var id = url;
+
+    // Destination: go back if same-origin referrer, else home
+    var dest = (document.referrer && document.referrer.includes(window.location.host))
+      ? document.referrer
+      : '/';
+
+    // Register the tab so it already exists on the destination page
+    if (window.__giTabs) {
+      window.__giTabs.add(id, title, url);
+    }
+
+    // ── 1. Inject destination as a full-screen iframe behind everything ──
+    var bgFrame = document.createElement('iframe');
+    bgFrame.src = dest;
+    bgFrame.setAttribute('aria-hidden', 'true');
+    bgFrame.style.cssText = [
+      'position:fixed', 'inset:0', 'width:100%', 'height:100%',
+      'border:none', 'z-index:0', 'opacity:1', 'pointer-events:none'
+    ].join(';');
+    document.body.appendChild(bgFrame);
+
+    // ── 2. Lift nav + main above the iframe so they can animate ──
+    var nav  = document.querySelector('.site-nav');
+    var main = document.querySelector('main');
+    var foot = document.querySelector('footer');
+    var tabbar = document.getElementById('gi-tabbar');
+
+    [nav, main, foot].forEach(function (el) {
+      if (el) { el.style.position = 'relative'; el.style.zIndex = '10'; }
+    });
+    // Keep tab bar on top so the page visibly lands on it
+    if (tabbar) { tabbar.style.zIndex = '20'; }
+
+    // ── 3. Play shrink animation ──
+    document.body.classList.add('minimizing');
+
+    // ── 4. Hard-navigate once animation is done — iframe already painted ──
+    setTimeout(function () {
+      window.location.href = dest;
+    }, 430);
+  });
+})();
+</script>

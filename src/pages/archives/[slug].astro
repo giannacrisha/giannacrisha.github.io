@@ -5,6 +5,7 @@ import GrowthPill from '../../components/GrowthPill.astro';
 import Timestamps from '../../components/Timestamps.astro';
 import AuthorNote from '../../components/AuthorNote.astro';
 import Recommended from '../../components/Recommended.astro';
+import MinimizePageBtn from '../../components/MinimizePageBtn.astro';
 import { getCollection } from 'astro:content';
 
 export async function getStaticPaths() {
@@ -60,6 +61,7 @@ const showToc = isEssay && tocHeadings.length >= 2;
           <span class="breadcrumb-sep" aria-hidden="true">/</span>
           <a href="/archives">archives</a>
           <span class="breadcrumb-sep" aria-hidden="true">/</span>
+          <MinimizePageBtn title={title} />
         </nav>
 
         <div class="entry-meta">
@@ -161,6 +163,8 @@ const showToc = isEssay && tocHeadings.length >= 2;
   .breadcrumb a { color: var(--color-muted); text-decoration: none; }
   .breadcrumb a:hover { color: var(--color-fg); }
   .breadcrumb-sep { color: var(--color-accent-border); font-size: 10px; }
+  /* push minimize button to far right */
+  .breadcrumb :global(.minimize-page-btn) { margin-left: auto; }
 
   .entry-meta {
     display: flex;

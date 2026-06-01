@@ -80,6 +80,8 @@ const library = defineCollection({
     rating:      z.number().min(0).max(5),
     review:      z.string().optional(),
     cover_image: z.string().optional(),
+    link:        z.string().url().optional(),
+    status:      z.enum(['read', 'in progress', 'to read']).optional(),
     featured:    z.boolean().default(false),
   }),
 });

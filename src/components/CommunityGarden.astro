@@ -1,547 +1,557 @@
 ---
 // src/components/CommunityGarden.astro
-// Fetches approved (open) community garden submissions from GitHub Issues.
-// Renders pixel art + a drawing editor for new submissions.
-
 const REPO_OWNER = 'giannacrisha';
 const REPO_NAME  = 'giannacrisha.github.io';
 const LABEL      = 'community-garden';
 
-// Fetch at build time — Vercel ISR will revalidate periodically
-let submissions: Array<{
-  pixels: string[];
-  name: string;
-  note: string;
-  website: string;
-  ts: string;
-}> = [];
+let submissions: Array<{ pixels: (string|null)[]; name: string; note: string; website: string; ts: string; }> = [];
 
 try {
   const res = await fetch(
-    `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues?labels=${LABEL}&state=open&per_page=50`,
+    `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues?labels=${LABEL}&state=open&per_page=100`,
     { headers: { Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' } }
   );
   if (res.ok) {
     const issues = await res.json() as { body: string }[];
-    submissions = issues
-      .map(issue => {
-        try { return JSON.parse(issue.body); } catch { return null; }
-      })
-      .filter(Boolean)
-      .reverse(); // oldest first so the garden grows left to right
+    submissions = issues.map(i => { try { return JSON.parse(i.body); } catch { return null; } }).filter(Boolean).reverse();
   }
-} catch (e) {
-  console.warn('Community garden fetch failed:', e);
-}
+} catch (e) { console.warn('Community garden fetch failed:', e); }
 ---
 
-<section class="community-garden" id="community-garden">
-  <div class="cg-header">
-    <h2 class="cg-title">the community garden</h2>
-    <p class="cg-desc">plant something. draw a little pixel art, leave a note, and become part of the garden. i'll water it regularly. ♡</p>
-  </div>
+<div class="cg-wrap">
 
-  <!-- Existing plantings -->
+  <!-- ── Existing plantings ─────────────────────────────── -->
   {submissions.length > 0 && (
-    <div class="plantings" id="plantings">
+    <div class="plantings">
       {submissions.map(s => (
-        <div class="planting" title={s.note || s.name}>
-          <canvas
-            class="planting-canvas"
-            width="64"
-            height="64"
-            data-pixels={JSON.stringify(s.pixels)}
-            aria-label={`pixel art by ${s.name}`}
-          ></canvas>
+        <div class="planting">
+          <canvas class="planting-canvas" width="64" height="64" data-pixels={JSON.stringify(s.pixels)} aria-label={`pixel art by ${s.name}`}></canvas>
           <div class="planting-meta">
             {s.website
               ? <a href={s.website} target="_blank" rel="noopener noreferrer" class="planting-name">{s.name}</a>
-              : <span class="planting-name">{s.name}</span>
-            }
+              : <span class="planting-name">{s.name}</span>}
             {s.note && <p class="planting-note">{s.note}</p>}
           </div>
         </div>
       ))}
     </div>
   )}
+  {submissions.length === 0 && <p class="cg-empty">no plantings yet — be the first ↓</p>}
 
-  {submissions.length === 0 && (
-    <p class="cg-empty">no plantings yet — be the first! ↓</p>
-  )}
+  <!-- ── Editor ─────────────────────────────────────────── -->
+  <div class="editor-wrap">
 
-  <!-- Drawing editor -->
-  <div class="cg-editor" id="cg-editor">
-    <div class="editor-canvas-wrap">
+    <!-- Toolbar (left) -->
+    <div class="toolbar" id="toolbar" role="group" aria-label="Drawing tools">
+      <!-- tools injected by JS -->
+    </div>
+
+    <!-- Canvas + size + palette -->
+    <div class="canvas-col">
       <canvas id="pixel-canvas" width="256" height="256" class="pixel-canvas" aria-label="pixel art drawing canvas"></canvas>
+
+      <!-- Brush size -->
+      <div class="size-row" role="group" aria-label="Brush size">
+        {[1,2,3,4].map(n => (
+          <button class:list={['size-btn', { 'size-active': n === 1 }]} data-size={n} aria-label={`${n}px brush`}>
+            <span class="size-dot" style={`width:${n*3}px;height:${n*3}px`}></span>
+          </button>
+        ))}
+      </div>
+
+      <!-- Palette -->
+      <div class="palette" id="palette" role="group" aria-label="Color palette"></div>
     </div>
-
-    <div class="editor-controls">
-      <!-- Color palette -->
-      <div class="palette" id="palette" role="group" aria-label="Color palette">
-        <!-- Colors injected by JS -->
-      </div>
-
-      <div class="editor-tools">
-        <button class="tool-btn active" id="tool-draw" aria-label="Draw" title="Draw">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M10 2l2 2-7 7-3 1 1-3 7-7z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-        <button class="tool-btn" id="tool-erase" aria-label="Erase" title="Erase">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 12h10M8 2l4 4-5 6H3L1 10l7-8z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-        <button class="tool-btn" id="tool-clear" aria-label="Clear canvas" title="Clear all">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-        </button>
-      </div>
-    </div>
-
-    <!-- Submission form -->
-    <form class="plant-form" id="plant-form" novalidate>
-      <!-- honeypot -->
-      <input type="text" name="website_url" tabindex="-1" autocomplete="off" style="display:none" aria-hidden="true" />
-
-      <div class="form-row">
-        <input type="text" id="plant-name" name="name" placeholder="your name or handle (optional)" maxlength="50" class="plant-input" autocomplete="nickname" />
-        <input type="url"  id="plant-website" name="website" placeholder="your website (optional)" maxlength="200" class="plant-input" autocomplete="url" />
-      </div>
-      <textarea id="plant-note" name="note" placeholder="leave a little note (optional, 280 chars)" maxlength="280" class="plant-textarea" rows="2"></textarea>
-
-      <div class="form-footer">
-        <span class="pixel-count" id="pixel-count">draw at least 4 pixels to plant</span>
-        <button type="submit" class="plant-btn" id="plant-btn" disabled>plant it ✦</button>
-      </div>
-      <p class="plant-confirm" id="plant-confirm" hidden>planted! it'll appear in the garden shortly. thank you ♡</p>
-      <p class="plant-error" id="plant-error" hidden></p>
-    </form>
   </div>
-</section>
+
+  <!-- ── Form ───────────────────────────────────────────── -->
+  <form class="plant-form" id="plant-form" novalidate>
+    <input type="text" name="hp" tabindex="-1" autocomplete="off" aria-hidden="true" style="display:none" />
+    <div class="form-row">
+      <input type="text" id="plant-name"    name="name"    placeholder="your name or handle (optional)" maxlength="50"  class="plant-input" />
+      <input type="url"  id="plant-website" name="website" placeholder="your website (optional)"         maxlength="200" class="plant-input" />
+    </div>
+    <textarea id="plant-note" name="note" placeholder="leave a little note (optional, 280 chars)" maxlength="280" class="plant-textarea" rows="2"></textarea>
+    <div class="form-footer">
+      <span class="pixel-count" id="pixel-count">draw at least 4 pixels to plant</span>
+      <button type="submit" class="plant-btn" id="plant-btn" disabled>plant it ✦</button>
+    </div>
+    <p class="plant-confirm" id="plant-confirm" hidden>planted! it'll appear here soon. thank you ♡</p>
+    <p class="plant-error"   id="plant-error"   hidden></p>
+  </form>
+</div>
 
 <style>
-  .community-garden {
-    padding: var(--space-section) 0;
-    border-top: 0.5px solid var(--color-border);
-  }
+  .cg-wrap { display: flex; flex-direction: column; gap: var(--space-xxl); }
 
-  /* header */
-  .cg-header { margin-bottom: var(--space-xxl); }
-  .cg-title {
-    font-family: var(--font-display);
-    font-size: var(--text-section);
-    color: var(--color-fg);
-    line-height: var(--leading-tight);
-    margin-bottom: var(--space-md);
-  }
-  .cg-desc {
-    font-family: var(--font-body);
-    font-size: var(--text-md);
-    color: var(--color-muted);
-    max-width: 520px;
-    line-height: var(--leading-loose);
-  }
-  .cg-empty {
-    font-family: var(--font-body);
-    font-size: var(--text-sm);
-    color: var(--color-muted);
-    font-style: italic;
-    margin-bottom: var(--space-xxl);
-  }
-
-  /* plantings grid */
-  .plantings {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-xl);
-    margin-bottom: var(--space-section);
-  }
-  .planting {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-sm);
-    max-width: 80px;
-  }
-  .planting-canvas {
-    width: 64px;
-    height: 64px;
-    image-rendering: pixelated;
-    border-radius: 6px;
-    border: 0.5px solid var(--color-border);
-    cursor: default;
-    transition: transform 0.15s;
-  }
-  .planting-canvas:hover { transform: scale(1.15); }
-  .planting-meta {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-    text-align: center;
-  }
-  .planting-name {
-    font-family: var(--font-body);
-    font-size: var(--text-xs);
-    color: var(--color-muted);
-    text-decoration: none;
-    letter-spacing: 0.03em;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    max-width: 80px;
-  }
+  /* plantings */
+  .plantings { display: flex; flex-wrap: wrap; gap: var(--space-xl); }
+  .cg-empty { font-family: var(--font-body); font-size: var(--text-sm); color: var(--color-muted); font-style: italic; }
+  .planting { display: flex; flex-direction: column; align-items: center; gap: 6px; max-width: 80px; }
+  .planting-canvas { width: 64px; height: 64px; image-rendering: pixelated; border-radius: 6px; border: 0.5px solid var(--color-border); transition: transform 0.15s; cursor: default; }
+  .planting-canvas:hover { transform: scale(1.18); }
+  .planting-meta { display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; }
+  .planting-name { font-family: var(--font-body); font-size: var(--text-xs); color: var(--color-muted); text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80px; }
   a.planting-name:hover { color: var(--color-fg); text-decoration: underline; }
-  .planting-note {
-    font-family: var(--font-body);
-    font-size: 10px;
-    color: var(--color-muted);
-    font-style: italic;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    text-align: center;
-  }
+  .planting-note { font-family: var(--font-body); font-size: 10px; color: var(--color-muted); font-style: italic; text-align: center; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
   /* editor */
-  .cg-editor {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-xl);
-    max-width: 520px;
-  }
-  .editor-canvas-wrap {
-    border: 0.5px solid var(--color-border);
-    border-radius: var(--radius-card);
-    overflow: hidden;
-    display: inline-block;
-    line-height: 0;
-    cursor: crosshair;
-  }
-  .pixel-canvas {
-    width: 256px;
-    height: 256px;
-    image-rendering: pixelated;
-    display: block;
-  }
+  .editor-wrap { display: flex; gap: var(--space-md); align-items: flex-start; flex-wrap: wrap; }
 
-  /* controls */
-  .editor-controls {
-    display: flex;
-    align-items: center;
-    gap: var(--space-xl);
-    flex-wrap: wrap;
-  }
-  .palette {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-    max-width: 200px;
-  }
-  :global(.palette-swatch) {
-    width: 18px;
-    height: 18px;
-    border-radius: 4px;
-    border: 1.5px solid transparent;
-    cursor: pointer;
-    transition: transform 0.1s, border-color 0.1s;
-  }
-  :global(.palette-swatch:hover) { transform: scale(1.2); }
-  :global(.palette-swatch.selected) { border-color: var(--color-fg); transform: scale(1.15); }
+  /* toolbar */
+  .toolbar { display: flex; flex-direction: column; gap: 4px; padding: 6px; background: var(--color-card); border: 0.5px solid var(--color-border); border-radius: var(--radius-card); }
+  :global(.tool-btn) { width: 34px; height: 34px; border-radius: 8px; border: none; background: none; color: var(--color-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.12s, color 0.12s; }
+  :global(.tool-btn:hover) { background: var(--color-accent-light); color: var(--color-fg); }
+  :global(.tool-btn.tool-active) { background: var(--color-fg); color: var(--color-bg); }
+  :global(.tool-divider) { height: 0.5px; background: var(--color-border); margin: 2px 4px; }
 
-  .editor-tools {
-    display: flex;
-    gap: var(--space-sm);
-  }
-  .tool-btn {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    border: 0.5px solid var(--color-border);
-    background: var(--color-card);
-    color: var(--color-muted);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.12s, color 0.12s, border-color 0.12s;
-  }
-  .tool-btn:hover { color: var(--color-fg); border-color: var(--color-accent); }
-  .tool-btn.active { background: var(--color-fg); color: var(--color-bg); border-color: var(--color-fg); }
+  /* canvas */
+  .canvas-col { display: flex; flex-direction: column; gap: var(--space-md); }
+  .pixel-canvas { width: 256px; height: 256px; image-rendering: pixelated; display: block; border: 0.5px solid var(--color-border); border-radius: 4px; cursor: crosshair; touch-action: none; }
+
+  /* size */
+  .size-row { display: flex; gap: 6px; align-items: center; }
+  .size-btn { width: 32px; height: 32px; border-radius: 8px; border: 0.5px solid var(--color-border); background: var(--color-card); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.12s, border-color 0.12s; }
+  .size-btn.size-active { background: var(--color-fg); border-color: var(--color-fg); }
+  .size-btn.size-active .size-dot { background: var(--color-bg); }
+  .size-dot { border-radius: 50%; background: var(--color-fg); display: block; }
+
+  /* palette */
+  .palette { display: flex; flex-wrap: wrap; gap: 5px; max-width: 256px; }
+  :global(.swatch) { width: 20px; height: 20px; border-radius: 5px; border: 1.5px solid transparent; cursor: pointer; transition: transform 0.1s, border-color 0.1s; }
+  :global(.swatch:hover) { transform: scale(1.2); }
+  :global(.swatch.swatch-active) { border-color: var(--color-fg); transform: scale(1.12); }
 
   /* form */
-  .plant-form {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-md);
-  }
-  .form-row {
-    display: flex;
-    gap: var(--space-md);
-    flex-wrap: wrap;
-  }
-  .plant-input {
-    flex: 1;
-    min-width: 140px;
-    background: var(--color-card);
-    border: 0.5px solid var(--color-border);
-    border-radius: var(--radius-input);
-    padding: var(--space-sm) var(--space-md);
-    font-family: var(--font-body);
-    font-size: var(--text-sm);
-    color: var(--color-fg);
-    outline: none;
-    transition: border-color 0.15s;
-  }
+  .plant-form { display: flex; flex-direction: column; gap: var(--space-md); max-width: 520px; }
+  .form-row { display: flex; gap: var(--space-md); flex-wrap: wrap; }
+  .plant-input { flex: 1; min-width: 140px; background: var(--color-card); border: 0.5px solid var(--color-border); border-radius: var(--radius-input); padding: var(--space-sm) var(--space-md); font-family: var(--font-body); font-size: var(--text-sm); color: var(--color-fg); outline: none; transition: border-color 0.15s; }
   .plant-input:focus { border-color: var(--color-accent); }
   .plant-input::placeholder { color: var(--color-muted); }
-
-  .plant-textarea {
-    background: var(--color-card);
-    border: 0.5px solid var(--color-border);
-    border-radius: var(--radius-input);
-    padding: var(--space-sm) var(--space-md);
-    font-family: var(--font-body);
-    font-size: var(--text-sm);
-    color: var(--color-fg);
-    outline: none;
-    resize: vertical;
-    transition: border-color 0.15s;
-    width: 100%;
-    box-sizing: border-box;
-  }
+  .plant-textarea { background: var(--color-card); border: 0.5px solid var(--color-border); border-radius: var(--radius-input); padding: var(--space-sm) var(--space-md); font-family: var(--font-body); font-size: var(--text-sm); color: var(--color-fg); outline: none; resize: vertical; transition: border-color 0.15s; width: 100%; box-sizing: border-box; }
   .plant-textarea:focus { border-color: var(--color-accent); }
   .plant-textarea::placeholder { color: var(--color-muted); }
-
-  .form-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-md);
-  }
-  .pixel-count {
-    font-family: var(--font-body);
-    font-size: var(--text-xs);
-    color: var(--color-muted);
-  }
-  .plant-btn {
-    background: var(--color-fg);
-    color: var(--color-bg);
-    border: none;
-    border-radius: var(--radius-pill);
-    padding: var(--space-sm) var(--space-xl);
-    font-family: var(--font-body);
-    font-size: var(--text-sm);
-    cursor: pointer;
-    transition: opacity 0.15s, background 0.15s;
-    white-space: nowrap;
-  }
+  .form-footer { display: flex; align-items: center; justify-content: space-between; gap: var(--space-md); }
+  .pixel-count { font-family: var(--font-body); font-size: var(--text-xs); color: var(--color-muted); }
+  .plant-btn { background: var(--color-fg); color: var(--color-bg); border: none; border-radius: var(--radius-pill); padding: var(--space-sm) var(--space-xl); font-family: var(--font-body); font-size: var(--text-sm); cursor: pointer; transition: opacity 0.15s, background 0.15s; white-space: nowrap; }
   .plant-btn:disabled { opacity: 0.35; cursor: not-allowed; }
   .plant-btn:not(:disabled):hover { background: var(--color-accent); }
-
-  .plant-confirm {
-    font-family: var(--font-body);
-    font-size: var(--text-sm);
-    color: var(--color-muted);
-    font-style: italic;
-  }
-  .plant-error {
-    font-family: var(--font-body);
-    font-size: var(--text-sm);
-    color: #c0392b;
-  }
+  .plant-confirm { font-family: var(--font-body); font-size: var(--text-sm); color: var(--color-muted); font-style: italic; }
+  .plant-error { font-family: var(--font-body); font-size: var(--text-sm); color: #c0392b; }
 </style>
 
 <script>
 (function () {
-  const GRID = 16;
-  const CELL = 16; // canvas is 256px / 16 = 16px per cell
+  const GRID = 16, CELL = 16;
 
-  // ── Palette ────────────────────────────────────────────────────────────
-  const COLORS = [
-    // neutrals / site palette
-    '#3d2f1f', '#6B5234', '#9C8B6E', '#C4B49A', '#E8DCC8', '#faf7f2', '#ffffff',
-    // warm earth
-    '#8B4513', '#CD853F', '#DEB887', '#F5DEB3',
-    // greens
-    '#2d5a27', '#4a7c59', '#7fb069', '#b5d5a0',
-    // blues
-    '#264653', '#2a9d8f', '#a8dadc', '#457b9d',
-    // pinks + purples
-    '#e07a5f', '#f2cc8f', '#e8a0bf', '#c77dff',
-    // darks
-    '#1a1a1a', '#333333', '#555555',
+  // ── Canvas setup ─────────────────────────────────────────────────────
+  const canvas = document.getElementById('pixel-canvas') as HTMLCanvasElement;
+  const ctx = canvas.getContext('2d')!;
+
+  // ── State ─────────────────────────────────────────────────────────────
+  let pixels: (string|null)[] = new Array(GRID*GRID).fill(null);
+  let basePixels: (string|null)[]|null = null;
+  let currentColor = '#1a1a1a';
+  let tool = 'pen';
+  let brushSize = 1;
+  let isDown = false;
+  let startCol = -1, startRow = -1;
+  // Selection
+  let selRect: {x1:number,y1:number,x2:number,y2:number}|null = null;
+  let selPixels: (string|null)[]|null = null;
+  let selPhase: 'idle'|'selecting'|'selected'|'moving' = 'idle';
+  let selAnchor: {col:number,row:number}|null = null;
+
+  // ── Helpers ───────────────────────────────────────────────────────────
+  function idx(c:number,r:number){ return r*GRID+c; }
+  function inBounds(c:number,r:number){ return c>=0&&c<GRID&&r>=0&&r<GRID; }
+
+  function getColRow(e: MouseEvent|TouchEvent):{col:number,row:number} {
+    const rect = canvas.getBoundingClientRect();
+    let cx:number, cy:number;
+    if ('touches' in e && e.touches.length) { cx=e.touches[0].clientX; cy=e.touches[0].clientY; }
+    else if ('changedTouches' in e && e.changedTouches.length) { cx=e.changedTouches[0].clientX; cy=e.changedTouches[0].clientY; }
+    else { cx=(e as MouseEvent).clientX; cy=(e as MouseEvent).clientY; }
+    return {
+      col: Math.floor((cx-rect.left) * GRID / rect.width),
+      row: Math.floor((cy-rect.top)  * GRID / rect.height),
+    };
+  }
+
+  function clamp(v:number,lo:number,hi:number){ return Math.max(lo,Math.min(hi,v)); }
+
+  // ── Drawing primitives ────────────────────────────────────────────────
+  function paintBrush(col:number, row:number, color:string|null, target=pixels) {
+    const half = Math.floor(brushSize/2);
+    for (let dy=0;dy<brushSize;dy++) for (let dx=0;dx<brushSize;dx++) {
+      const c=col+dx-half, r=row+dy-half;
+      if (inBounds(c,r)) target[idx(c,r)]=color;
+    }
+  }
+
+  function bresenham(x0:number,y0:number,x1:number,y1:number):{col:number,row:number}[] {
+    const pts=[];
+    let dx=Math.abs(x1-x0),dy=Math.abs(y1-y0),sx=x0<x1?1:-1,sy=y0<y1?1:-1,err=dx-dy;
+    while(true){
+      pts.push({col:x0,row:y0});
+      if(x0===x1&&y0===y1)break;
+      const e2=2*err;
+      if(e2>-dy){err-=dy;x0+=sx;}
+      if(e2<dx){err+=dx;y0+=sy;}
+    }
+    return pts;
+  }
+
+  function rectOutline(x0:number,y0:number,x1:number,y1:number):{col:number,row:number}[] {
+    const pts=[];
+    const minX=Math.min(x0,x1),maxX=Math.max(x0,x1),minY=Math.min(y0,y1),maxY=Math.max(y0,y1);
+    for(let x=minX;x<=maxX;x++){pts.push({col:x,row:minY});if(minY!==maxY)pts.push({col:x,row:maxY});}
+    for(let y=minY+1;y<maxY;y++){pts.push({col:minX,row:y});if(minX!==maxX)pts.push({col:maxX,row:y});}
+    return pts;
+  }
+
+  function ellipseOutline(x0:number,y0:number,x1:number,y1:number):{col:number,row:number}[] {
+    const cx=(x0+x1)/2, cy=(y0+y1)/2, rx=Math.abs(x1-x0)/2, ry=Math.abs(y1-y0)/2;
+    if(rx<0.4&&ry<0.4) return [{col:Math.round(cx),row:Math.round(cy)}];
+    const pts=new Map<string,{col:number,row:number}>();
+    const steps=Math.ceil(Math.PI*2*Math.max(rx,ry)*2.5);
+    for(let i=0;i<steps;i++){
+      const a=(i/steps)*Math.PI*2;
+      const c=Math.round(cx+Math.cos(a)*rx), r=Math.round(cy+Math.sin(a)*ry);
+      if(inBounds(c,r)){const k=`${c},${r}`;if(!pts.has(k))pts.set(k,{col:c,row:r});}
+    }
+    return [...pts.values()];
+  }
+
+  function floodFill(col:number,row:number,newColor:string|null){
+    const si=idx(col,row), target=pixels[si];
+    if(target===newColor)return;
+    const stack=[si],visited=new Set<number>();
+    while(stack.length){
+      const i=stack.pop()!;
+      if(visited.has(i)||pixels[i]!==target)continue;
+      visited.add(i);pixels[i]=newColor;
+      const c=i%GRID,r=Math.floor(i/GRID);
+      if(c>0)stack.push(i-1);if(c<GRID-1)stack.push(i+1);
+      if(r>0)stack.push(i-GRID);if(r<GRID-1)stack.push(i+GRID);
+    }
+  }
+
+  // ── Redraw ────────────────────────────────────────────────────────────
+  function redraw(){
+    ctx.clearRect(0,0,256,256);
+    // white background
+    ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,256,256);
+    // pixels
+    pixels.forEach((color,i)=>{
+      if(!color)return;
+      ctx.fillStyle=color;
+      ctx.fillRect((i%GRID)*CELL,Math.floor(i/GRID)*CELL,CELL,CELL);
+    });
+    // selection content overlay (while moving)
+    if(selPhase!=='idle'&&selPixels){
+      selPixels.forEach((color,i)=>{
+        if(!color)return;
+        ctx.fillStyle=color;
+        ctx.fillRect((i%GRID)*CELL,Math.floor(i/GRID)*CELL,CELL,CELL);
+      });
+    }
+    // selection rect
+    if(selRect&&selPhase!=='idle'){
+      const x=Math.min(selRect.x1,selRect.x2)*CELL, y=Math.min(selRect.y1,selRect.y2)*CELL;
+      const w=(Math.abs(selRect.x2-selRect.x1)+1)*CELL, h=(Math.abs(selRect.y2-selRect.y1)+1)*CELL;
+      ctx.save();
+      ctx.strokeStyle='rgba(0,0,0,0.8)'; ctx.lineWidth=1; ctx.setLineDash([3,2]);
+      ctx.strokeRect(x+0.5,y+0.5,w-1,h-1);
+      ctx.strokeStyle='rgba(255,255,255,0.6)'; ctx.setLineDash([3,2]); ctx.lineDashOffset=3;
+      ctx.strokeRect(x+0.5,y+0.5,w-1,h-1);
+      ctx.restore();
+    }
+    // grid lines
+    ctx.strokeStyle='rgba(180,180,180,0.45)'; ctx.lineWidth=0.5;
+    for(let i=0;i<=GRID;i++){
+      ctx.beginPath();ctx.moveTo(i*CELL,0);ctx.lineTo(i*CELL,256);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(0,i*CELL);ctx.lineTo(256,i*CELL);ctx.stroke();
+    }
+    updateCount();
+  }
+
+  // ── Selection helpers ─────────────────────────────────────────────────
+  function normSel(){
+    if(!selRect)return null;
+    return {x1:Math.min(selRect.x1,selRect.x2),y1:Math.min(selRect.y1,selRect.y2),x2:Math.max(selRect.x1,selRect.x2),y2:Math.max(selRect.y1,selRect.y2)};
+  }
+  function inSel(col:number,row:number){
+    const s=normSel(); if(!s)return false;
+    return col>=s.x1&&col<=s.x2&&row>=s.y1&&row<=s.y2;
+  }
+  function liftSel(){
+    const s=normSel(); if(!s)return;
+    selPixels=new Array(GRID*GRID).fill(null);
+    for(let r=s.y1;r<=s.y2;r++) for(let c=s.x1;c<=s.x2;c++){
+      selPixels[idx(c,r)]=pixels[idx(c,r)];
+      pixels[idx(c,r)]=null;
+    }
+  }
+  function stampSel(){
+    if(!selPixels)return;
+    selPixels.forEach((color,i)=>{ if(color)pixels[i]=color; });
+    selPixels=null;
+  }
+  function moveSel(dc:number,dr:number){
+    if(!selRect||!selPixels)return;
+    const newSel=new Array(GRID*GRID).fill(null);
+    selPixels.forEach((color,i)=>{
+      if(!color)return;
+      const c=(i%GRID)+dc, r=Math.floor(i/GRID)+dr;
+      if(inBounds(c,r))newSel[idx(c,r)]=color;
+    });
+    selPixels=newSel;
+    selRect={x1:selRect.x1+dc,y1:selRect.y1+dr,x2:selRect.x2+dc,y2:selRect.y2+dr};
+  }
+  function deselect(){
+    stampSel();
+    selRect=null; selPhase='idle'; selAnchor=null;
+    redraw();
+  }
+
+  // ── Pointer events ────────────────────────────────────────────────────
+  canvas.addEventListener('mousedown',  e=>onDown(e));
+  canvas.addEventListener('mousemove',  e=>onMove(e));
+  canvas.addEventListener('mouseup',    e=>onUp(e));
+  canvas.addEventListener('mouseleave', ()=>{ isDown=false; });
+  canvas.addEventListener('touchstart', e=>{e.preventDefault();onDown(e);},{passive:false});
+  canvas.addEventListener('touchmove',  e=>{e.preventDefault();onMove(e);},{passive:false});
+  canvas.addEventListener('touchend',   e=>{e.preventDefault();onUp(e);},{passive:false});
+
+  function onDown(e:MouseEvent|TouchEvent){
+    isDown=true;
+    const {col,row}=getColRow(e);
+    const cc=clamp(col,0,GRID-1), cr=clamp(row,0,GRID-1);
+    startCol=cc; startRow=cr;
+
+    if(tool==='pen'||tool==='eraser'){
+      const color=tool==='eraser'?null:currentColor;
+      paintBrush(cc,cr,color); redraw();
+    } else if(tool==='mirror'){
+      paintBrush(cc,cr,currentColor);
+      paintBrush(GRID-1-cc,cr,currentColor);
+      redraw();
+    } else if(tool==='fill'){
+      floodFill(cc,cr,currentColor); redraw(); isDown=false;
+    } else if(tool==='line'||tool==='rect'||tool==='circle'){
+      basePixels=[...pixels];
+    } else if(tool==='move'){
+      basePixels=[...pixels];
+    } else if(tool==='select'){
+      if(selPhase==='selected'&&inSel(cc,cr)){
+        selPhase='moving'; selAnchor={col:cc,row:cr};
+      } else {
+        if(selPhase==='selected') stampSel();
+        selPhase='selecting';
+        selRect={x1:cc,y1:cr,x2:cc,y2:cr};
+        selPixels=null;
+        redraw();
+      }
+    }
+  }
+
+  function onMove(e:MouseEvent|TouchEvent){
+    if(!isDown)return;
+    const {col,row}=getColRow(e);
+    const cc=clamp(col,0,GRID-1), cr=clamp(row,0,GRID-1);
+
+    if(tool==='pen'||tool==='eraser'){
+      paintBrush(cc,cr,tool==='eraser'?null:currentColor); redraw();
+    } else if(tool==='mirror'){
+      paintBrush(cc,cr,currentColor); paintBrush(GRID-1-cc,cr,currentColor); redraw();
+    } else if(tool==='line'&&basePixels){
+      pixels=[...basePixels];
+      bresenham(startCol,startRow,cc,cr).forEach(({col:c,row:r})=>paintBrush(c,r,currentColor));
+      redraw();
+    } else if(tool==='rect'&&basePixels){
+      pixels=[...basePixels];
+      rectOutline(startCol,startRow,cc,cr).forEach(({col:c,row:r})=>paintBrush(c,r,currentColor));
+      redraw();
+    } else if(tool==='circle'&&basePixels){
+      pixels=[...basePixels];
+      ellipseOutline(startCol,startRow,cc,cr).forEach(({col:c,row:r})=>paintBrush(c,r,currentColor));
+      redraw();
+    } else if(tool==='move'&&basePixels){
+      const dc=cc-startCol, dr=cr-startRow;
+      pixels=new Array(GRID*GRID).fill(null);
+      basePixels.forEach((color,i)=>{
+        if(!color)return;
+        const c=(i%GRID)+dc, r=Math.floor(i/GRID)+dr;
+        if(inBounds(c,r))pixels[idx(c,r)]=color;
+      });
+      redraw();
+    } else if(tool==='select'){
+      if(selPhase==='selecting'){
+        selRect={x1:startCol,y1:startRow,x2:cc,y2:cr}; redraw();
+      } else if(selPhase==='moving'&&selAnchor){
+        moveSel(cc-selAnchor.col, cr-selAnchor.row);
+        selAnchor={col:cc,row:cr}; redraw();
+      }
+    }
+  }
+
+  function onUp(e:MouseEvent|TouchEvent){
+    if(!isDown)return;
+    isDown=false;
+    const {col,row}=getColRow(e);
+    const cc=clamp(col,0,GRID-1), cr=clamp(row,0,GRID-1);
+
+    if(tool==='move') basePixels=null;
+    if(tool==='line'||tool==='rect'||tool==='circle') basePixels=null;
+    if(tool==='select'){
+      if(selPhase==='selecting'){
+        if(selRect&&selRect.x1===cc&&selRect.y1===cr){
+          // single click → deselect
+          selRect=null; selPhase='idle'; selPixels=null;
+        } else {
+          selPhase='selected'; liftSel();
+        }
+        redraw();
+      } else if(selPhase==='moving'){
+        selPhase='selected'; selAnchor=null;
+      }
+    }
+    startCol=-1; startRow=-1;
+  }
+
+  // Escape → deselect
+  document.addEventListener('keydown', e=>{
+    if(e.key==='Escape'&&selPhase!=='idle') deselect();
+  });
+
+  // ── Toolbar ───────────────────────────────────────────────────────────
+  const TOOLS = [
+    { id:'pen',    label:'Pen',               svg:'<path d="M11 2l3 3-8 8-3.5.5.5-3.5L11 2z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>' },
+    { id:'mirror', label:'Vertical mirror pen', svg:'<path d="M4 2l3 3-5 5-2 .3.3-2L4 2zM12 2l-3 3 5 5 2 .3-.3-2L12 2z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M8 1v14" stroke="currentColor" stroke-width="1" stroke-dasharray="2,1.5"/>' },
+    { id:'eraser', label:'Eraser',            svg:'<path d="M2 12h12M9 3l4 4-5 5H4L2 10l7-7z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>' },
+    { id:'fill',   label:'Paint bucket',      svg:'<path d="M2 10l6-7 6 7M4 8l4-5 4 5H4z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="12" cy="12" r="2" stroke="currentColor" stroke-width="1.2" fill="none"/>' },
+    { id:'--' },
+    { id:'line',   label:'Line',              svg:'<path d="M2 12L12 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>' },
+    { id:'rect',   label:'Rectangle',         svg:'<rect x="2" y="3" width="10" height="8" rx="0.5" stroke="currentColor" stroke-width="1.3" fill="none"/>' },
+    { id:'circle', label:'Ellipse',           svg:'<ellipse cx="7" cy="7" rx="5" ry="4" stroke="currentColor" stroke-width="1.3" fill="none"/>' },
+    { id:'--' },
+    { id:'move',   label:'Move canvas',       svg:'<path d="M7 1v12M1 7h12M7 1L5 3M7 1l2 2M7 13l-2-2M7 13l2-2M1 7l2-2M1 7l2 2M13 7l-2-2M13 7l-2 2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>' },
+    { id:'select', label:'Rectangular select',svg:'<rect x="2" y="2" width="10" height="10" stroke="currentColor" stroke-width="1.2" fill="none" stroke-dasharray="2.5,2"/>' },
   ];
 
-  let currentColor = COLORS[0];
-  let tool: 'draw' | 'erase' = 'draw';
-  let isDrawing = false;
-  const pixels = new Array(GRID * GRID).fill(null) as (string | null)[];
+  const toolbar = document.getElementById('toolbar')!;
+  TOOLS.forEach(t => {
+    if(t.id==='--'){
+      const div=document.createElement('div'); div.className='tool-divider'; toolbar.appendChild(div); return;
+    }
+    const btn=document.createElement('button');
+    btn.type='button'; btn.className='tool-btn'+(t.id==='pen'?' tool-active':'');
+    btn.id=`tool-${t.id}`; btn.title=t.label!; btn.setAttribute('aria-label',t.label!);
+    btn.innerHTML=`<svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">${t.svg}</svg>`;
+    btn.addEventListener('click',()=>{
+      if(selPhase!=='idle') deselect();
+      tool=t.id;
+      document.querySelectorAll('.tool-btn').forEach(b=>b.classList.remove('tool-active'));
+      btn.classList.add('tool-active');
+      canvas.style.cursor=t.id==='fill'?'cell':t.id==='move'?'grab':t.id==='select'?'crosshair':'crosshair';
+    });
+    toolbar.appendChild(btn);
+  });
 
-  // ── Render palette ─────────────────────────────────────────────────────
-  const paletteEl = document.getElementById('palette')!;
-  COLORS.forEach(color => {
-    const sw = document.createElement('button');
-    sw.type = 'button';
-    sw.className = 'palette-swatch' + (color === currentColor ? ' selected' : '');
-    sw.style.background = color;
-    sw.setAttribute('aria-label', color);
-    sw.addEventListener('click', () => {
-      currentColor = color;
-      tool = 'draw';
-      document.querySelectorAll('.palette-swatch').forEach(s => s.classList.remove('selected'));
-      sw.classList.add('selected');
-      setActiveTool('draw');
+  // ── Brush size ────────────────────────────────────────────────────────
+  document.querySelectorAll('.size-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      brushSize=parseInt((btn as HTMLElement).dataset.size!);
+      document.querySelectorAll('.size-btn').forEach(b=>b.classList.remove('size-active'));
+      btn.classList.add('size-active');
+    });
+  });
+
+  // ── Palette ───────────────────────────────────────────────────────────
+  const COLORS = [
+    '#000000','#1a1a1a','#3d3d3d','#6e6e6e','#afafaf','#d4d4d4','#f0f0f0','#ffffff',
+    '#3d2f1f','#6B5234','#9C8B6E','#C4B49A','#E8DCC8',
+    '#7c2d12','#c2410c','#ea580c','#fb923c','#fde68a',
+    '#14532d','#166534','#4ade80','#86efac',
+    '#1e3a5f','#1d4ed8','#60a5fa','#a5b4fc',
+    '#6b21a8','#a855f7','#e879f9','#fda4af',
+  ];
+
+  const paletteEl=document.getElementById('palette')!;
+  COLORS.forEach(color=>{
+    const sw=document.createElement('button');
+    sw.type='button'; sw.className='swatch'+(color===currentColor?' swatch-active':'');
+    sw.style.background=color; sw.setAttribute('aria-label',color);
+    sw.addEventListener('click',()=>{
+      currentColor=color; tool=tool==='eraser'?'pen':tool;
+      document.querySelectorAll('.swatch').forEach(s=>s.classList.remove('swatch-active'));
+      sw.classList.add('swatch-active');
+      // switch to pen if on eraser
+      if(tool==='eraser'){
+        tool='pen';
+        document.querySelectorAll('.tool-btn').forEach(b=>b.classList.remove('tool-active'));
+        document.getElementById('tool-pen')?.classList.add('tool-active');
+      }
     });
     paletteEl.appendChild(sw);
   });
 
-  // ── Canvas drawing ─────────────────────────────────────────────────────
-  const canvas = document.getElementById('pixel-canvas') as HTMLCanvasElement;
-  const ctx = canvas.getContext('2d')!;
-
-  function redraw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    // Draw grid background
-    ctx.fillStyle = '#faf7f2';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    // Grid lines
-    ctx.strokeStyle = '#E8DCC8';
-    ctx.lineWidth = 0.5;
-    for (let i = 0; i <= GRID; i++) {
-      ctx.beginPath(); ctx.moveTo(i * CELL, 0); ctx.lineTo(i * CELL, canvas.height); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(0, i * CELL); ctx.lineTo(canvas.width, i * CELL); ctx.stroke();
-    }
-    // Pixels
-    pixels.forEach((color, i) => {
-      if (!color) return;
-      const x = (i % GRID) * CELL;
-      const y = Math.floor(i / GRID) * CELL;
-      ctx.fillStyle = color;
-      ctx.fillRect(x, y, CELL, CELL);
-    });
-    updateCount();
-  }
-
-  function getCell(e: MouseEvent | TouchEvent): number {
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = GRID / rect.width;
-    const scaleY = GRID / rect.height;
-    let clientX: number, clientY: number;
-    if ('touches' in e) {
-      clientX = e.touches[0].clientX;
-      clientY = e.touches[0].clientY;
-    } else {
-      clientX = e.clientX;
-      clientY = e.clientY;
-    }
-    const col = Math.floor((clientX - rect.left) * scaleX);
-    const row = Math.floor((clientY - rect.top)  * scaleY);
-    if (col < 0 || col >= GRID || row < 0 || row >= GRID) return -1;
-    return row * GRID + col;
-  }
-
-  function paint(e: MouseEvent | TouchEvent) {
-    const idx = getCell(e);
-    if (idx < 0) return;
-    pixels[idx] = tool === 'erase' ? null : currentColor;
-    redraw();
-  }
-
-  canvas.addEventListener('mousedown',  e => { isDrawing = true; paint(e); });
-  canvas.addEventListener('mousemove',  e => { if (isDrawing) paint(e); });
-  canvas.addEventListener('mouseup',    () => { isDrawing = false; });
-  canvas.addEventListener('mouseleave', () => { isDrawing = false; });
-  canvas.addEventListener('touchstart', e => { e.preventDefault(); isDrawing = true; paint(e); }, { passive: false });
-  canvas.addEventListener('touchmove',  e => { e.preventDefault(); if (isDrawing) paint(e); }, { passive: false });
-  canvas.addEventListener('touchend',   () => { isDrawing = false; });
-
-  // ── Tools ──────────────────────────────────────────────────────────────
-  function setActiveTool(t: 'draw' | 'erase') {
-    tool = t;
-    document.getElementById('tool-draw')!.classList.toggle('active', t === 'draw');
-    document.getElementById('tool-erase')!.classList.toggle('active', t === 'erase');
-  }
-  document.getElementById('tool-draw')!.addEventListener('click',  () => setActiveTool('draw'));
-  document.getElementById('tool-erase')!.addEventListener('click', () => setActiveTool('erase'));
-  document.getElementById('tool-clear')!.addEventListener('click', () => {
-    pixels.fill(null);
-    redraw();
+  // ── Clear button (double-click canvas) ───────────────────────────────
+  canvas.addEventListener('dblclick', ()=>{
+    if(confirm('Clear the canvas?')){pixels.fill(null);selRect=null;selPixels=null;selPhase='idle';redraw();}
   });
 
-  // ── Pixel count + submit enable ────────────────────────────────────────
-  const countEl = document.getElementById('pixel-count')!;
-  const plantBtn = document.getElementById('plant-btn') as HTMLButtonElement;
-
-  function updateCount() {
-    const n = pixels.filter(Boolean).length;
-    if (n === 0) {
-      countEl.textContent = 'draw at least 4 pixels to plant';
-    } else if (n < 4) {
-      countEl.textContent = `${n} pixel${n === 1 ? '' : 's'} — draw a bit more`;
-    } else {
-      countEl.textContent = `${n} pixels painted ✓`;
-    }
-    plantBtn.disabled = n < 4;
+  // ── Pixel count + submit ──────────────────────────────────────────────
+  const countEl=document.getElementById('pixel-count')!;
+  const plantBtn=document.getElementById('plant-btn') as HTMLButtonElement;
+  function updateCount(){
+    const n=pixels.filter(Boolean).length+(selPixels?.filter(Boolean).length??0);
+    countEl.textContent=n<4?(n===0?'draw at least 4 pixels to plant':`${n} pixel${n===1?'':'s'} — a bit more!`):`${n} pixels ✓`;
+    plantBtn.disabled=n<4;
   }
 
-  // ── Submit ─────────────────────────────────────────────────────────────
-  const form    = document.getElementById('plant-form') as HTMLFormElement;
-  const confirm = document.getElementById('plant-confirm')!;
-  const errorEl = document.getElementById('plant-error')!;
+  // ── Submit ────────────────────────────────────────────────────────────
+  const form=document.getElementById('plant-form') as HTMLFormElement;
+  const confirm2=document.getElementById('plant-confirm')!;
+  const errorEl=document.getElementById('plant-error')!;
 
-  form.addEventListener('submit', async (e) => {
+  form.addEventListener('submit',async e=>{
     e.preventDefault();
-    // Honeypot check
-    const honeypot = (form.querySelector('[name="website_url"]') as HTMLInputElement).value;
-    if (honeypot) return;
-
-    const name    = (form.querySelector('#plant-name')    as HTMLInputElement).value;
-    const website = (form.querySelector('#plant-website') as HTMLInputElement).value;
-    const note    = (form.querySelector('#plant-note')    as HTMLTextAreaElement).value;
-
-    plantBtn.disabled = true;
-    plantBtn.textContent = 'planting…';
-    errorEl.setAttribute('hidden', '');
-
+    if((form.querySelector('[name="hp"]') as HTMLInputElement).value)return;
+    // Stamp selection before submitting
+    if(selPhase!=='idle') stampSel();
+    const name=(form.querySelector('#plant-name') as HTMLInputElement).value;
+    const website=(form.querySelector('#plant-website') as HTMLInputElement).value;
+    const note=(form.querySelector('#plant-note') as HTMLTextAreaElement).value;
+    plantBtn.disabled=true; plantBtn.textContent='planting…'; errorEl.setAttribute('hidden','');
     try {
-      const res = await fetch('/api/plant', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pixels: pixels.map(p => p ?? null), name, note, website }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Something went wrong');
-
-      // Success
-      form.style.opacity = '0';
-      form.style.transition = 'opacity 0.2s';
-      setTimeout(() => {
-        form.style.display = 'none';
-        confirm.removeAttribute('hidden');
-      }, 200);
-    } catch (err: any) {
-      errorEl.textContent = err.message;
-      errorEl.removeAttribute('hidden');
-      plantBtn.disabled = false;
-      plantBtn.textContent = 'plant it ✦';
+      const res=await fetch('/api/plant',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pixels,name,note,website})});
+      const data=await res.json();
+      if(!res.ok)throw new Error(data.error||'Something went wrong');
+      form.style.opacity='0'; form.style.transition='opacity 0.2s';
+      setTimeout(()=>{form.style.display='none';confirm2.removeAttribute('hidden');},200);
+    } catch(err:any){
+      errorEl.textContent=err.message; errorEl.removeAttribute('hidden');
+      plantBtn.disabled=false; plantBtn.textContent='plant it ✦';
     }
   });
 
-  // ── Render existing plantings ──────────────────────────────────────────
-  document.querySelectorAll('.planting-canvas').forEach(el => {
-    const canvasEl = el as HTMLCanvasElement;
-    const data = JSON.parse(canvasEl.dataset.pixels ?? '[]') as (string | null)[];
-    const pCtx = canvasEl.getContext('2d')!;
-    const cell = canvasEl.width / GRID; // 64/16 = 4px per cell
-    pCtx.clearRect(0, 0, canvasEl.width, canvasEl.height);
-    data.forEach((color, i) => {
-      if (!color) return;
-      const x = (i % GRID) * cell;
-      const y = Math.floor(i / GRID) * cell;
-      pCtx.fillStyle = color;
-      pCtx.fillRect(x, y, cell, cell);
+  // ── Render existing plantings ─────────────────────────────────────────
+  document.querySelectorAll('.planting-canvas').forEach(el=>{
+    const c=el as HTMLCanvasElement;
+    const data=JSON.parse(c.dataset.pixels??'[]') as (string|null)[];
+    const pc=c.getContext('2d')!;
+    const cell=c.width/GRID;
+    pc.fillStyle='#ffffff'; pc.fillRect(0,0,c.width,c.height);
+    data.forEach((color,i)=>{
+      if(!color)return;
+      pc.fillStyle=color;
+      pc.fillRect((i%GRID)*cell,Math.floor(i/GRID)*cell,cell,cell);
     });
   });
 
+  // ── Init ─────────────────────────────────────────────────────────────
   redraw();
 })();
 </script>

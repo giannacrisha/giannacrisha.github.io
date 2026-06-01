@@ -1,0 +1,313 @@
+---
+// src/components/MinimizeBar.astro
+// Global tab bar + iframe modal — rendered in Garden.astro
+// Tabs are stored in localStorage under 'gi-page-tabs' as [{id, title, url}]
+---
+
+<!-- Tab bar at bottom of screen -->
+<div id="gi-tabbar" class="gi-tabbar" aria-label="Minimized pages"></div>
+
+<!-- Iframe modal for restored tabs -->
+<div id="gi-tab-modal" class="gi-tab-modal" aria-hidden="true" role="dialog" aria-label="Page viewer">
+  <div class="gi-tab-modal-chrome">
+    <div class="gi-tab-modal-title" id="gi-tab-modal-title"></div>
+    <div class="gi-tab-modal-actions">
+      <button class="gi-tab-modal-btn gi-tab-modal-btn--minimize" id="gi-tab-modal-minimize" title="Minimize" aria-label="Minimize">
+        <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><line x1="1" y1="9" x2="10" y2="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <button class="gi-tab-modal-btn gi-tab-modal-btn--close" id="gi-tab-modal-close" title="Close" aria-label="Close">
+        <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><line x1="1.5" y1="1.5" x2="9.5" y2="9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="9.5" y1="1.5" x2="1.5" y2="9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  </div>
+  <iframe id="gi-tab-iframe" class="gi-tab-iframe" title="Page content" src="about:blank"></iframe>
+</div>
+<div id="gi-tab-backdrop" class="gi-tab-backdrop"></div>
+
+<style is:global>
+  /* ── Tab bar ─────────────────────────────────── */
+  .gi-tabbar {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 6px;
+    padding: 0 16px 0;
+    z-index: 300;
+    align-items: flex-end;
+    pointer-events: none;
+    overflow: visible;
+  }
+
+  .gi-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 14px 8px;
+    background: var(--color-card, #fff);
+    border: 0.5px solid var(--color-border, #E8DCC8);
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    font-family: var(--font-body);
+    font-size: 11px;
+    color: var(--color-fg);
+    cursor: pointer;
+    pointer-events: auto;
+    box-shadow: 0 -2px 12px rgba(0,0,0,0.06);
+    /* no animation by default — only .gi-tab--new gets the rise */
+    transition: background 0.15s, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+    max-width: 180px;
+    white-space: nowrap;
+    /* overflow must be visible for transform to show — truncation handled on label */
+    overflow: visible;
+    transform-origin: center bottom;
+    /* sink slightly below viewport so scale growth only goes upward, no gap */
+    padding-bottom: 4px;
+  }
+
+  /* Rise animation only on newly added tabs */
+  .gi-tab--new {
+    animation: tab-rise 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+  @keyframes tab-rise {
+    from { transform: translateY(100%); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+
+  .gi-tab:hover {
+    background: var(--color-accent-light, #EDE5D8);
+    transform: scaleX(1.05) scaleY(1.08) translateY(-2px);
+    box-shadow: 0 -4px 16px rgba(0,0,0,0.1);
+  }
+
+  .gi-tab-label {
+    flex: 1;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: 0.03em;
+  }
+
+  .gi-tab-close {
+    flex-shrink: 0;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #ff5f57;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.15s;
+    padding: 0;
+  }
+  .gi-tab:hover .gi-tab-close { opacity: 1; }
+  .gi-tab-close svg { display: block; }
+
+  /* ── Iframe modal ─────────────────────────────── */
+  .gi-tab-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.3);
+    z-index: 350;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  .gi-tab-backdrop.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .gi-tab-modal {
+    position: fixed;
+    top: 5vh;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    width: min(92vw, 960px);
+    height: 88vh;
+    background: var(--color-bg, #faf7f2);
+    border-radius: 12px;
+    overflow: hidden;
+    z-index: 400;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.18);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+  .gi-tab-modal.open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .gi-tab-modal-chrome {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: var(--color-card, #fff);
+    border-bottom: 0.5px solid var(--color-border, #E8DCC8);
+    flex-shrink: 0;
+  }
+
+  .gi-tab-modal-title {
+    font-family: var(--font-body);
+    font-size: 12px;
+    color: var(--color-muted);
+    letter-spacing: 0.04em;
+  }
+
+  .gi-tab-modal-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .gi-tab-modal-btn {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    color: transparent;
+    transition: color 0.12s;
+  }
+  .gi-tab-modal-btn:hover { color: rgba(0,0,0,0.6); }
+  .gi-tab-modal-btn--minimize { background: #febc2e; }
+  .gi-tab-modal-btn--close    { background: #ff5f57; }
+
+  .gi-tab-iframe {
+    flex: 1;
+    border: none;
+    width: 100%;
+  }
+</style>
+
+<script is:inline>
+(function () {
+  var STORAGE_KEY  = 'gi-page-tabs';
+  var SEEN_KEY     = 'gi-tabs-seen';   // tracks which tab IDs have already animated
+  var tabbar       = document.getElementById('gi-tabbar');
+  var modal        = document.getElementById('gi-tab-modal');
+  var backdrop     = document.getElementById('gi-tab-backdrop');
+  var iframe       = document.getElementById('gi-tab-iframe');
+  var titleEl      = document.getElementById('gi-tab-modal-title');
+  var btnMin       = document.getElementById('gi-tab-modal-minimize');
+  var btnClose     = document.getElementById('gi-tab-modal-close');
+  var activeTabId  = null;
+
+  // ── Storage helpers ──────────────────────────────
+  function getTabs() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch { return []; }
+  }
+  function saveTabs(tabs) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(tabs));
+  }
+  function getSeenIds() {
+    try { return JSON.parse(sessionStorage.getItem(SEEN_KEY) || '[]'); } catch { return []; }
+  }
+  function markSeen(id) {
+    var seen = getSeenIds();
+    if (!seen.includes(id)) { seen.push(id); sessionStorage.setItem(SEEN_KEY, JSON.stringify(seen)); }
+  }
+
+  function addTab(id, title, url) {
+    var tabs = getTabs().filter(function(t) { return t.id !== id; });
+    tabs.push({ id: id, title: title, url: url });
+    saveTabs(tabs);
+  }
+  function removeTab(id) {
+    saveTabs(getTabs().filter(function(t) { return t.id !== id; }));
+    // also remove from seen so it can animate again if re-added
+    var seen = getSeenIds().filter(function(s) { return s !== id; });
+    sessionStorage.setItem(SEEN_KEY, JSON.stringify(seen));
+  }
+
+  // ── Render tabs ──────────────────────────────────
+  function renderTabs(newId) {
+    var tabs   = getTabs();
+    var seenIds = getSeenIds();
+    tabbar.innerHTML = '';
+
+    tabs.forEach(function(t) {
+      var isNew = (t.id === newId) || !seenIds.includes(t.id);
+
+      var tab = document.createElement('div');
+      tab.className = 'gi-tab' + (isNew ? ' gi-tab--new' : '');
+      tab.setAttribute('role', 'button');
+      tab.setAttribute('tabindex', '0');
+
+      var label = document.createElement('span');
+      label.className = 'gi-tab-label';
+      label.textContent = t.title;
+
+      var closeBtn = document.createElement('button');
+      closeBtn.className = 'gi-tab-close';
+      closeBtn.setAttribute('aria-label', 'Close ' + t.title);
+      closeBtn.innerHTML = '<svg width="6" height="6" viewBox="0 0 6 6" fill="none"><line x1="1" y1="1" x2="5" y2="5" stroke="rgba(0,0,0,0.5)" stroke-width="1.2" stroke-linecap="round"/><line x1="5" y1="1" x2="1" y2="5" stroke="rgba(0,0,0,0.5)" stroke-width="1.2" stroke-linecap="round"/></svg>';
+      closeBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        removeTab(t.id);
+        if (activeTabId === t.id) closeModal();
+        renderTabs();
+      });
+
+      tab.appendChild(label);
+      tab.appendChild(closeBtn);
+      tab.addEventListener('click', function() { openModal(t); });
+      tab.addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') openModal(t); });
+      tabbar.appendChild(tab);
+
+      // Mark as seen so future page loads skip the animation
+      markSeen(t.id);
+    });
+  }
+
+  // ── Modal open/close ─────────────────────────────
+  function openModal(tab) {
+    activeTabId = tab.id;
+    titleEl.textContent = tab.title;
+    iframe.src = tab.url;
+    modal.classList.add('open');
+    backdrop.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeModal() {
+    modal.classList.remove('open');
+    backdrop.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
+    iframe.src = 'about:blank';
+    activeTabId = null;
+  }
+
+  btnMin.addEventListener('click', closeModal);
+  btnClose.addEventListener('click', function() {
+    if (activeTabId) { removeTab(activeTabId); renderTabs(); }
+    closeModal();
+  });
+  backdrop.addEventListener('click', closeModal);
+  document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
+
+  // ── Public API for MinimizePageBtn ───────────────
+  window.__giTabs = {
+    add: function(id, title, url) {
+      addTab(id, title, url);
+      renderTabs(id);  // pass id so this specific tab gets the rise animation
+    },
+  };
+
+  // On page load, render existing tabs without any animation
+  renderTabs();
+})();
+</script>
