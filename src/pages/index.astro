@@ -132,6 +132,7 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
           <a class="garden-link-btn" href="https://maggieappleton.com/garden-history" target="_blank" rel="noopener">what is a digital garden? ↗</a>
           <button class="garden-link-btn" id="btn-story">the story</button>
           <button class="garden-link-btn" id="btn-design">the design</button>
+          <button class="garden-link-btn" id="btn-stages">growth stages</button>
         </div>
       </header>
 
@@ -839,6 +840,58 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
     text-decoration: underline;
     text-decoration-color: var(--color-accent);
     text-underline-offset: 3px;
+  }
+
+  /* ── Growth stages modal ────────────────────────────────────────────── */
+  :global(.stages-body) {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xxl);
+    padding-top: var(--space-md);
+  }
+  :global(.stage-row) {
+    display: flex;
+    gap: var(--space-xl);
+    align-items: flex-start;
+  }
+  :global(.stage-icon) {
+    font-size: 22px;
+    width: 32px;
+    flex-shrink: 0;
+    text-align: center;
+    line-height: 1.4;
+  }
+  :global(.stage-icon--dust)  { color: #9C8B6E; }
+  :global(.stage-icon--spark) { color: #C4B49A; }
+  :global(.stage-icon--star)  { color: #5C4D3A; }
+  :global(.stage-content) {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+  :global(.stage-name) {
+    font-family: var(--font-serif);
+    font-size: var(--text-lg);
+    color: var(--color-fg);
+    font-weight: 500;
+    margin: 0;
+  }
+  :global(.stage-desc) {
+    font-family: var(--font-body);
+    font-size: var(--text-md);
+    color: var(--color-muted);
+    line-height: var(--leading-loose);
+    margin: 0;
+  }
+  :global(.stage-note) {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+    font-style: italic;
+    line-height: var(--leading-loose);
+    padding-top: var(--space-md);
+    border-top: 0.5px solid var(--color-border);
+    margin: 0;
   }
 
   /* ── Design system modal ─────────────────────────────────────────────── */
@@ -1783,6 +1836,40 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
           </section>
 
         </div>`;
+
+      var stagesHTML = `
+        <h2 class="story-title">growth stages</h2>
+        <div class="modal-meta">
+          <p class="modal-meta-desc">Everything in the garden is tagged with a growth stage. It's a way of being honest about how finished — or unfinished — something is.</p>
+        </div>
+        <div class="stages-body">
+          <div class="stage-row">
+            <div class="stage-icon stage-icon--dust">●</div>
+            <div class="stage-content">
+              <p class="stage-name">dust</p>
+              <p class="stage-desc">early, scattered, not yet gathered. a seed of an idea that hasn't taken shape yet. rough notes, half-thoughts, things i'm still figuring out. exists here because even messy starts deserve a place.</p>
+            </div>
+          </div>
+          <div class="stage-row">
+            <div class="stage-icon stage-icon--spark">✦</div>
+            <div class="stage-content">
+              <p class="stage-name">spark</p>
+              <p class="stage-desc">igniting, taking shape, in progress. there's something here — a direction, a voice, a clear idea — but it's still growing. i'm actively working on it or returning to it often.</p>
+            </div>
+          </div>
+          <div class="stage-row">
+            <div class="stage-icon stage-icon--star">★</div>
+            <div class="stage-content">
+              <p class="stage-name">star</p>
+              <p class="stage-desc">complete, burning steadily, fully itself. this one is done — or as done as anything ever gets. i'm happy with it. it might still get small edits over time, but the core won't change.</p>
+            </div>
+          </div>
+          <p class="stage-note">nothing here is permanent. a dust note might become a star essay years later. that's the point.</p>
+        </div>`;
+
+      document.getElementById('btn-stages')?.addEventListener('click', function () {
+        openModal(stagesHTML, 'growth stages', 'stages');
+      });
 
       document.getElementById('btn-story')?.addEventListener('click', function () {
         openModal(storyHTML, 'the story', 'story');

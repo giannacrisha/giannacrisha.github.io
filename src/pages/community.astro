@@ -6,45 +6,17 @@ import CommunityGarden from '../components/CommunityGarden.astro';
 <Garden
   title="community garden"
   description="a shared pixel-art garden. draw a little plant, creature, or scene and leave it here."
+  noFooter
 >
-  <section class="community-page">
-    <div class="community-header">
-      <h1>community garden</h1>
-      <p class="community-desc">
-        draw something small and leave it here. a plant, a creature, a doodle.
-        this is a shared space. be kind to it.
-      </p>
-    </div>
-
-    <CommunityGarden />
-  </section>
+  <CommunityGarden />
 </Garden>
 
-<style>
-  .community-page {
-    max-width: var(--width-site);
-    margin: 0 auto;
-    padding: var(--space-xxl) var(--space-xl);
-  }
-
-  .community-header {
-    margin-bottom: var(--space-xxl);
-  }
-
-  .community-header h1 {
-    font-family: var(--font-display);
-    font-size: clamp(2rem, 5vw, 3rem);
-    color: var(--color-fg);
-    margin: 0 0 var(--space-md);
-    line-height: 1.1;
-  }
-
-  .community-desc {
-    font-family: var(--font-body);
-    font-size: var(--text-sm);
-    color: var(--color-muted);
-    max-width: 480px;
-    line-height: 1.7;
-    margin: 0;
+<style is:global>
+  /* Make main fill remaining viewport height */
+  body, html { height: 100%; }
+  main {
+    height: calc(100vh - 56px); /* 56px = nav height */
+    overflow: hidden;
+    display: flex;
   }
 </style>

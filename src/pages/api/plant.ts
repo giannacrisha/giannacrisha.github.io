@@ -5,8 +5,8 @@ export const prerender = false;
 
 import type { APIRoute } from 'astro';
 
-const REPO_OWNER = 'giannacrisha';
-const REPO_NAME  = 'giannacrisha.github.io';
+const REPO_OWNER = import.meta.env.GITHUB_REPO_OWNER ?? 'giannacrisha';
+const REPO_NAME  = import.meta.env.GITHUB_REPO_NAME  ?? 'giannacrisha.github.io';
 const LABEL      = 'community-garden';
 
 export const POST: APIRoute = async ({ request }) => {
@@ -36,7 +36,20 @@ export const POST: APIRoute = async ({ request }) => {
 
   const displayName = (name ?? '').trim().slice(0, 50) || 'anonymous';
   const safeNote    = (note ?? '').trim().slice(0, 280);
-  const safeWebsite = (website ?? '').trim().slice(0, 200);
+
+  // Validate website: must be empty or a safe http(s) URL
+  const rawWebsite = (website ?? '').trim().slice(0, 200);
+  let safeWebsite = '';
+  if (rawWebsite) {
+    try {
+      const u = new URL(rawWebsite);
+      if (u.protocol === 'http:' || u.protocol === 'https:') {
+        safeWebsite = rawWebsite;
+      }
+    } catch {
+      // invalid URL — drop it silently
+    }
+  }
 
   // Honeypot check (set by the form — bots fill it in)
   // (handled client-side; we trust the server to reject if it ever slips through)
