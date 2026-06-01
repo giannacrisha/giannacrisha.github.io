@@ -1,8 +1,8 @@
 ---
 // src/components/CommunityGarden.astro
-const REPO_OWNER = 'giannacrisha';
-const REPO_NAME  = 'giannacrisha.github.io';
-const LABEL      = 'community-garden';
+const REPO_OWNER = import.meta.env.GITHUB_REPO_OWNER ?? 'giannacrisha';
+const REPO_NAME  = import.meta.env.GITHUB_REPO_NAME  ?? 'giannacrisha.github.io';
+const LABEL      = import.meta.env.GITHUB_GARDEN_LABEL ?? 'community-garden';
 
 function timeAgo(dateStr: string): string {
   const now = Date.now();

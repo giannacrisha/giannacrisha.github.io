@@ -5,8 +5,8 @@ export const prerender = false;
 
 import type { APIRoute } from 'astro';
 
-const REPO_OWNER = 'giannacrisha';
-const REPO_NAME  = 'giannacrisha.github.io';
+const REPO_OWNER = import.meta.env.GITHUB_REPO_OWNER ?? 'giannacrisha';
+const REPO_NAME  = import.meta.env.GITHUB_REPO_NAME  ?? 'giannacrisha.github.io';
 const LABEL      = 'community-garden';
 
 export const POST: APIRoute = async ({ request }) => {

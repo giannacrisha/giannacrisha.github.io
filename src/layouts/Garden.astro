@@ -16,7 +16,7 @@ const { title, description, ogImage, noFooter = false } = Astro.props;
 ---
 <Base title={title} description={description} ogImage={ogImage}>
   <Nav />
-  <main>
+  <main id="main-content" tabindex="-1">
     <slot />
   </main>
   {!noFooter && <Footer />}

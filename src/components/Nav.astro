@@ -17,13 +17,13 @@ const sublinks = [
     <ul class="nav-links">
       <!-- the garden with hover dropdown -->
       <li class="nav-item nav-item--garden">
-        <a href="/" class:list={['nav-link', { active: gardenActive }]}>
+        <a href="/" class:list={['nav-link', { active: gardenActive }]} aria-haspopup="true" aria-expanded="false" id="garden-nav-trigger">
           the garden
           <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true" class="caret">
             <path d="M2 3.5l3 3 3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </a>
-        <div class="garden-dropdown">
+        <div class="garden-dropdown" id="garden-dropdown" role="region" aria-label="Garden sections">
           <div class="garden-dropdown-inner">
             {sublinks.map(l => (
               <a href={l.href} class:list={['dropdown-link', { active: current.startsWith(l.href) }]}>
@@ -145,7 +145,7 @@ const sublinks = [
     flex-direction: column;
   }
   .garden-dropdown-inner {
-    background: #ffffff;
+    background: var(--color-card);
     border: 0.5px solid var(--color-border);
     border-radius: var(--radius-card);
     box-shadow: 0 4px 20px rgba(0,0,0,0.07);
@@ -313,12 +313,21 @@ const sublinks = [
   const backdrop = document.getElementById('nav-backdrop');
   const closeBtn = document.getElementById('nav-close');
 
+  // Focusable elements selector
+  const FOCUSABLE = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+  function getFocusable(): HTMLElement[] {
+    return Array.from(menu?.querySelectorAll<HTMLElement>(FOCUSABLE) ?? []);
+  }
+
   function openMenu() {
     menu?.classList.add('open');
     backdrop?.classList.add('open');
     btn?.setAttribute('aria-expanded', 'true');
     menu?.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
+    // Move focus into the drawer (close button)
+    setTimeout(() => closeBtn?.focus(), 50);
   }
 
   function closeMenu() {
@@ -327,14 +336,39 @@ const sublinks = [
     btn?.setAttribute('aria-expanded', 'false');
     menu?.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
+    // Return focus to the hamburger button
+    btn?.focus();
   }
 
   btn?.addEventListener('click', openMenu);
   closeBtn?.addEventListener('click', closeMenu);
   backdrop?.addEventListener('click', closeMenu);
 
-  // Close on Escape
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeMenu();
+  // Focus trap inside drawer
+  menu?.addEventListener('keydown', (e: KeyboardEvent) => {
+    if (e.key === 'Escape') { closeMenu(); return; }
+    if (e.key !== 'Tab') return;
+    const focusable = getFocusable();
+    if (!focusable.length) return;
+    const first = focusable[0];
+    const last  = focusable[focusable.length - 1];
+    if (e.shiftKey) {
+      if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+    } else {
+      if (document.activeElement === last)  { e.preventDefault(); first.focus(); }
+    }
   });
+
+  // Garden dropdown aria-expanded on hover/focus
+  const gardenItem    = document.querySelector('.nav-item--garden');
+  const gardenTrigger = document.getElementById('garden-nav-trigger');
+  if (gardenItem && gardenTrigger) {
+    const setExpanded = (v: boolean) => gardenTrigger.setAttribute('aria-expanded', String(v));
+    gardenItem.addEventListener('mouseenter', () => setExpanded(true));
+    gardenItem.addEventListener('mouseleave', () => setExpanded(false));
+    gardenItem.addEventListener('focusin',    () => setExpanded(true));
+    gardenItem.addEventListener('focusout',   (e) => {
+      if (!gardenItem.contains((e as FocusEvent).relatedTarget as Node)) setExpanded(false);
+    });
+  }
 </script>

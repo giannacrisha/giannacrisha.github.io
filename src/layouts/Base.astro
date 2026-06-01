@@ -45,7 +45,9 @@ const {
   ogImage = '/og-default.png',
 } = Astro.props;
 
-const pageTitle = title === site.name ? title : `${title} — ${site.name}`;
+const pageTitle    = title === site.name ? title : `${title} — ${site.name}`;
+const canonicalUrl = new URL(Astro.url.pathname, site.url).href;
+const ogImageUrl   = ogImage.startsWith('http') ? ogImage : new URL(ogImage, site.url).href;
 ---
 <!doctype html>
 <html lang="en">
@@ -60,17 +62,18 @@ const pageTitle = title === site.name ? title : `${title} — ${site.name}`;
     <!-- Open Graph -->
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content={ogImage} />
+    <meta property="og:image" content={ogImageUrl} />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content={site.url} />
+    <meta property="og:url" content={canonicalUrl} />
     <meta property="og:locale" content="en_US" />
     <meta property="og:site_name" content={site.name} />
 
     <!-- Twitter / X card -->
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@giannacrisha" />
     <meta name="twitter:title" content={pageTitle} />
     <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image" content={ogImageUrl} />
 
     <!-- JSON-LD structured data for AI assistants + search -->
     <script type="application/ld+json" set:html={jsonLd} />
@@ -79,7 +82,7 @@ const pageTitle = title === site.name ? title : `${title} — ${site.name}`;
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href={fonts.googleFontsUrl} rel="stylesheet" />
     <link rel="alternate" type="application/rss+xml" title="gi's garden" href="/rss.xml" />
-    <link rel="canonical" href={site.url} />
+    <link rel="canonical" href={canonicalUrl} />
     <!-- prevent theme flash -->
     <script is:inline>
       (function(){
@@ -90,6 +93,7 @@ const pageTitle = title === site.name ? title : `${title} — ${site.name}`;
     </script>
   </head>
   <body>
+    <a href="#main-content" class="skip-link">skip to content</a>
     <slot />
 
     <!-- ── Theme toggle ──────────────────────────────────────────────────── -->
@@ -120,6 +124,24 @@ const pageTitle = title === site.name ? title : `${title} — ${site.name}`;
     </button>
 
     <style>
+      /* Skip to content — visually hidden until focused */
+      .skip-link {
+        position: absolute;
+        top: -100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--color-fg);
+        color: var(--color-bg);
+        padding: 10px 20px;
+        border-radius: 0 0 8px 8px;
+        font-family: var(--font-body);
+        font-size: 14px;
+        text-decoration: none;
+        z-index: 9999;
+        transition: top 0.15s;
+      }
+      .skip-link:focus { top: 0; }
+
       .theme-toggle {
         position: fixed;
         bottom: 24px;
