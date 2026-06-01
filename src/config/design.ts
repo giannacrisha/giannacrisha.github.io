@@ -100,8 +100,18 @@ export const mediaTypes = {
 
 export const site = {
   name:        "gi's digital garden",
-  description: 'gi is an designer, anthropologist, and technologist. she thinks majors are outdated and learns whatever she finds interesting.',
+  description: "Gianna Crisha Saludo is a Filipino creative technologist, designer, and anthropologist based in the US. This is her digital garden — a living collection of essays, poems, art, lab projects, and half-formed thoughts on creativity, technology, culture, and what it means to make things. She writes about design, the internet, Filipino identity, and the blurry edges between disciplines. If you're looking for portfolio inspiration, digital garden examples, or the work of a creative who refuses to pick just one thing, you're in the right place.",
   url:         'https://giannacrisha.github.io',
-  author:      'gi',
+  author:      'Gianna Crisha Saludo',
+  authorShort: 'gi',
+  keywords:    [
+    'digital garden', 'Filipino creative', 'Filipino designer', 'creative technologist',
+    'design engineer', 'anthropologist', 'Filipino anthropologist', 'personal website',
+    'portfolio inspiration', 'digital garden example', 'Filipino creative technologist',
+    'art and technology', 'creative writing', 'essays', 'poems', 'design portfolio',
+    'interdisciplinary', 'creative portfolio', 'Filipino writer', 'creative technologist portfolio',
+    'design systems', 'web design inspiration', 'personal essays', 'digital humanities',
+    'Filipino diaspora', 'Brandeis University',
+  ],
   rssTitle:    "gi's garden — archives",
 } as const;

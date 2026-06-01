@@ -1,0 +1,185 @@
+---
+// src/pages/now.astro
+// A /now page — a snapshot of what gi is up to right now.
+// Inspired by nownownow.com
+import Garden from '../layouts/Garden.astro';
+
+const updated = 'June 2025';
+---
+<Garden title="now — gi">
+  <div class="page-wrapper">
+    <article class="now-page">
+
+      <header class="now-header">
+        <h1 class="now-title">now</h1>
+        <p class="now-subtitle">a snapshot of what i'm doing, thinking, and feeling — updated <time>{updated}</time>.</p>
+        <a class="now-link" href="https://nownownow.com/about" target="_blank" rel="noopener">what is a now page? ↗</a>
+      </header>
+
+      <div class="now-sections">
+
+        <section class="now-section">
+          <h2 class="now-section-title">making</h2>
+          <ul class="now-list">
+            <li>this digital garden — building it in public, one section at a time</li>
+            <li>leading deishacks 2027, the biggest hackathon brandeis has seen</li>
+            <li>designing for the weston art & innovation center</li>
+          </ul>
+        </section>
+
+        <section class="now-section">
+          <h2 class="now-section-title">learning</h2>
+          <ul class="now-list">
+            <li>studying design, tech & society at brandeis — designing my own major</li>
+            <li>getting deeper into anthropology of technology</li>
+            <li>teaching myself more creative coding (canvas, webgl, p5.js)</li>
+          </ul>
+        </section>
+
+        <section class="now-section">
+          <h2 class="now-section-title">thinking about</h2>
+          <ul class="now-list">
+            <li>what it means to be a creative who refuses to specialize</li>
+            <li>data privacy as a care practice, not just a legal one</li>
+            <li>how design shapes power — and who gets to design</li>
+            <li>the personal web, digital gardens, and why the internet used to feel more human</li>
+          </ul>
+        </section>
+
+        <section class="now-section">
+          <h2 class="now-section-title">reading</h2>
+          <ul class="now-list">
+            <li>whatever's next on my <a href="/library">library shelf</a></li>
+          </ul>
+        </section>
+
+        <section class="now-section">
+          <h2 class="now-section-title">where</h2>
+          <ul class="now-list">
+            <li>boston, ma — waltham specifically, which is technically not boston but close enough</li>
+          </ul>
+        </section>
+
+      </div>
+
+      <footer class="now-footer">
+        <p>this page was last updated in <time>{updated}</time>. if you're reading this much later, things have probably changed a lot.</p>
+        <p>inspired by <a href="https://nownownow.com" target="_blank" rel="noopener">the /now movement</a> started by derek sivers.</p>
+      </footer>
+
+    </article>
+  </div>
+</Garden>
+
+<style>
+  .now-page {
+    max-width: 640px;
+    padding: var(--space-section) 0 calc(var(--space-section) * 2);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-section);
+  }
+
+  /* header */
+  .now-header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+  .now-title {
+    font-family: var(--font-display);
+    font-size: var(--text-hero);
+    color: var(--color-fg);
+    line-height: var(--leading-tight);
+  }
+  .now-subtitle {
+    font-family: var(--font-body);
+    font-size: var(--text-lg);
+    color: var(--color-muted);
+    line-height: var(--leading-loose);
+  }
+  .now-link {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-accent);
+    text-decoration: underline;
+    text-decoration-color: var(--color-accent-border);
+    text-underline-offset: 3px;
+    transition: color 0.15s;
+    width: fit-content;
+  }
+  .now-link:hover { color: var(--color-fg); }
+
+  /* sections */
+  .now-sections {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xxl);
+  }
+  .now-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+  }
+  .now-section-title {
+    font-family: var(--font-serif);
+    font-size: var(--text-xl);
+    color: var(--color-fg);
+    line-height: var(--leading-tight);
+  }
+  .now-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .now-list li {
+    font-family: var(--font-body);
+    font-size: var(--text-md);
+    color: var(--color-fg);
+    line-height: var(--leading-loose);
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-md);
+  }
+  .now-list li::before {
+    content: '';
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    flex-shrink: 0;
+    position: relative;
+    top: -2px;
+  }
+  .now-list a {
+    color: var(--color-fg);
+    text-decoration: underline;
+    text-decoration-color: var(--color-accent);
+    text-underline-offset: 3px;
+  }
+
+  /* footer */
+  .now-footer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    padding-top: var(--space-xxl);
+    border-top: 0.5px solid var(--color-border);
+  }
+  .now-footer p {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+    line-height: var(--leading-loose);
+    font-style: italic;
+  }
+  .now-footer a {
+    color: var(--color-muted);
+    text-decoration: underline;
+    text-decoration-color: var(--color-accent-border);
+    text-underline-offset: 3px;
+  }
+</style>

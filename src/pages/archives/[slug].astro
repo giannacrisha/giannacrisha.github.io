@@ -13,26 +13,47 @@ export async function getStaticPaths() {
 }
 
 const { entry } = Astro.props;
-const { Content } = await entry.render();
+const { Content, headings } = await entry.render();
 const { title, type, date_written, date_published, growth_stage, tags, note } = entry.data;
 const published = date_published ?? date_written;
 const isPoem = type === 'poem';
+const isEssay = type === 'essay';
 
+// Reading time — ~200 wpm
+const wordCount = entry.body.split(/\s+/).length;
+const readingMins = Math.max(1, Math.round(wordCount / 200));
+
+// Related: prefer tag overlap, fall back to same type
 const allEntries = await getCollection('archives');
+const entryTags = new Set(tags ?? []);
 const related = allEntries
-  .filter(e => e.slug !== entry.slug && e.data.type === type)
-  .sort((a, b) => {
-    const dateA = a.data.date_published ?? a.data.date_written;
-    const dateB = b.data.date_published ?? b.data.date_written;
-    return new Date(dateB).getTime() - new Date(dateA).getTime();
+  .filter(e => e.slug !== entry.slug)
+  .map(e => {
+    const sharedTags = (e.data.tags ?? []).filter((t: string) => entryTags.has(t)).length;
+    const sameType  = e.data.type === type ? 1 : 0;
+    return { entry: e, score: sharedTags * 2 + sameType };
   })
-  .slice(0, 3);
+  .filter(x => x.score > 0)
+  .sort((a, b) => b.score - a.score)
+  .slice(0, 3)
+  .map(x => x.entry);
+
+// Table of contents — only h2 and h3, only for essays with enough headings
+const tocHeadings = headings.filter(h => h.depth === 2 || h.depth === 3);
+const showToc = isEssay && tocHeadings.length >= 2;
 ---
+
 <Garden title={title}>
+
+  {/* Scroll progress bar — only for essays */}
+  {isEssay && (
+    <div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
+  )}
+
   <div class="content-with-sidebar">
 
     <div class="content-main">
-      <article class:list={['archive-article', { 'poem-page': isPoem }]}>
+      <article class:list={['archive-article', { 'poem-page': isPoem }]} id="article-body">
 
         <nav class="breadcrumb" aria-label="Breadcrumb">
           <a href="/">garden</a>
@@ -44,7 +65,17 @@ const related = allEntries
         <div class="entry-meta">
           <span class="pill">{type}</span>
           <GrowthPill stage={growth_stage} />
+          {!isPoem && (
+            <span class="reading-time" aria-label={`${readingMins} minute read`}>
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                <circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.2"/>
+                <path d="M6 3.5v3l1.5 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+              </svg>
+              {readingMins} min read
+            </span>
+          )}
         </div>
+
         <h1 class="entry-title">{title}</h1>
         <Timestamps
           primaryLabel="written"
@@ -54,11 +85,25 @@ const related = allEntries
         />
         {tags && tags.length > 0 && (
           <div class="tags">
-            {tags.map(tag => <span class="pill">{tag}</span>)}
+            {tags.map((tag: string) => <span class="pill">{tag}</span>)}
           </div>
         )}
 
         {note && <AuthorNote note={note} />}
+
+        {/* Inline TOC for mobile / before the prose */}
+        {showToc && (
+          <nav class="toc-inline" aria-label="Table of contents">
+            <p class="toc-label">in this essay</p>
+            <ol class="toc-list">
+              {tocHeadings.map(h => (
+                <li class:list={['toc-item', { 'toc-item--h3': h.depth === 3 }]}>
+                  <a href={`#${h.slug}`} class="toc-link">{h.text}</a>
+                </li>
+              ))}
+            </ol>
+          </nav>
+        )}
 
         <div class:list={['prose', { 'prose-poem': isPoem }]}>
           <Content />
@@ -68,6 +113,19 @@ const related = allEntries
     </div>
 
     <div class="content-sidebar">
+      {/* Sticky TOC for desktop */}
+      {showToc && (
+        <nav class="toc-sidebar" aria-label="Table of contents" id="toc-sidebar">
+          <p class="toc-label">in this essay</p>
+          <ol class="toc-list">
+            {tocHeadings.map(h => (
+              <li class:list={['toc-item', { 'toc-item--h3': h.depth === 3 }]}>
+                <a href={`#${h.slug}`} class="toc-link" data-heading={h.slug}>{h.text}</a>
+              </li>
+            ))}
+          </ol>
+        </nav>
+      )}
       <Recommended entries={related} />
     </div>
 
@@ -75,7 +133,22 @@ const related = allEntries
 </Garden>
 
 <style>
+  /* ── Scroll progress ─────────────────────────────────────────────────── */
+  .scroll-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 2px;
+    width: 0%;
+    background: var(--color-accent);
+    z-index: 999;
+    transition: width 0.08s linear;
+    transform-origin: left;
+  }
+
+  /* ── Article ─────────────────────────────────────────────────────────── */
   .archive-article { padding: var(--space-section) 0; }
+
   .breadcrumb {
     display: flex;
     align-items: center;
@@ -88,7 +161,24 @@ const related = allEntries
   .breadcrumb a { color: var(--color-muted); text-decoration: none; }
   .breadcrumb a:hover { color: var(--color-fg); }
   .breadcrumb-sep { color: var(--color-accent-border); font-size: 10px; }
-  .entry-meta { display: flex; gap: var(--space-sm); flex-wrap: wrap; margin-bottom: var(--space-lg); }
+
+  .entry-meta {
+    display: flex;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: var(--space-lg);
+  }
+  .reading-time {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    color: var(--color-muted);
+    letter-spacing: 0.04em;
+  }
+
   .entry-title {
     font-family: var(--font-serif);
     font-size: var(--text-xxl);
@@ -98,4 +188,118 @@ const related = allEntries
   }
   .tags { display: flex; gap: var(--space-sm); flex-wrap: wrap; margin-top: var(--space-md); }
   .prose { margin-top: var(--space-xxl); }
+
+  /* ── Table of contents ───────────────────────────────────────────────── */
+  .toc-label {
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    color: var(--color-muted);
+    letter-spacing: 0.1em;
+    margin-bottom: var(--space-md);
+  }
+  .toc-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .toc-item { padding: 0; }
+  .toc-item--h3 { padding-left: var(--space-lg); }
+  .toc-link {
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    color: var(--color-muted);
+    text-decoration: none;
+    line-height: 1.8;
+    display: block;
+    transition: color 0.15s;
+    border-left: 2px solid transparent;
+    padding-left: var(--space-sm);
+  }
+  .toc-link:hover { color: var(--color-fg); }
+  .toc-link.active {
+    color: var(--color-fg);
+    border-left-color: var(--color-accent);
+  }
+
+  /* inline TOC (mobile + above prose) */
+  .toc-inline {
+    margin: var(--space-xxl) 0;
+    padding: var(--space-lg) var(--space-xl);
+    background: var(--color-accent-light);
+    border-radius: var(--radius-card);
+    border: 0.5px solid var(--color-border);
+  }
+
+  /* sidebar TOC (desktop only) */
+  .toc-sidebar {
+    margin-bottom: var(--space-xxl);
+    padding: var(--space-lg) var(--space-xl);
+    background: var(--color-card);
+    border: 0.5px solid var(--color-border);
+    border-radius: var(--radius-card);
+  }
+
+  /* hide inline TOC on desktop (sidebar shows instead) */
+  @media (min-width: 900px) {
+    .toc-inline { display: none; }
+  }
+  /* hide sidebar TOC on mobile */
+  @media (max-width: 899px) {
+    .toc-sidebar { display: none; }
+  }
 </style>
+
+<script>
+  // ── Scroll progress bar ─────────────────────────────────────────────────
+  const bar = document.getElementById('scroll-progress');
+  if (bar) {
+    function updateProgress() {
+      const article = document.getElementById('article-body');
+      if (!article) return;
+      const { top, height } = article.getBoundingClientRect();
+      const scrolled = Math.max(0, -top);
+      const total    = Math.max(1, height - window.innerHeight);
+      bar.style.width = Math.min(100, (scrolled / total) * 100) + '%';
+    }
+    window.addEventListener('scroll', updateProgress, { passive: true });
+    updateProgress();
+  }
+
+  // ── Active TOC heading highlight ────────────────────────────────────────
+  const tocLinks = document.querySelectorAll('.toc-link[data-heading]') as NodeListOf<HTMLAnchorElement>;
+  if (tocLinks.length > 0) {
+    const headingEls = Array.from(tocLinks).map(link => {
+      return document.getElementById(link.dataset.heading!);
+    }).filter(Boolean) as HTMLElement[];
+
+    function updateActive() {
+      let active = headingEls[0];
+      for (const el of headingEls) {
+        if (el.getBoundingClientRect().top <= 120) active = el;
+      }
+      tocLinks.forEach(link => {
+        link.classList.toggle('active', link.dataset.heading === active?.id);
+      });
+    }
+
+    window.addEventListener('scroll', updateActive, { passive: true });
+    updateActive();
+  }
+
+  // ── Smooth scroll for TOC links ─────────────────────────────────────────
+  document.querySelectorAll('.toc-link').forEach(link => {
+    link.addEventListener('click', (e) => {
+      const href = (link as HTMLAnchorElement).getAttribute('href');
+      if (!href?.startsWith('#')) return;
+      e.preventDefault();
+      const target = document.querySelector(href);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        history.pushState(null, '', href);
+      }
+    });
+  });
+</script>

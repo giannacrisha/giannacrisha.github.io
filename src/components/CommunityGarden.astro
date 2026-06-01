@@ -1,0 +1,547 @@
+---
+// src/components/CommunityGarden.astro
+// Fetches approved (open) community garden submissions from GitHub Issues.
+// Renders pixel art + a drawing editor for new submissions.
+
+const REPO_OWNER = 'giannacrisha';
+const REPO_NAME  = 'giannacrisha.github.io';
+const LABEL      = 'community-garden';
+
+// Fetch at build time — Vercel ISR will revalidate periodically
+let submissions: Array<{
+  pixels: string[];
+  name: string;
+  note: string;
+  website: string;
+  ts: string;
+}> = [];
+
+try {
+  const res = await fetch(
+    `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues?labels=${LABEL}&state=open&per_page=50`,
+    { headers: { Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' } }
+  );
+  if (res.ok) {
+    const issues = await res.json() as { body: string }[];
+    submissions = issues
+      .map(issue => {
+        try { return JSON.parse(issue.body); } catch { return null; }
+      })
+      .filter(Boolean)
+      .reverse(); // oldest first so the garden grows left to right
+  }
+} catch (e) {
+  console.warn('Community garden fetch failed:', e);
+}
+---
+
+<section class="community-garden" id="community-garden">
+  <div class="cg-header">
+    <h2 class="cg-title">the community garden</h2>
+    <p class="cg-desc">plant something. draw a little pixel art, leave a note, and become part of the garden. i'll water it regularly. ♡</p>
+  </div>
+
+  <!-- Existing plantings -->
+  {submissions.length > 0 && (
+    <div class="plantings" id="plantings">
+      {submissions.map(s => (
+        <div class="planting" title={s.note || s.name}>
+          <canvas
+            class="planting-canvas"
+            width="64"
+            height="64"
+            data-pixels={JSON.stringify(s.pixels)}
+            aria-label={`pixel art by ${s.name}`}
+          ></canvas>
+          <div class="planting-meta">
+            {s.website
+              ? <a href={s.website} target="_blank" rel="noopener noreferrer" class="planting-name">{s.name}</a>
+              : <span class="planting-name">{s.name}</span>
+            }
+            {s.note && <p class="planting-note">{s.note}</p>}
+          </div>
+        </div>
+      ))}
+    </div>
+  )}
+
+  {submissions.length === 0 && (
+    <p class="cg-empty">no plantings yet — be the first! ↓</p>
+  )}
+
+  <!-- Drawing editor -->
+  <div class="cg-editor" id="cg-editor">
+    <div class="editor-canvas-wrap">
+      <canvas id="pixel-canvas" width="256" height="256" class="pixel-canvas" aria-label="pixel art drawing canvas"></canvas>
+    </div>
+
+    <div class="editor-controls">
+      <!-- Color palette -->
+      <div class="palette" id="palette" role="group" aria-label="Color palette">
+        <!-- Colors injected by JS -->
+      </div>
+
+      <div class="editor-tools">
+        <button class="tool-btn active" id="tool-draw" aria-label="Draw" title="Draw">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M10 2l2 2-7 7-3 1 1-3 7-7z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="tool-btn" id="tool-erase" aria-label="Erase" title="Erase">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 12h10M8 2l4 4-5 6H3L1 10l7-8z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="tool-btn" id="tool-clear" aria-label="Clear canvas" title="Clear all">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Submission form -->
+    <form class="plant-form" id="plant-form" novalidate>
+      <!-- honeypot -->
+      <input type="text" name="website_url" tabindex="-1" autocomplete="off" style="display:none" aria-hidden="true" />
+
+      <div class="form-row">
+        <input type="text" id="plant-name" name="name" placeholder="your name or handle (optional)" maxlength="50" class="plant-input" autocomplete="nickname" />
+        <input type="url"  id="plant-website" name="website" placeholder="your website (optional)" maxlength="200" class="plant-input" autocomplete="url" />
+      </div>
+      <textarea id="plant-note" name="note" placeholder="leave a little note (optional, 280 chars)" maxlength="280" class="plant-textarea" rows="2"></textarea>
+
+      <div class="form-footer">
+        <span class="pixel-count" id="pixel-count">draw at least 4 pixels to plant</span>
+        <button type="submit" class="plant-btn" id="plant-btn" disabled>plant it ✦</button>
+      </div>
+      <p class="plant-confirm" id="plant-confirm" hidden>planted! it'll appear in the garden shortly. thank you ♡</p>
+      <p class="plant-error" id="plant-error" hidden></p>
+    </form>
+  </div>
+</section>
+
+<style>
+  .community-garden {
+    padding: var(--space-section) 0;
+    border-top: 0.5px solid var(--color-border);
+  }
+
+  /* header */
+  .cg-header { margin-bottom: var(--space-xxl); }
+  .cg-title {
+    font-family: var(--font-display);
+    font-size: var(--text-section);
+    color: var(--color-fg);
+    line-height: var(--leading-tight);
+    margin-bottom: var(--space-md);
+  }
+  .cg-desc {
+    font-family: var(--font-body);
+    font-size: var(--text-md);
+    color: var(--color-muted);
+    max-width: 520px;
+    line-height: var(--leading-loose);
+  }
+  .cg-empty {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+    font-style: italic;
+    margin-bottom: var(--space-xxl);
+  }
+
+  /* plantings grid */
+  .plantings {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xl);
+    margin-bottom: var(--space-section);
+  }
+  .planting {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);
+    max-width: 80px;
+  }
+  .planting-canvas {
+    width: 64px;
+    height: 64px;
+    image-rendering: pixelated;
+    border-radius: 6px;
+    border: 0.5px solid var(--color-border);
+    cursor: default;
+    transition: transform 0.15s;
+  }
+  .planting-canvas:hover { transform: scale(1.15); }
+  .planting-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    text-align: center;
+  }
+  .planting-name {
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    color: var(--color-muted);
+    text-decoration: none;
+    letter-spacing: 0.03em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 80px;
+  }
+  a.planting-name:hover { color: var(--color-fg); text-decoration: underline; }
+  .planting-note {
+    font-family: var(--font-body);
+    font-size: 10px;
+    color: var(--color-muted);
+    font-style: italic;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    text-align: center;
+  }
+
+  /* editor */
+  .cg-editor {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xl);
+    max-width: 520px;
+  }
+  .editor-canvas-wrap {
+    border: 0.5px solid var(--color-border);
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    display: inline-block;
+    line-height: 0;
+    cursor: crosshair;
+  }
+  .pixel-canvas {
+    width: 256px;
+    height: 256px;
+    image-rendering: pixelated;
+    display: block;
+  }
+
+  /* controls */
+  .editor-controls {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xl);
+    flex-wrap: wrap;
+  }
+  .palette {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    max-width: 200px;
+  }
+  :global(.palette-swatch) {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    border: 1.5px solid transparent;
+    cursor: pointer;
+    transition: transform 0.1s, border-color 0.1s;
+  }
+  :global(.palette-swatch:hover) { transform: scale(1.2); }
+  :global(.palette-swatch.selected) { border-color: var(--color-fg); transform: scale(1.15); }
+
+  .editor-tools {
+    display: flex;
+    gap: var(--space-sm);
+  }
+  .tool-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 0.5px solid var(--color-border);
+    background: var(--color-card);
+    color: var(--color-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.12s, color 0.12s, border-color 0.12s;
+  }
+  .tool-btn:hover { color: var(--color-fg); border-color: var(--color-accent); }
+  .tool-btn.active { background: var(--color-fg); color: var(--color-bg); border-color: var(--color-fg); }
+
+  /* form */
+  .plant-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+  .form-row {
+    display: flex;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+  }
+  .plant-input {
+    flex: 1;
+    min-width: 140px;
+    background: var(--color-card);
+    border: 0.5px solid var(--color-border);
+    border-radius: var(--radius-input);
+    padding: var(--space-sm) var(--space-md);
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-fg);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .plant-input:focus { border-color: var(--color-accent); }
+  .plant-input::placeholder { color: var(--color-muted); }
+
+  .plant-textarea {
+    background: var(--color-card);
+    border: 0.5px solid var(--color-border);
+    border-radius: var(--radius-input);
+    padding: var(--space-sm) var(--space-md);
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-fg);
+    outline: none;
+    resize: vertical;
+    transition: border-color 0.15s;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .plant-textarea:focus { border-color: var(--color-accent); }
+  .plant-textarea::placeholder { color: var(--color-muted); }
+
+  .form-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+  }
+  .pixel-count {
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    color: var(--color-muted);
+  }
+  .plant-btn {
+    background: var(--color-fg);
+    color: var(--color-bg);
+    border: none;
+    border-radius: var(--radius-pill);
+    padding: var(--space-sm) var(--space-xl);
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    cursor: pointer;
+    transition: opacity 0.15s, background 0.15s;
+    white-space: nowrap;
+  }
+  .plant-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .plant-btn:not(:disabled):hover { background: var(--color-accent); }
+
+  .plant-confirm {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+    font-style: italic;
+  }
+  .plant-error {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: #c0392b;
+  }
+</style>
+
+<script>
+(function () {
+  const GRID = 16;
+  const CELL = 16; // canvas is 256px / 16 = 16px per cell
+
+  // ── Palette ────────────────────────────────────────────────────────────
+  const COLORS = [
+    // neutrals / site palette
+    '#3d2f1f', '#6B5234', '#9C8B6E', '#C4B49A', '#E8DCC8', '#faf7f2', '#ffffff',
+    // warm earth
+    '#8B4513', '#CD853F', '#DEB887', '#F5DEB3',
+    // greens
+    '#2d5a27', '#4a7c59', '#7fb069', '#b5d5a0',
+    // blues
+    '#264653', '#2a9d8f', '#a8dadc', '#457b9d',
+    // pinks + purples
+    '#e07a5f', '#f2cc8f', '#e8a0bf', '#c77dff',
+    // darks
+    '#1a1a1a', '#333333', '#555555',
+  ];
+
+  let currentColor = COLORS[0];
+  let tool: 'draw' | 'erase' = 'draw';
+  let isDrawing = false;
+  const pixels = new Array(GRID * GRID).fill(null) as (string | null)[];
+
+  // ── Render palette ─────────────────────────────────────────────────────
+  const paletteEl = document.getElementById('palette')!;
+  COLORS.forEach(color => {
+    const sw = document.createElement('button');
+    sw.type = 'button';
+    sw.className = 'palette-swatch' + (color === currentColor ? ' selected' : '');
+    sw.style.background = color;
+    sw.setAttribute('aria-label', color);
+    sw.addEventListener('click', () => {
+      currentColor = color;
+      tool = 'draw';
+      document.querySelectorAll('.palette-swatch').forEach(s => s.classList.remove('selected'));
+      sw.classList.add('selected');
+      setActiveTool('draw');
+    });
+    paletteEl.appendChild(sw);
+  });
+
+  // ── Canvas drawing ─────────────────────────────────────────────────────
+  const canvas = document.getElementById('pixel-canvas') as HTMLCanvasElement;
+  const ctx = canvas.getContext('2d')!;
+
+  function redraw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Draw grid background
+    ctx.fillStyle = '#faf7f2';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // Grid lines
+    ctx.strokeStyle = '#E8DCC8';
+    ctx.lineWidth = 0.5;
+    for (let i = 0; i <= GRID; i++) {
+      ctx.beginPath(); ctx.moveTo(i * CELL, 0); ctx.lineTo(i * CELL, canvas.height); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, i * CELL); ctx.lineTo(canvas.width, i * CELL); ctx.stroke();
+    }
+    // Pixels
+    pixels.forEach((color, i) => {
+      if (!color) return;
+      const x = (i % GRID) * CELL;
+      const y = Math.floor(i / GRID) * CELL;
+      ctx.fillStyle = color;
+      ctx.fillRect(x, y, CELL, CELL);
+    });
+    updateCount();
+  }
+
+  function getCell(e: MouseEvent | TouchEvent): number {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = GRID / rect.width;
+    const scaleY = GRID / rect.height;
+    let clientX: number, clientY: number;
+    if ('touches' in e) {
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    } else {
+      clientX = e.clientX;
+      clientY = e.clientY;
+    }
+    const col = Math.floor((clientX - rect.left) * scaleX);
+    const row = Math.floor((clientY - rect.top)  * scaleY);
+    if (col < 0 || col >= GRID || row < 0 || row >= GRID) return -1;
+    return row * GRID + col;
+  }
+
+  function paint(e: MouseEvent | TouchEvent) {
+    const idx = getCell(e);
+    if (idx < 0) return;
+    pixels[idx] = tool === 'erase' ? null : currentColor;
+    redraw();
+  }
+
+  canvas.addEventListener('mousedown',  e => { isDrawing = true; paint(e); });
+  canvas.addEventListener('mousemove',  e => { if (isDrawing) paint(e); });
+  canvas.addEventListener('mouseup',    () => { isDrawing = false; });
+  canvas.addEventListener('mouseleave', () => { isDrawing = false; });
+  canvas.addEventListener('touchstart', e => { e.preventDefault(); isDrawing = true; paint(e); }, { passive: false });
+  canvas.addEventListener('touchmove',  e => { e.preventDefault(); if (isDrawing) paint(e); }, { passive: false });
+  canvas.addEventListener('touchend',   () => { isDrawing = false; });
+
+  // ── Tools ──────────────────────────────────────────────────────────────
+  function setActiveTool(t: 'draw' | 'erase') {
+    tool = t;
+    document.getElementById('tool-draw')!.classList.toggle('active', t === 'draw');
+    document.getElementById('tool-erase')!.classList.toggle('active', t === 'erase');
+  }
+  document.getElementById('tool-draw')!.addEventListener('click',  () => setActiveTool('draw'));
+  document.getElementById('tool-erase')!.addEventListener('click', () => setActiveTool('erase'));
+  document.getElementById('tool-clear')!.addEventListener('click', () => {
+    pixels.fill(null);
+    redraw();
+  });
+
+  // ── Pixel count + submit enable ────────────────────────────────────────
+  const countEl = document.getElementById('pixel-count')!;
+  const plantBtn = document.getElementById('plant-btn') as HTMLButtonElement;
+
+  function updateCount() {
+    const n = pixels.filter(Boolean).length;
+    if (n === 0) {
+      countEl.textContent = 'draw at least 4 pixels to plant';
+    } else if (n < 4) {
+      countEl.textContent = `${n} pixel${n === 1 ? '' : 's'} — draw a bit more`;
+    } else {
+      countEl.textContent = `${n} pixels painted ✓`;
+    }
+    plantBtn.disabled = n < 4;
+  }
+
+  // ── Submit ─────────────────────────────────────────────────────────────
+  const form    = document.getElementById('plant-form') as HTMLFormElement;
+  const confirm = document.getElementById('plant-confirm')!;
+  const errorEl = document.getElementById('plant-error')!;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    // Honeypot check
+    const honeypot = (form.querySelector('[name="website_url"]') as HTMLInputElement).value;
+    if (honeypot) return;
+
+    const name    = (form.querySelector('#plant-name')    as HTMLInputElement).value;
+    const website = (form.querySelector('#plant-website') as HTMLInputElement).value;
+    const note    = (form.querySelector('#plant-note')    as HTMLTextAreaElement).value;
+
+    plantBtn.disabled = true;
+    plantBtn.textContent = 'planting…';
+    errorEl.setAttribute('hidden', '');
+
+    try {
+      const res = await fetch('/api/plant', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pixels: pixels.map(p => p ?? null), name, note, website }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Something went wrong');
+
+      // Success
+      form.style.opacity = '0';
+      form.style.transition = 'opacity 0.2s';
+      setTimeout(() => {
+        form.style.display = 'none';
+        confirm.removeAttribute('hidden');
+      }, 200);
+    } catch (err: any) {
+      errorEl.textContent = err.message;
+      errorEl.removeAttribute('hidden');
+      plantBtn.disabled = false;
+      plantBtn.textContent = 'plant it ✦';
+    }
+  });
+
+  // ── Render existing plantings ──────────────────────────────────────────
+  document.querySelectorAll('.planting-canvas').forEach(el => {
+    const canvasEl = el as HTMLCanvasElement;
+    const data = JSON.parse(canvasEl.dataset.pixels ?? '[]') as (string | null)[];
+    const pCtx = canvasEl.getContext('2d')!;
+    const cell = canvasEl.width / GRID; // 64/16 = 4px per cell
+    pCtx.clearRect(0, 0, canvasEl.width, canvasEl.height);
+    data.forEach((color, i) => {
+      if (!color) return;
+      const x = (i % GRID) * cell;
+      const y = Math.floor(i / GRID) * cell;
+      pCtx.fillStyle = color;
+      pCtx.fillRect(x, y, cell, cell);
+    });
+  });
+
+  redraw();
+})();
+</script>
