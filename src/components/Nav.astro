@@ -1,7 +1,7 @@
 ---
 // src/components/Nav.astro
 const current = Astro.url.pathname;
-const gardenActive = ['/','/lab','/archives','/gallery','/library'].some(p => current.startsWith(p));
+const gardenActive = current === '/' || ['/lab','/archives','/gallery','/library'].some(p => current.startsWith(p));
 const sublinks = [
   { href: '/lab',      label: 'lab',      desc: 'design and code projects', icon: '/icons/lab-icon.png'     },
   { href: '/archives', label: 'archives', desc: 'essays, poems, thoughts',  icon: '/icons/archive-icon.png' },
