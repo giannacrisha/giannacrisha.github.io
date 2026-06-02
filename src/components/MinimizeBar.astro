@@ -97,10 +97,7 @@
     justify-content: center;
     opacity: 0;
     transition: opacity 0.15s;
-    /* expand touch target to 44×44 */
-    padding: 15px;
-    margin: -15px;
-    box-sizing: content-box;
+    padding: 0;
     color: #ffffff;
   }
   .gi-tab:hover .gi-tab-close,
@@ -179,9 +176,10 @@
       tab.appendChild(label);
       tab.appendChild(closeBtn);
 
-      // Intercept navigation: sink animation then navigate
+      // Intercept navigation: remove tab, sink animation, then navigate
       tab.addEventListener('click', function(e) {
         e.preventDefault();
+        removeTab(t.id);          // delete from storage before we land on the next page
         tab.classList.add('gi-tab--closing');
         var dest = t.url;
         setTimeout(function() { window.location.href = dest; }, 220);
