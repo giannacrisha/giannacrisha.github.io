@@ -4,7 +4,7 @@ type: poem
 date_written: 2024-01-01
 date_published: 2026-05-30
 growth_stage: star
-featured: true
+featured: false
 ---
 
 i wish things would stay as it is
