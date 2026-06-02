@@ -27,7 +27,7 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 7px 14px 11px;   /* extra bottom padding so hover growth hides the gap */
+    padding: 7px 14px 20px;   /* tall bottom padding fills gap when scaled up */
     background: var(--color-card);
     border: 0.5px solid var(--color-border);
     border-bottom: none;
@@ -44,6 +44,7 @@
     overflow: visible;
     transform-origin: center bottom;
     text-decoration: none;
+    margin-bottom: -13px;     /* pull tab down so only the top portion is visible at rest */
   }
 
   /* Rise animation only on first appearance */
@@ -55,9 +56,19 @@
     to   { transform: translateY(0);    opacity: 1; }
   }
 
+  /* Sink animation when navigating away via tab click */
+  .gi-tab--closing {
+    animation: tab-sink 0.22s cubic-bezier(0.4, 0, 1, 1) forwards !important;
+    pointer-events: none;
+  }
+  @keyframes tab-sink {
+    from { transform: translateY(0); opacity: 1; }
+    to   { transform: translateY(110%); opacity: 0; }
+  }
+
   .gi-tab:hover {
     background: var(--color-accent-light);
-    transform: scaleX(1.05) scaleY(1.08) translateY(-2px);
+    transform: scaleX(1.05) scaleY(1.08);   /* no translateY — bottom stays flush */
     box-shadow: 0 -4px 16px rgba(0,0,0,0.1);
   }
   .gi-tab:focus-visible {
@@ -78,7 +89,7 @@
     width: 14px;
     height: 14px;
     border-radius: 50%;
-    background: var(--color-muted);
+    background: #e5534b;
     border: none;
     cursor: pointer;
     display: flex;
@@ -90,7 +101,7 @@
     padding: 15px;
     margin: -15px;
     box-sizing: content-box;
-    color: var(--color-bg);
+    color: #ffffff;
   }
   .gi-tab:hover .gi-tab-close,
   .gi-tab-close:focus-visible { opacity: 1; }
@@ -167,8 +178,16 @@
 
       tab.appendChild(label);
       tab.appendChild(closeBtn);
-      tabbar.appendChild(tab);
 
+      // Intercept navigation: sink animation then navigate
+      tab.addEventListener('click', function(e) {
+        e.preventDefault();
+        tab.classList.add('gi-tab--closing');
+        var dest = t.url;
+        setTimeout(function() { window.location.href = dest; }, 220);
+      });
+
+      tabbar.appendChild(tab);
       markSeen(t.id);
     });
   }
