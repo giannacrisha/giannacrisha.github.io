@@ -817,7 +817,8 @@ try {
     const note=(form.querySelector('#plant-note') as HTMLTextAreaElement).value;
     plantBtn.disabled=true; plantBtn.textContent='planting…'; errorEl.setAttribute('hidden','');
     try {
-      const res=await fetch('/api/plant',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pixels,name,note,website})});
+      const hp=(form.querySelector('[name="hp"]') as HTMLInputElement).value;
+      const res=await fetch('/api/plant',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pixels,name,note,website,hp})});
       const data=await res.json();
       if(!res.ok)throw new Error(data.error||'Something went wrong');
       form.style.opacity='0'; form.style.transition='opacity 0.2s';
