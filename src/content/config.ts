@@ -86,4 +86,11 @@ const library = defineCollection({
   }),
 });
 
-export const collections = { lab, archives, gallery, library, case_studies };
+const now = defineCollection({
+  type: 'content',
+  schema: z.object({
+    date: z.date(),
+  }),
+});
+
+export const collections = { lab, archives, gallery, library, case_studies, now };
