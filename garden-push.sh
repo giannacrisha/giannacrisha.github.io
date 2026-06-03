@@ -1,0 +1,62 @@
+#!/bin/bash
+# garden-push.sh
+# Syncs Obsidian vault content → src/content, then commits and pushes to git.
+# Usage: ./garden-push.sh
+#        ./garden-push.sh "optional commit message"
+
+set -e
+
+VAULT="/Users/giannacrisha/Library/Mobile Documents/iCloud~md~obsidian/Documents/gi-garden-vault"
+CONTENT="/Users/giannacrisha/projects/giannacrisha.github.io/src/content"
+
+echo "🌱 Syncing Obsidian → src/content..."
+
+# Sync each folder (delete files removed in Obsidian, skip .DS_Store and Obsidian metadata)
+rsync -av --delete \
+  --exclude='.DS_Store' \
+  --exclude='.obsidian/' \
+  --exclude='*.canvas' \
+  "$VAULT/🌱 garden/archives/" "$CONTENT/archives/"
+
+rsync -av --delete \
+  --exclude='.DS_Store' \
+  --exclude='.obsidian/' \
+  --exclude='*.canvas' \
+  "$VAULT/🌱 garden/lab/" "$CONTENT/lab/"
+
+rsync -av --delete \
+  --exclude='.DS_Store' \
+  --exclude='.obsidian/' \
+  --exclude='*.canvas' \
+  "$VAULT/🌱 garden/gallery/" "$CONTENT/gallery/"
+
+rsync -av --delete \
+  --exclude='.DS_Store' \
+  --exclude='.obsidian/' \
+  --exclude='*.canvas' \
+  "$VAULT/🌱 garden/library/" "$CONTENT/library/"
+
+rsync -av --delete \
+  --exclude='.DS_Store' \
+  --exclude='.obsidian/' \
+  --exclude='*.canvas' \
+  "$VAULT/👇 now/" "$CONTENT/now/"
+
+echo ""
+
+# Check if there's anything to commit
+cd "/Users/giannacrisha/projects/giannacrisha.github.io"
+if git diff --quiet && git diff --staged --quiet; then
+  echo "✓ Nothing changed — already up to date."
+  exit 0
+fi
+
+# Commit message: use argument or default with date
+MSG="${1:-"content: sync from Obsidian $(date '+%Y-%m-%d')"}"
+
+git add src/content/
+git commit -m "$MSG"
+git push
+
+echo ""
+echo "🚀 Pushed! Vercel will redeploy shortly."
