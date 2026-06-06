@@ -16,7 +16,19 @@ function timeAgo(dateStr: string): string {
   return `${Math.floor(diff / (86400 * 30))}mo ago`;
 }
 
-let submissions: Array<{ pixels: (string|null)[]; name: string; note: string; website: string; ts: string; }> = [];
+const FEATURED_COUNT = 4;
+
+type Submission = {
+  pixels: (string|null)[];
+  name: string;
+  note: string;
+  website: string;
+  ts: string;
+  issueNumber: number;
+  hearts: number;
+};
+
+let submissions: Submission[] = [];
 
 try {
   const res = await fetch(
@@ -24,11 +36,13 @@ try {
     { headers: { Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' } }
   );
   if (res.ok) {
-    const issues = await res.json() as { body: string; created_at: string }[];
+    const issues = await res.json() as { body: string; created_at: string; number: number; reactions?: { heart: number } }[];
     submissions = issues.map(i => {
       try {
         const parsed = JSON.parse(i.body);
         if (!parsed.ts) parsed.ts = i.created_at;
+        parsed.issueNumber = i.number;
+        parsed.hearts = i.reactions?.heart ?? 0;
         // Sanitize website: only keep http(s) URLs
         if (parsed.website) {
           try {
@@ -36,11 +50,40 @@ try {
             if (u.protocol !== 'http:' && u.protocol !== 'https:') parsed.website = '';
           } catch { parsed.website = ''; }
         }
-        return parsed;
+        return parsed as Submission;
       } catch { return null; }
-    }).filter(Boolean).reverse();
+    }).filter(Boolean) as Submission[];
+
+    // Sort by hearts desc, newest first as tiebreaker
+    submissions.sort((a, b) => (b.hearts - a.hearts) || (new Date(b.ts).getTime() - new Date(a.ts).getTime()));
   }
 } catch (e) { console.warn('Community garden fetch failed:', e); }
+
+const featuredSubmissions = submissions.slice(0, FEATURED_COUNT);
+const lockedSubmissions   = submissions.slice(FEATURED_COUNT);
+
+const HEART_EMPTY = `<svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="currentColor" aria-hidden="true"><path d="m480-120-58-52q-101-91-167-157T150-447.5Q111-500 95.5-544T80-634q0-94 63-157t157-63q52 0 99 22t81 62q34-40 81-62t99-22q94 0 157 63t63 157q0 46-15.5 90T810-447.5Q771-395 705-329T538-172l-58 52Zm0-108q96-86 158-147.5t98-107q36-45.5 50-81t14-70.5q0-60-40-100t-100-40q-47 0-87 26.5T518-680h-76q-15-41-55-67.5T300-774q-60 0-100 40t-40 100q0 35 14 70.5t50 81q36 45.5 98 107T480-228Zm0-273Z"/></svg>`;
+const HEART_FILLED = `<svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="currentColor" aria-hidden="true"><path d="m480-120-58-52q-101-91-167-157T150-447.5Q111-500 95.5-544T80-634q0-94 63-157t157-63q52 0 99 22t81 62q34-40 81-62t99-22q94 0 157 63t63 157q0 46-15.5 90T810-447.5Q771-395 705-329T538-172l-58 52Z"/></svg>`;
+
+function plantingHTML(s: Submission): string {
+  const canvas = `<canvas class="planting-canvas" width="96" height="96" data-pixels='${JSON.stringify(s.pixels)}' aria-label="pixel art by ${s.name || 'anonymous'}"></canvas>`;
+  const overlay = `<button class="heart-overlay" data-issue="${s.issueNumber}" aria-label="Heart ${s.name || 'anonymous'}'s planting">
+    <span class="heart-icon-empty">${HEART_EMPTY}</span>
+    <span class="heart-icon-filled">${HEART_FILLED}</span>
+  </button>`;
+  const canvasWrap = `<div class="planting-canvas-wrap">${canvas}${overlay}</div>`;
+  const tooltip = `<div class="planting-tooltip">
+    <span class="planting-tooltip-name">${s.name || 'anonymous'}</span>
+    ${s.note ? `<p class="planting-tooltip-note">${s.note}</p>` : ''}
+    ${s.website ? `<a href="${s.website}" target="_blank" rel="noopener noreferrer" class="planting-tooltip-link" aria-label="Visit ${s.name || 'anonymous'}'s site (opens in new tab)">visit site ↗</a>` : ''}
+    ${s.ts ? `<span class="planting-tooltip-time">${timeAgo(s.ts)}</span>` : ''}
+  </div>`;
+  const meta = `<div class="planting-meta">
+    <span class="heart-count" data-issue="${s.issueNumber}">${s.hearts > 0 ? String(s.hearts) : ''}</span>
+    ${s.ts ? `<span class="planting-time">${timeAgo(s.ts)}</span>` : ''}
+  </div>`;
+  return canvasWrap + tooltip + meta;
+}
 ---
 
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,300,0,0" />
@@ -51,9 +94,7 @@ try {
   <aside class="cg-left" id="cg-left">
 
     <!-- Info -->
-    <div class="cg-info">
-      <p>draw a tiny pixel-art and leave it here for everyone to find. double-click the canvas to clear it!</p>
-    </div>
+    <p class="cg-info">draw a tiny pixel-art and leave it here for everyone to find. double-click the canvas to clear it!</p>
 
     <!-- Editor -->
     <div class="editor-wrap">
@@ -82,10 +123,10 @@ try {
     <form class="plant-form" id="plant-form" novalidate>
       <input type="text" name="hp" tabindex="-1" autocomplete="off" aria-hidden="true" style="display:none" />
       <div class="form-row">
-        <input type="text" id="plant-name"    name="name"    placeholder="your name or handle (optional)" maxlength="50"  class="plant-input" />
-        <input type="url"  id="plant-website" name="website" placeholder="your website (optional)"         maxlength="200" class="plant-input" />
+        <input type="text" id="plant-name"    name="name"    placeholder="your name or handle (optional)" maxlength="50"  class="plant-input" aria-label="your name or handle (optional)" />
+        <input type="url"  id="plant-website" name="website" placeholder="your website (optional)"         maxlength="200" class="plant-input" aria-label="your website URL (optional)" />
       </div>
-      <textarea id="plant-note" name="note" placeholder="leave a little note (optional, 280 chars)" maxlength="280" class="plant-textarea" rows="2"></textarea>
+      <textarea id="plant-note" name="note" placeholder="leave a little note (optional, 280 chars)" maxlength="280" class="plant-textarea" rows="2" aria-label="leave a little note (optional, 280 characters max)"></textarea>
       <div class="form-footer">
         <span class="pixel-count" id="pixel-count">draw at least 4 pixels to plant</span>
         <button type="submit" class="plant-btn" id="plant-btn" disabled>plant</button>
@@ -105,37 +146,87 @@ try {
 
     <!-- Header -->
     <div class="cg-header">
-      <h1 class="cg-title">community garden</h1>
+      <div class="page-title-row">
+        <h1 class="section-header cg-title">community</h1>
+      </div>
+      <p class="page-def">draw something small and leave it here for other people to find!</p>
       {submissions.length > 0 && (
-        <p class="cg-count">{submissions.length} planting{submissions.length === 1 ? '' : 's'}</p>
+        <p class="cg-count">{submissions.length} planted</p>
       )}
     </div>
 
-    {submissions.length > 0 ? (
-      <div class="plantings">
-        {submissions.map(s => (
-          <div class="planting">
-            {s.website ? (
-              <a href={s.website} target="_blank" rel="noopener noreferrer" class="planting-link">
-                <canvas class="planting-canvas" width="96" height="96" data-pixels={JSON.stringify(s.pixels)} aria-label={`pixel art by ${s.name}`}></canvas>
-              </a>
-            ) : (
-              <canvas class="planting-canvas" width="96" height="96" data-pixels={JSON.stringify(s.pixels)} aria-label={`pixel art by ${s.name}`}></canvas>
-            )}
-            <div class="planting-tooltip">
-              <span class="planting-tooltip-name">{s.name || 'anonymous'}</span>
-              {s.note && <p class="planting-tooltip-note">{s.note}</p>}
-              {s.ts && <span class="planting-tooltip-time">{timeAgo(s.ts)}</span>}
-            </div>
-            {s.ts && <span class="planting-time">{timeAgo(s.ts)}</span>}
-          </div>
-        ))}
+    {submissions.length === 0 ? (
+      <div class="cg-empty">
+        <p>no plants yet.</p>
+        <p class="cg-empty-sub">be the first to plant! ↙</p>
       </div>
     ) : (
-      <div class="cg-empty">
-        <p>no plantings yet.</p>
-        <p class="cg-empty-sub">be the first to leave something here ↙</p>
-      </div>
+      <>
+        {/* Featured plantings — always visible */}
+        <div class="plantings" id="cg-featured">
+          {featuredSubmissions.map(s => (
+            <div class="planting">
+              <div class="planting-canvas-wrap">
+                <canvas class="planting-canvas" width="96" height="96"
+                  data-pixels={JSON.stringify(s.pixels)}
+                  aria-label={`pixel art by ${s.name || 'anonymous'}`}></canvas>
+                <button class="heart-overlay" data-issue={String(s.issueNumber)}
+                  aria-label={`Heart ${s.name || 'anonymous'}'s planting`}>
+                  <span class="heart-icon-empty" set:html={HEART_EMPTY} />
+                  <span class="heart-icon-filled" set:html={HEART_FILLED} />
+                </button>
+              </div>
+              <div class="planting-tooltip">
+                <span class="planting-tooltip-name">{s.name || 'anonymous'}</span>
+                {s.note && <p class="planting-tooltip-note">{s.note}</p>}
+                {s.website && <a href={s.website} target="_blank" rel="noopener noreferrer" class="planting-tooltip-link">visit site ↗</a>}
+                {s.ts && <span class="planting-tooltip-time">{timeAgo(s.ts)}</span>}
+              </div>
+              <div class="planting-meta">
+                <span class="heart-count" data-issue={String(s.issueNumber)}>{s.hearts > 0 ? s.hearts : ''}</span>
+                {s.ts && <span class="planting-time">{timeAgo(s.ts)}</span>}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Locked plantings — hidden until visitor plants something */}
+        {lockedSubmissions.length > 0 && (
+          <div class="cg-locked" id="cg-locked">
+            <div class="plantings plantings-peek">
+              {lockedSubmissions.map(s => (
+                <div class="planting">
+                  <div class="planting-canvas-wrap">
+                    <canvas class="planting-canvas" width="96" height="96"
+                      data-pixels={JSON.stringify(s.pixels)}
+                      aria-label={`pixel art by ${s.name || 'anonymous'}`}></canvas>
+                    <button class="heart-overlay" data-issue={String(s.issueNumber)}
+                      aria-label={`Heart ${s.name || 'anonymous'}'s planting`}>
+                      <span class="heart-icon-empty" set:html={HEART_EMPTY} />
+                      <span class="heart-icon-filled" set:html={HEART_FILLED} />
+                    </button>
+                  </div>
+                  <div class="planting-tooltip">
+                    <span class="planting-tooltip-name">{s.name || 'anonymous'}</span>
+                    {s.note && <p class="planting-tooltip-note">{s.note}</p>}
+                    {s.website && <a href={s.website} target="_blank" rel="noopener noreferrer" class="planting-tooltip-link">visit site ↗</a>}
+                    {s.ts && <span class="planting-tooltip-time">{timeAgo(s.ts)}</span>}
+                  </div>
+                  <div class="planting-meta">
+                    <span class="heart-count" data-issue={String(s.issueNumber)}>{s.hearts > 0 ? s.hearts : ''}</span>
+                    {s.ts && <span class="planting-time">{timeAgo(s.ts)}</span>}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div class="cg-lock-overlay" id="cg-lock-overlay">
+              <p class="cg-lock-msg">{lockedSubmissions.length} more planting{lockedSubmissions.length === 1 ? '' : 's'}</p>
+              <p class="cg-lock-sub">draw something to see the full garden</p>
+              <button class="cg-lock-btn" id="cg-lock-scroll">draw something ↙</button>
+            </div>
+          </div>
+        )}
+      </>
     )}
   </section>
 
@@ -193,51 +284,30 @@ try {
   }
 
   /* ── Header ──────────────────────────────────────────── */
-  .cg-header { display: flex; flex-direction: column; gap: var(--space-md); }
-  .cg-title {
-    font-family: var(--font-display);
-    font-size: var(--text-hero);
-    color: var(--color-fg);
-    margin: 0;
-    font-weight: 400;
-    letter-spacing: -0.01em;
-    line-height: 1.1;
+  .cg-header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    padding-bottom: var(--space-xl);
+    border-bottom: 0.5px solid var(--color-border);
   }
+  .cg-title { margin: 0; }
   .cg-count {
     font-family: var(--font-body);
     font-size: var(--text-sm);
     color: var(--color-muted);
+    font-style: italic;
+    padding-left: var(--space-xl);
   }
+
+  /* Info — plain text, matches page-def style */
   .cg-info {
-    background: var(--color-accent-light);
-    border: 0.5px solid var(--color-border);
-    border-radius: var(--radius-card);
-    padding: var(--space-md) var(--space-lg);
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-sm);
-  }
-  .cg-info p {
     font-family: var(--font-body);
     font-size: var(--text-sm);
     color: var(--color-muted);
+    line-height: var(--leading-loose);
     margin: 0;
-    line-height: 1.5;
   }
-  .cg-info ul {
-    margin: 0;
-    padding-left: 1.2em;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  .cg-info li {
-    font-family: var(--font-body);
-    font-size: var(--text-sm);
-    color: var(--color-muted);
-    line-height: 1.5;
-  }
-  .cg-info strong { color: var(--color-fg); font-weight: 500; }
 
   /* ── Editor ───────────────────────────────────────────── */
   .editor-wrap { display: flex; gap: var(--space-md); align-items: flex-start; min-width: 0; justify-content: center; }
@@ -314,9 +384,9 @@ try {
     min-width: 0;
     height: 100%;
     overflow-y: auto;
-    padding: var(--space-section) var(--space-xl);
+    padding: var(--space-section) var(--space-xxl);
     box-sizing: border-box;
-    background: var(--color-card);
+    background: var(--color-bg);
     display: flex;
     flex-direction: column;
     gap: var(--space-xl);
@@ -340,7 +410,56 @@ try {
     align-items: center;
     gap: 4px;
     position: relative;
-    cursor: default;
+  }
+
+  /* canvas wrap — positions the heart overlay */
+  .planting-canvas-wrap {
+    position: relative;
+    display: block;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  /* heart overlay — covers canvas, appears on hover */
+  .heart-overlay {
+    position: absolute;
+    inset: 0;
+    border: none;
+    background: rgba(0,0,0,0);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: background 0.18s ease, opacity 0.18s ease;
+    color: #ffffff;
+    padding: 0;
+    border-radius: 8px;
+  }
+  .planting:hover .heart-overlay { opacity: 1; background: rgba(0,0,0,0.38); }
+  .heart-overlay.heart-active { color: #e5534b; }
+  .planting:hover .heart-overlay.heart-active { background: rgba(0,0,0,0.18); }
+
+  .heart-icon-empty,
+  .heart-icon-filled {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.15s ease;
+  }
+  .heart-icon-filled { display: none; }
+  .heart-overlay.heart-active .heart-icon-empty { display: none; }
+  .heart-overlay.heart-active .heart-icon-filled { display: flex; }
+
+  /* heart pop animation */
+  @keyframes heart-pop {
+    0%   { transform: scale(1);   }
+    35%  { transform: scale(1.5); }
+    65%  { transform: scale(0.88);}
+    100% { transform: scale(1);   }
+  }
+  .heart-overlay.heart-popping .heart-icon-filled {
+    animation: heart-pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   }
 
   /* tooltip */
@@ -366,13 +485,98 @@ try {
   .planting-tooltip-name { font-family: var(--font-body); font-size: var(--text-xs); font-weight: 600; color: inherit; display: block; }
   .planting-tooltip-note { font-family: var(--font-body); font-size: 10px; color: inherit; opacity: 0.8; margin: 4px 0 0; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
   .planting-tooltip-time { font-family: var(--font-body); font-size: 10px; opacity: 0.6; display: block; margin-top: 4px; }
+  .planting-tooltip-link { font-family: var(--font-body); font-size: 10px; color: inherit; opacity: 0.75; display: block; margin-top: 4px; text-decoration: underline; }
 
-  /* always-visible timestamp */
-  .planting-time { font-family: var(--font-body); font-size: 10px; color: var(--color-muted); text-align: center; }
+  /* planting meta row: count + timestamp */
+  .planting-meta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    min-height: 16px;
+  }
+  .planting-time { font-family: var(--font-body); font-size: 10px; color: var(--color-muted); }
 
-  /* clickable planting link */
-  .planting-link { display: block; text-decoration: none; }
-  .planting-link .planting-canvas:hover { transform: scale(1.1); }
+  /* heart count */
+  .heart-count {
+    font-family: var(--font-body);
+    font-size: 10px;
+    color: var(--color-muted);
+    transition: color 0.15s;
+    min-width: 10px;
+    text-align: center;
+  }
+  .heart-count.heart-count--active { color: #e5534b; }
+
+  @keyframes count-up {
+    from { opacity: 0; transform: translateY(3px); }
+    to   { opacity: 1; transform: translateY(0);   }
+  }
+  .heart-count.animating { animation: count-up 0.2s ease forwards; }
+
+  /* ── Lock / unlock ───────────────────────────────────── */
+  .cg-locked {
+    position: relative;
+    overflow: hidden;
+    max-height: 180px;
+  }
+  .plantings-peek {
+    opacity: 0.35;
+    pointer-events: none;
+    user-select: none;
+    filter: blur(2px);
+  }
+  .cg-lock-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: var(--space-xxl) var(--space-lg) var(--space-xl);
+    background: linear-gradient(to bottom, transparent, var(--color-bg) 55%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);
+    text-align: center;
+  }
+  .cg-lock-msg {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-fg);
+    font-weight: 600;
+    margin: 0;
+  }
+  .cg-lock-sub {
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    color: var(--color-muted);
+    margin: 0;
+  }
+  .cg-lock-btn {
+    margin-top: var(--space-sm);
+    background: var(--color-fg);
+    color: var(--color-bg);
+    border: none;
+    border-radius: var(--radius-pill);
+    padding: var(--space-sm) var(--space-xl);
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .cg-lock-btn:hover { opacity: 0.8; }
+
+  /* unlocked state — applied by JS when visitor has planted */
+  .cg-locked.unlocked {
+    max-height: none;
+    overflow: visible;
+  }
+  .cg-locked.unlocked .plantings-peek {
+    opacity: 1;
+    pointer-events: auto;
+    filter: none;
+  }
+  .cg-locked.unlocked .cg-lock-overlay { display: none; }
 
   .planting-canvas {
     width: 96px;
@@ -380,16 +584,32 @@ try {
     image-rendering: pixelated;
     border-radius: 8px;
     border: 0.5px solid var(--color-border);
-    transition: transform 0.15s;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
     cursor: default;
     display: block;
   }
+  .planting:hover .planting-canvas { transform: scale(1.06); }
 
   /* ── Mobile: stack vertically ────────────────────────── */
   @media (max-width: 720px) {
-    .cg-layout { flex-direction: column; height: auto; overflow: visible; }
-    .cg-right  { order: -1; height: auto; }
-    .cg-left   { width: 100% !important; max-width: 100%; height: auto; }
+    .cg-layout {
+      flex-direction: column;
+      height: auto;
+      overflow: visible;
+    }
+    .cg-right {
+      order: -1;
+      height: auto;
+      overflow: visible;
+      padding: var(--space-section) var(--space-lg);
+    }
+    .cg-left {
+      width: 100% !important;
+      max-width: 100%;
+      height: auto;
+      overflow: visible;
+      padding: var(--space-xl) var(--space-lg);
+    }
     .cg-resizer { display: none; }
   }
 </style>
@@ -821,6 +1041,9 @@ try {
       const res=await fetch('/api/plant',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pixels,name,note,website,hp})});
       const data=await res.json();
       if(!res.ok)throw new Error(data.error||'Something went wrong');
+      // Mark as planted — unlocks the full garden
+      localStorage.setItem('cg-planted', 'true');
+      unlockGarden();
       form.style.opacity='0'; form.style.transition='opacity 0.2s';
       setTimeout(()=>{form.style.display='none';confirm2.removeAttribute('hidden');},200);
     } catch(err:any){
@@ -856,6 +1079,93 @@ try {
 
   // ── Init ─────────────────────────────────────────────────────────────
   redraw();
+
+  // ── Garden unlock ─────────────────────────────────────────────────────
+  function unlockGarden() {
+    const locked = document.getElementById('cg-locked');
+    if (locked) locked.classList.add('unlocked');
+  }
+
+  if (localStorage.getItem('cg-planted') === 'true') unlockGarden();
+
+  // Scroll-to-canvas from lock overlay
+  document.getElementById('cg-lock-scroll')?.addEventListener('click', () => {
+    document.getElementById('pixel-canvas')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+
+  // ── Hearts ────────────────────────────────────────────────────────────
+  function getHearted(): number[] {
+    try { return JSON.parse(localStorage.getItem('cg-hearted') || '[]'); } catch { return []; }
+  }
+  function addHearted(n: number) {
+    const h = getHearted();
+    if (!h.includes(n)) { h.push(n); localStorage.setItem('cg-hearted', JSON.stringify(h)); }
+  }
+  function removeHearted(n: number) {
+    localStorage.setItem('cg-hearted', JSON.stringify(getHearted().filter(x => x !== n)));
+  }
+
+  // Fetch real counts from Redis on load
+  const allIssueNums = Array.from(document.querySelectorAll<HTMLElement>('.heart-count[data-issue]'))
+    .map(el => el.dataset.issue).filter(Boolean).join(',');
+  if (allIssueNums) {
+    fetch(`/api/hearts?issues=${allIssueNums}`)
+      .then(r => r.json())
+      .then((counts: Record<string, number>) => {
+        Object.entries(counts).forEach(([issue, count]) => {
+          const el = document.querySelector<HTMLElement>(`.heart-count[data-issue="${issue}"]`);
+          if (el) el.textContent = count > 0 ? String(count) : '';
+        });
+      })
+      .catch(() => {});
+  }
+
+  // Mark already-hearted overlays on load
+  const heartedNums = getHearted();
+  document.querySelectorAll<HTMLButtonElement>('.heart-overlay').forEach(btn => {
+    const issue = parseInt(btn.dataset.issue || '0');
+    if (heartedNums.includes(issue)) {
+      btn.classList.add('heart-active');
+      const countEl = document.querySelector<HTMLElement>(`.heart-count[data-issue="${issue}"]`);
+      if (countEl) countEl.classList.add('heart-count--active');
+    }
+    btn.addEventListener('click', () => {
+      const isActive = btn.classList.contains('heart-active');
+      const countEl = document.querySelector<HTMLElement>(`.heart-count[data-issue="${issue}"]`);
+
+      if (isActive) {
+        // Unlike — optimistic
+        btn.classList.remove('heart-active');
+        removeHearted(issue);
+        if (countEl) {
+          const current = parseInt(countEl.textContent || '0') || 0;
+          countEl.textContent = current > 1 ? String(current - 1) : '';
+          countEl.classList.remove('heart-count--active');
+        }
+        fetch('/api/heart', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ issueNumber: issue, action: 'unlike' }),
+        }).catch(() => {});
+      } else {
+        // Like — optimistic
+        btn.classList.add('heart-active', 'heart-popping');
+        setTimeout(() => btn.classList.remove('heart-popping'), 450);
+        if (countEl) {
+          const current = parseInt(countEl.textContent || '0') || 0;
+          countEl.textContent = String(current + 1);
+          countEl.classList.add('heart-count--active', 'animating');
+          setTimeout(() => countEl.classList.remove('animating'), 200);
+        }
+        addHearted(issue);
+        fetch('/api/heart', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ issueNumber: issue, action: 'like' }),
+        }).catch(() => {});
+      }
+    });
+  });
 
   // ── Resizable divider ────────────────────────────────────────────────
   const resizer   = document.getElementById('cg-resizer') as HTMLElement | null;
