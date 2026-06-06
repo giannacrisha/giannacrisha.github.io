@@ -1085,7 +1085,7 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
     display: flex;
     flex-direction: column;
     gap: var(--space-md);
-    overflow: hidden;
+    overflow-x: clip;
   }
   .shelf-label-link {
     color: inherit;
@@ -1116,7 +1116,7 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
     overflow-y: visible;
     scrollbar-width: none;
     padding-bottom: var(--space-lg);
-    padding-top: var(--space-xs);
+    padding-top: 8px;
   }
   .shelf-row::-webkit-scrollbar { display: none; }
   .shelf-item {
