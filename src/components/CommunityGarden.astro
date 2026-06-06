@@ -93,9 +93,6 @@ function plantingHTML(s: Submission): string {
   <!-- ── Left: drawing zone ────────────────────────────── -->
   <aside class="cg-left" id="cg-left">
 
-    <!-- Info -->
-    <p class="cg-info">draw a tiny pixel-art and leave it here for everyone to find. double-click the canvas to clear it!</p>
-
     <!-- Editor -->
     <div class="editor-wrap">
       <div class="toolbar" id="toolbar" role="group" aria-label="Drawing tools"></div>
@@ -108,14 +105,31 @@ function plantingHTML(s: Submission): string {
               </button>
             ))}
           </div>
-          <button class="zoom-btn" id="zoom-btn" aria-label="Toggle zoom">
-            <span class="material-symbols-outlined">zoom_in</span>
-          </button>
+          <div class="canvas-btn-group">
+            <button class="zoom-btn" id="save-btn" aria-label="Save artwork as PNG">
+              <span class="material-symbols-outlined">download</span>
+            </button>
+            <button class="zoom-btn" id="zoom-btn" aria-label="Toggle zoom">
+              <span class="material-symbols-outlined">zoom_in</span>
+            </button>
+          </div>
         </div>
         <div class="canvas-zoom-wrap" id="canvas-zoom-wrap">
           <canvas id="pixel-canvas" width="256" height="256" class="pixel-canvas" aria-label="pixel art drawing canvas"></canvas>
         </div>
-        <div class="palette" id="palette" role="group" aria-label="Color palette"></div>
+        <div class="palette" id="palette" role="group" aria-label="Color palette">
+          <!-- custom color picker swatch -->
+          <div class="custom-color-wrap" id="custom-color-wrap">
+            <button class="swatch swatch-rainbow" id="swatch-rainbow" aria-label="Pick custom color" type="button" title="Custom color"></button>
+            <div class="color-popover" id="color-popover" role="dialog" aria-label="Custom color picker" hidden>
+              <input type="color" id="color-wheel" class="color-wheel" value="#ff0000" aria-label="Color wheel" />
+              <div class="hex-row">
+                <span class="hex-hash">#</span>
+                <input type="text" id="hex-input" class="hex-input" maxlength="6" placeholder="ff0000" aria-label="Hex color code" spellcheck="false" />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -123,8 +137,7 @@ function plantingHTML(s: Submission): string {
     <form class="plant-form" id="plant-form" novalidate>
       <input type="text" name="hp" tabindex="-1" autocomplete="off" aria-hidden="true" style="display:none" />
       <div class="form-row">
-        <input type="text" id="plant-name"    name="name"    placeholder="your name or handle (optional)" maxlength="50"  class="plant-input" aria-label="your name or handle (optional)" />
-        <input type="url"  id="plant-website" name="website" placeholder="your website (optional)"         maxlength="200" class="plant-input" aria-label="your website URL (optional)" />
+        <input type="text" id="plant-name" name="name" placeholder="your name or handle (optional)" maxlength="50" class="plant-input" aria-label="your name or handle (optional)" />
       </div>
       <textarea id="plant-note" name="note" placeholder="leave a little note (optional, 280 chars)" maxlength="280" class="plant-textarea" rows="2" aria-label="leave a little note (optional, 280 characters max)"></textarea>
       <div class="form-footer">
@@ -145,13 +158,15 @@ function plantingHTML(s: Submission): string {
   <section class="cg-right" aria-label="Community plantings">
 
     <!-- Header -->
-    <div class="cg-header">
-      <div class="cg-title-row">
-        <h1 class="section-header cg-title">community garden</h1>
+    <div class="cg-header page-header">
+      <div class="cg-title-row page-title-row">
+        <h1 class="section-header cg-title">our garden</h1>
         {submissions.length > 0 && (
-          <span class="cg-count">{submissions.length} planted</span>
+          <span class="cg-count page-phonetic">{submissions.length} planted</span>
         )}
       </div>
+      <p class="page-def">draw a tiny pixel-art plant or creature and leave it here for everyone to find.</p>
+      <hr class="cg-divider" />
     </div>
 
     {submissions.length === 0 ? (
@@ -227,7 +242,10 @@ function plantingHTML(s: Submission): string {
         )}
       </>
     )}
+    <button class="cg-canvas-btn" id="cg-canvas-btn">plant pixels</button>
   </section>
+
+  <hr class="cg-section-divider" />
 
 </div>
 
@@ -286,17 +304,30 @@ function plantingHTML(s: Submission): string {
   .cg-header {
     display: flex;
     flex-direction: column;
-    gap: var(--space-sm);
-    padding-bottom: var(--space-xl);
-    border-bottom: 0.5px solid var(--color-border);
+    gap: 0;
+    padding: var(--space-xxl) 0 var(--space-md);
   }
   .cg-title-row {
     display: flex;
     align-items: center;
     gap: var(--space-lg);
     flex-wrap: wrap;
+    margin-bottom: var(--space-md);
   }
   .cg-title { margin: 0; }
+  .cg-divider {
+    border: none;
+    border-top: 0.5px solid var(--color-border);
+    margin: var(--space-xl) 0 0;
+  }
+
+  /* section divider — mobile only */
+  .cg-section-divider {
+    display: none;
+    border: none;
+    border-top: 0.5px solid var(--color-border);
+    margin: 0;
+  }
   .cg-count {
     font-family: var(--font-body);
     font-size: var(--text-xs);
@@ -304,8 +335,9 @@ function plantingHTML(s: Submission): string {
     background: var(--color-accent-light);
     border: 0.5px solid var(--color-border);
     border-radius: 999px;
-    padding: 3px 10px;
+    padding: 2px 8px;
     white-space: nowrap;
+    font-size: 0.7rem;
   }
 
   /* Info — plain text, matches page-def style */
@@ -360,11 +392,75 @@ function plantingHTML(s: Submission): string {
   .size-dot { border-radius: 50%; background: var(--color-fg); display: block; }
 
   /* zoom button */
+  .canvas-btn-group { display: flex; gap: 4px; flex-shrink: 0; }
   .zoom-btn { width: 32px; height: 32px; border-radius: 12px; border: 0.5px solid var(--color-border); background: var(--color-card); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.12s; flex-shrink: 0; color: var(--color-muted); }
   .zoom-btn:hover, .zoom-btn.zoom-active { background: var(--color-fg); color: var(--color-bg); }
 
   /* palette matches canvas width */
-  .palette { display: flex; flex-wrap: wrap; gap: 5px; width: 100%; max-width: 480px; }
+  .palette { display: flex; flex-wrap: wrap; gap: 5px; width: 100%; max-width: 480px; align-items: flex-start; }
+
+  /* rainbow swatch + popover */
+  .custom-color-wrap { position: relative; }
+  .swatch-rainbow {
+    width: 20px; height: 20px; border-radius: 5px;
+    border: 1.5px solid transparent;
+    cursor: pointer;
+    background: conic-gradient(red, yellow, lime, cyan, blue, magenta, red);
+    transition: transform 0.1s, border-color 0.1s;
+    padding: 0;
+  }
+  .swatch-rainbow:hover { transform: scale(1.2); }
+  .swatch-rainbow.swatch-active { border-color: var(--color-fg); transform: scale(1.12); }
+
+  .color-popover {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 0;
+    background: var(--color-card);
+    border: 0.5px solid var(--color-border);
+    border-radius: 12px;
+    padding: var(--space-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+    z-index: 50;
+    width: 180px;
+  }
+  .color-popover[hidden] { display: none; }
+  .color-wheel {
+    width: 100%;
+    height: 120px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    padding: 0;
+    background: none;
+  }
+  .hex-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--color-bg);
+    border: 0.5px solid var(--color-border);
+    border-radius: 8px;
+    padding: 4px 8px;
+  }
+  .hex-hash {
+    font-family: var(--font-mono, monospace);
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+  }
+  .hex-input {
+    flex: 1;
+    border: none;
+    background: none;
+    font-family: var(--font-mono, monospace);
+    font-size: var(--text-sm);
+    color: var(--color-fg);
+    outline: none;
+    width: 100%;
+  }
   :global(.swatch) { width: 20px; height: 20px; border-radius: 5px; border: 1.5px solid transparent; cursor: pointer; transition: transform 0.1s, border-color 0.1s; }
   :global(.swatch:hover) { transform: scale(1.2); }
   :global(.swatch.swatch-active) { border-color: var(--color-fg); transform: scale(1.12); }
@@ -392,7 +488,7 @@ function plantingHTML(s: Submission): string {
     min-width: 0;
     height: 100%;
     overflow-y: auto;
-    padding: var(--space-section) var(--space-xxl);
+    padding: var(--space-xl) var(--space-xxl);
     box-sizing: border-box;
     background: var(--color-bg);
     display: flex;
@@ -407,7 +503,7 @@ function plantingHTML(s: Submission): string {
 
   .plantings {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: var(--space-xl);
   }
 
@@ -574,6 +670,22 @@ function plantingHTML(s: Submission): string {
   }
   .cg-lock-btn:hover { opacity: 0.8; }
 
+  /* canvas button — mobile only */
+  .cg-canvas-btn {
+    display: none;
+    background: var(--color-fg);
+    color: var(--color-bg);
+    border: none;
+    border-radius: var(--radius-pill);
+    padding: var(--space-sm) var(--space-xl);
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    cursor: pointer;
+    transition: opacity 0.15s;
+    width: fit-content;
+  }
+  .cg-canvas-btn:hover { opacity: 0.8; }
+
   /* unlocked state — applied by JS when visitor has planted */
   .cg-locked.unlocked {
     max-height: none;
@@ -609,7 +721,7 @@ function plantingHTML(s: Submission): string {
       order: -1;
       height: auto;
       overflow: visible;
-      padding: var(--space-section) var(--space-lg);
+      padding: 0 var(--space-lg);
     }
     .cg-left {
       width: 100% !important;
@@ -619,6 +731,18 @@ function plantingHTML(s: Submission): string {
       padding: var(--space-xl) var(--space-lg);
     }
     .cg-resizer { display: none; }
+    .cg-right { min-height: 100vh; }
+    .cg-section-divider { display: block; }
+    .cg-canvas-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: fixed;
+      bottom: var(--space-lg);
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+    }
   }
 </style>
 
@@ -629,6 +753,16 @@ function plantingHTML(s: Submission): string {
   // ── Canvas setup ─────────────────────────────────────────────────────
   const canvas = document.getElementById('pixel-canvas') as HTMLCanvasElement;
   const ctx = canvas.getContext('2d')!;
+
+  // ── Mobile canvas button ─────────────────────────────────────────────
+  const canvasBtn = document.getElementById('cg-canvas-btn') as HTMLButtonElement;
+  const canvasSection = document.getElementById('cg-left') as HTMLElement;
+  if (canvasBtn && canvasSection) {
+    canvasBtn.addEventListener('click', () => {
+      canvasBtn.style.display = 'none';
+      canvasSection.scrollIntoView({ behavior: 'smooth' });
+    });
+  }
 
   // ── State ─────────────────────────────────────────────────────────────
   let pixels: (string|null)[] = new Array(GRID*GRID).fill(null);
@@ -1017,6 +1151,52 @@ function plantingHTML(s: Submission): string {
     paletteEl.appendChild(sw);
   });
 
+  // ── Custom color picker ──────────────────────────────────────────────
+  const rainbowBtn  = document.getElementById('swatch-rainbow') as HTMLButtonElement;
+  const popover     = document.getElementById('color-popover') as HTMLElement;
+  const colorWheel  = document.getElementById('color-wheel')   as HTMLInputElement;
+  const hexInput    = document.getElementById('hex-input')     as HTMLInputElement;
+
+  function applyCustomColor(hex: string) {
+    currentColor = hex;
+    colorWheel.value = hex;
+    hexInput.value = hex.replace('#', '');
+    rainbowBtn.style.setProperty('--custom-bg', hex);
+    rainbowBtn.classList.add('swatch-active');
+    document.querySelectorAll('.swatch:not(.swatch-rainbow)').forEach(s => s.classList.remove('swatch-active'));
+    if (tool === 'eraser') {
+      tool = 'pen';
+      document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('tool-active'));
+      document.getElementById('tool-pen')?.classList.add('tool-active');
+    }
+  }
+
+  rainbowBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    popover.hidden = !popover.hidden;
+    if (!popover.hidden) hexInput.focus();
+  });
+
+  // Clicks inside popover don't bubble to document
+  popover.addEventListener('click', (e) => e.stopPropagation());
+
+  colorWheel.addEventListener('input', () => applyCustomColor(colorWheel.value));
+
+  hexInput.addEventListener('input', () => {
+    const val = hexInput.value.replace(/[^0-9a-fA-F]/g, '');
+    hexInput.value = val;
+    if (val.length === 6) applyCustomColor('#' + val);
+  });
+
+  hexInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { popover.hidden = true; }
+  });
+
+  // Close popover when clicking outside
+  document.addEventListener('click', () => {
+    if (!popover.hidden) popover.hidden = true;
+  });
+
   // ── Clear button (double-click canvas) ───────────────────────────────
   canvas.addEventListener('dblclick', ()=>{
     if(confirm('Clear the canvas?')){pixels.fill(null);selRect=null;selPixels=null;selPhase='idle';redraw();}
@@ -1041,12 +1221,11 @@ function plantingHTML(s: Submission): string {
     if((form.querySelector('[name="hp"]') as HTMLInputElement).value)return;
     if(selPhase!=='idle') stampSel();
     const name=(form.querySelector('#plant-name') as HTMLInputElement).value;
-    const website=(form.querySelector('#plant-website') as HTMLInputElement).value;
     const note=(form.querySelector('#plant-note') as HTMLTextAreaElement).value;
     plantBtn.disabled=true; plantBtn.textContent='planting…'; errorEl.setAttribute('hidden','');
     try {
       const hp=(form.querySelector('[name="hp"]') as HTMLInputElement).value;
-      const res=await fetch('/api/plant',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pixels,name,note,website,hp})});
+      const res=await fetch('/api/plant',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pixels,name,note,hp})});
       const data=await res.json();
       if(!res.ok)throw new Error(data.error||'Something went wrong');
       // Mark as planted — unlocks the full garden
@@ -1072,6 +1251,26 @@ function plantingHTML(s: Submission): string {
       pc.fillStyle=color;
       pc.fillRect((i%GRID)*cell,Math.floor(i/GRID)*cell,cell,cell);
     });
+  });
+
+  // ── Save as PNG ──────────────────────────────────────────────────────
+  document.getElementById('save-btn')?.addEventListener('click', () => {
+    // Render to a clean 512×512 canvas (no grid lines)
+    const out = document.createElement('canvas');
+    out.width = 512; out.height = 512;
+    const octx = out.getContext('2d')!;
+    octx.fillStyle = '#ffffff';
+    octx.fillRect(0, 0, 512, 512);
+    const cell = 512 / GRID;
+    pixels.forEach((color, i) => {
+      if (!color) return;
+      octx.fillStyle = color;
+      octx.fillRect((i % GRID) * cell, Math.floor(i / GRID) * cell, cell, cell);
+    });
+    const a = document.createElement('a');
+    a.href = out.toDataURL('image/png');
+    a.download = 'pixel-art.png';
+    a.click();
   });
 
   // ── Zoom toggle ───────────────────────────────────────────────────────

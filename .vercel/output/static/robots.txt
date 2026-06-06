@@ -1,7 +1,0 @@
-User-agent: *
-Allow: /
-
-# Block system/debug routes
-Disallow: /system
-
-Sitemap: https://giannacrisha.com/sitemap-index.xml

@@ -1,39 +1,29 @@
 ---
 import Garden from '../layouts/Garden.astro';
+import Icon from '../components/Icon.astro';
 ---
-<Garden title="about – gi">
+<Garden title="about gi">
   <div class="page-wrapper">
     <div class="about">
 
-      <!-- hero -->
-      <header class="about-hero">
-        <h1 class="about-name">gianna crisha saludo</h1>
-        <p class="about-role">design, tech & society &mdash; ux · creative strategy · tech policy</p>
-      </header>
-
-      <!-- portrait + intro -->
-      <section class="about-intro">
-        <div class="portrait-placeholder" aria-label="portrait placeholder"></div>
-        <div class="intro-text">
-          <p>
-            my design is very human. at brandeis, i'm designing my major in design, tech, and society.
-            whether that's building interfaces or advocating for tech policy, i'm always thinking about
-            how the things we make shape the people who use them.
-          </p>
-          <p>
-            i'm studying anthropology, CS, and psychology. i co-founded the brandeis consulting club,
-            i'm leading DeisHacks 2027, i've gone into legislators' offices pitching the MA data privacy act,
-            and i create personal projects every day because i'm a #creatress.
-          </p>
-          <p>always down to connect, collaborate, or just talk design. xx</p>
-        </div>
+      <!-- hero intro (full viewport) -->
+      <section class="about-hero-section" id="about-top">
+        <img src="/images/portrait.png" alt="Gianna Crisha Saludo" class="portrait" />
+        <h1 class="about-name">gianna crisha</h1>
+        <p class="about-role">design, tech & society ·</p>
+        <p class="about-bio">
+          my design is very human. at brandeis, i'm designing my major in design, tech, and society.
+          whether that's building interfaces or advocating for tech policy, i'm always thinking about
+          how the things we make shape the people who use them.
+        </p>
+        <button class="scroll-down" id="scroll-down-btn" aria-label="scroll to next section">
+          <Icon name="chevron-down" size={24} />
+        </button>
       </section>
 
       <!-- migration history -->
       <section class="about-section">
-        <h2 class="section-heading">where i've been</h2>
-        <p class="migration-intro">i've moved a lot. each place left something in me.</p>
-
+        <h2 class="section-heading">where's home?</h2>
         <div class="migration-map">
           <div id="migration-leaflet"></div>
 
@@ -44,10 +34,10 @@ import Garden from '../layouts/Garden.astro';
               </div>
               <div class="migration-nav">
                 <button id="migration-prev" aria-label="previous city" disabled>
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  <Icon name="chevron-left" size={14} />
                 </button>
                 <button id="migration-next" aria-label="next city">
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 2l5 5-5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  <Icon name="chevron-right" size={14} />
                 </button>
               </div>
             </div>
@@ -173,17 +163,32 @@ import Garden from '../layouts/Garden.astro';
 <style>
   .about {
     max-width: 720px;
-    padding: var(--space-section) 0 calc(var(--space-section) * 2);
+    padding: 0 0 calc(var(--space-section) * 2);
     display: flex;
     flex-direction: column;
     gap: var(--space-section);
   }
 
-  /* hero */
-  .about-hero {
+  /* full-viewport hero */
+  .about-hero-section {
+    min-height: calc(100vh - 60px);
     display: flex;
     flex-direction: column;
-    gap: var(--space-sm);
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: var(--space-md);
+    padding: var(--space-section) 0;
+    position: relative;
+  }
+  .portrait {
+    width: 160px;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    object-position: center top;
+    border-radius: var(--radius-card);
+    display: block;
+    margin-bottom: var(--space-sm);
   }
   .about-name {
     font-family: var(--font-display);
@@ -193,34 +198,46 @@ import Garden from '../layouts/Garden.astro';
   }
   .about-role {
     font-family: var(--font-body);
-    font-size: var(--text-lg);
+    font-size: var(--text-md);
     color: var(--color-muted);
   }
-
-  /* intro */
-  .about-intro {
-    display: grid;
-    grid-template-columns: 200px 1fr;
-    gap: var(--space-xxl);
-    align-items: start;
-  }
-  .portrait-placeholder {
-    width: 100%;
-    aspect-ratio: 3 / 4;
-    background: var(--color-accent-light);
-    border-radius: var(--radius-card);
-  }
-  .intro-text {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-lg);
-    padding-top: var(--space-sm);
-  }
-  .intro-text p {
+  .about-bio {
     font-family: var(--font-body);
     font-size: var(--text-md);
     color: var(--color-fg);
     line-height: var(--leading-loose);
+    max-width: 480px;
+    margin-top: var(--space-sm);
+  }
+  .scroll-down {
+    position: absolute;
+    bottom: var(--space-xl);
+    left: 50%;
+    transform: translateX(-50%);
+    background: none;
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-muted);
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+    animation: bounce 2s ease-in-out infinite;
+  }
+  .scroll-down:hover {
+    color: var(--color-fg);
+    border-color: var(--color-fg);
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(5px); }
+  }
+
+  @media (min-width: 600px) {
+    .portrait { width: 200px; }
   }
 
   /* sections */
@@ -273,9 +290,16 @@ import Garden from '../layouts/Garden.astro';
   }
   .work-item {
     display: grid;
-    grid-template-columns: 120px 1fr;
-    gap: var(--space-xl);
+    grid-template-columns: 1fr;
+    gap: var(--space-xs);
     align-items: start;
+  }
+
+  @media (min-width: 600px) {
+    .work-item {
+      grid-template-columns: 120px 1fr;
+      gap: var(--space-xl);
+    }
   }
   .work-year {
     font-family: var(--font-body);
@@ -323,7 +347,7 @@ import Garden from '../layouts/Garden.astro';
     z-index: 0;
   }
   .migration-card {
-    background: var(--color-bg);
+    background: #ffffff;
     padding: var(--space-xl);
     display: flex;
     flex-direction: column;
@@ -384,55 +408,61 @@ import Garden from '../layouts/Garden.astro';
     line-height: var(--leading-loose);
   }
 
-  @media (max-width: 700px) {
-    .about-intro {
-      grid-template-columns: 1fr;
-    }
-    .portrait-placeholder {
-      max-width: 180px;
-    }
-    .work-item {
-      grid-template-columns: 1fr;
-      gap: var(--space-xs);
-    }
-    .about-name {
-      font-size: var(--text-section);
-    }
+  @media (min-width: 600px) {
   }
 </style>
 
 <script is:inline>
 (function () {
+  function initScrollBtn() {
+    const btn = document.getElementById('scroll-down-btn');
+    const hero = document.getElementById('about-top');
+    if (!btn || !hero) return;
+    btn.addEventListener('click', function () {
+      const next = hero.nextElementSibling;
+      if (next) next.scrollIntoView({ behavior: 'smooth' });
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initScrollBtn);
+  } else {
+    initScrollBtn();
+  }
+})();
+</script>
+
+<script is:inline>
+(function () {
   const stops = [
     {
-      name: 'manila',
-      sub: 'philippines / where it started',
-      lat: 14.5995, lng: 120.9842, zoom: 11,
-      text: 'i was born here. more details coming soon. this one deserves the right words.',
+      name: 'antipolo',
+      sub: 'philippines · 2004 – 2014',
+      lat: 14.5888, lng: 121.1228, zoom: 13,
+      text: 'i was born in quezon city and raised in purok maligaya 2 in antipolo city. my family owned a small internet cafe, one of the firsts in the area — this is where i fell in love with computers. our house had two spaces: the back was our living space, and the front was the cafe, where i spent my after-school hours playing games and exploring the web. at six, i troubleshot my first computer problem to save my family repair costs, becoming a little technician before i knew the word for it.',
     },
     {
       name: 'abu dhabi',
-      sub: 'uae / growing up between worlds',
+      sub: 'uae · 2014 – 2017',
       lat: 24.4539, lng: 54.3773, zoom: 11,
-      text: 'i spent part of my childhood here, in a city that feels like it exists slightly outside of time. i did my research internship at NYU Abu Dhabi here years later. full circle.',
+      text: 'we moved to abu dhabi after my fourth grade. i did my research internship at NYU Abu Dhabi here years later. full circle.',
     },
     {
       name: 'butuan',
-      sub: 'philippines / coming home',
+      sub: 'philippines · 2017 – 2021',
       lat: 8.9475, lng: 125.5406, zoom: 12,
-      text: 'moving back to the philippines after abu dhabi. butuan is a quieter city, known as the city of golden tara. more to come on this chapter.',
+      text: 'my family moved back to the philippines after my sixth grade. butuan is a quieter city, known as the city of golden tara.',
     },
     {
       name: 'cagayan de oro',
-      sub: 'philippines / becoming myself',
+      sub: 'philippines · 2021 – 2024',
       lat: 8.4542, lng: 124.6319, zoom: 12,
-      text: 'i went to xavier university ateneo de cagayan for senior high school here. i debated, made things, figured out who i was. grandfinalist at PDA world congress 2021. this city gave me a lot.',
+      text: 'i moved to cagayan de oro for senior high school after getting a scholarship for junior high school valedictorians. i went to xavier university ateneo de cagayan, debated, made things, figured out who i was. grandfinalist at PDA world congress 2021. this city gave me a lot.',
     },
     {
       name: 'boston',
-      sub: 'usa / right now ✦',
+      sub: 'usa · 2024 – present ✦',
       lat: 42.3601, lng: -71.0589, zoom: 12,
-      text: 'brandeis university, studying design, tech, and society. co-founding clubs, leading hackathons, going into legislators\' offices, building things every day. still figuring it all out, but happily.',
+      text: 'after getting the wien international scholarship at brandeis university that covers my full cost of attendance, i packed up everything and moved to boston. co-founding clubs, leading hackathons, going into legislators\' offices, building things every day. still figuring it all out, but happily.',
     },
   ];
 

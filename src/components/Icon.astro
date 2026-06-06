@@ -1,0 +1,30 @@
+---
+// src/components/Icon.astro
+// The one icon renderer. Pulls markup from the central registry in src/icons.ts.
+// Usage: <Icon name="filter" size={16} /> or <Icon name="close" width={20} height={20} class="caret" />
+import { ICONS, type IconName } from '../icons';
+
+interface Props {
+  name: IconName;
+  /** shorthand for equal width + height */
+  size?: number | string;
+  width?: number | string;
+  height?: number | string;
+  class?: string;
+}
+
+const { name, size = 16, width, height, class: className } = Astro.props;
+const def = ICONS[name];
+const w = width ?? size;
+const h = height ?? size;
+---
+
+<svg
+  viewBox={def.viewBox}
+  width={w}
+  height={h}
+  fill="none"
+  aria-hidden="true"
+  class={className}
+  set:html={def.body}
+/>

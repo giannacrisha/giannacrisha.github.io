@@ -11,3 +11,9 @@ src/content/.obsidian/
 # obsidian inbox and templates — personal, not part of the site
 src/content/inbox/
 src/content/templates/
+.vercel
+.env*
+
+# macOS
+.DS_Store
+**/.DS_Store

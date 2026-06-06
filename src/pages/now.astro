@@ -22,9 +22,11 @@ function toISO(d: Date): string {
   <div class="page-wrapper">
     <article class="now-page">
 
-      <header class="now-header">
-        <h1 class="now-title">now</h1>
-        <p class="now-subtitle">a log of the current me! <a class="now-link" href="https://nownownow.com/about" target="_blank" rel="noopener" aria-label="what is a now page? (opens in new tab)">what is a now page? ↗</a></p>
+      <header class="now-header page-header">
+        <div class="page-title-row">
+          <h1 class="now-title section-header">now</h1>
+        </div>
+        <p class="page-def">a log of the current me! <a class="now-link" href="https://nownownow.com/about" target="_blank" rel="noopener" aria-label="what is a now page? (opens in new tab)">what is a now page? ↗</a></p>
       </header>
 
       <div class="now-timeline">
@@ -78,7 +80,7 @@ function toISO(d: Date): string {
 <style>
   .now-page {
     max-width: 660px;
-    padding: var(--space-section) 0 calc(var(--space-section) * 2);
+    padding: 0 0 calc(var(--space-section) * 2);
     display: flex;
     flex-direction: column;
     gap: calc(var(--space-section) * 0.75);
