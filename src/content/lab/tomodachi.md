@@ -11,25 +11,45 @@ tools:
   - Arduino
 topics:
   - tech
+  - design
 growth_stage: spark
 featured: false
 ---
 
-Tomodachi is a macro-HCI prototype proposal built with Mai Al Shaaban for Professor Dylan Cashman's HCI course.
+## Problem
 
-The core argument: most wellness apps fail because they rely on surveillance, streaks, and shame. Tomodachi uses emotional attachment instead — you care about the dog, so you care for yourself. This is the **Tomodachi Effect**: people form genuine emotional bonds with digital creatures and change their behavior as a result.
+Most wellness apps fail. Not because they're poorly designed, but because they use the wrong motivational model — surveillance, streaks, and shame. They extract attention rather than serve wellbeing. You miss a day and a red broken streak tells you you've failed. You keep a streak and feel anxious about losing it.
 
-The device snaps onto accessories like a clip or wristband via embedded N52 neodymium magnets, and delivers ambient feedback (haptic nudges, a glance at the screen) without pulling you out of what you're doing — treating the body itself as a computing environment.
+The behavior change literature (BJ Fogg, in particular) points to something different: small, immediate feedback loops tied to things you already care about work far better than punishment-based systems.
 
-**Components**
-- Seeed Studio XIAO ESP32-S3 — the brain (21×17mm, WiFi/Bluetooth ready)
-- GC9A01 + CST816S — 240×240 round color touchscreen with tap/swipe input
-- 500mAh LiPo battery + TP4056 USB-C charging module
-- N52 neodymium disc magnets for modular accessory snapping
+## Process
 
-**Firmware**
-- `TFT_eSPI` — pixel art rendering on the GC9A01
-- `CST816S` Arduino library — gesture recognition
-- `Adafruit_DRV2605` — haptic vibration patterns
+The starting hypothesis was the **Tomodachi Effect**: people form genuine emotional bonds with digital creatures, and those bonds change their behavior. If you care about the pet, you care for yourself.
 
-The enclosure is modeled in Blender, verified against manufacturer STEP files, and 3D-printed in PLA at ~35–40mm diameter.
+Built as a macro-HCI prototype proposal with Mai Al Shaaban for Professor Dylan Cashman's HCI course at Brandeis.
+
+Hardware constraints shaped every design decision. The 240×240 circular display is beautiful but small — pixel art was the right visual language. Magnetic attachment meant no permanent commitment; you clip it somewhere that makes sense for your day.
+
+The hardest lesson: unchecked assumptions cost hours. I assumed the GC9A01 display had capacitive touch built in. It didn't — the touch layer is a separate component (CST816S) that needed its own integration. Building hardware means working backwards from what the system is *actually* doing, with no error logs to guide you.
+
+The enclosure went through three printed iterations — each one tighter against the manufacturer STEP files, each one smaller than the last.
+
+## Solution
+
+A clip-on wearable device featuring:
+
+- **Circular 240×240 color touchscreen** — pixel-art pet and environment rendered via `TFT_eSPI`
+- **Touch input** — tap and swipe gestures via the CST816S gesture recognizer
+- **Haptic feedback** — ambient vibration reminders via the Adafruit DRV2605, without pulling you out of what you're doing
+- **Magnetic attachment** — N52 neodymium disc magnets snap to a clip, wristband, or bag strap
+- **500mAh LiPo + USB-C charging** — all-day battery, no proprietary cables
+- **3D-printed PLA enclosure** — ~35–40mm diameter, modeled in Blender
+
+**The Tomodachi Effect in practice:** when you log self-care (sleep, water, focus breaks), the pet thrives — its environment brightens, it moves differently. When you skip it, the pet shows it. No streaks, no shame. Just a creature you care about.
+
+## Links
+
+- **Demo:** *(add video demo or showcase link)*
+- **GitHub:** *(available upon request)*
+
+<!-- VISUALS: Device photos, UI design mockups, pixel-art character designs — available in Downloads folder -->
