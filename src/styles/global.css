@@ -95,9 +95,39 @@ ul, ol {
 
 .section-header {
   font-family: var(--font-display);
-  font-size: var(--text-section);
+  font-size: var(--text-hero);
   color: var(--color-fg);
   line-height: var(--leading-tight);
+}
+
+/* Shared page header structure — matches garden-header layout */
+.page-header {
+  padding: var(--space-xxl) 0 var(--space-xxl);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.page-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-lg);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-md);
+}
+.page-phonetic {
+  font-family: var(--font-body);
+  font-size: var(--text-md);
+  color: var(--color-muted);
+  letter-spacing: 0.02em;
+}
+.page-def {
+  font-family: var(--font-body);
+  font-size: var(--text-lg);
+  color: var(--color-muted);
+  line-height: var(--leading-loose);
+  max-width: 560px;
+  padding-left: var(--space-xl);
+  margin-bottom: 0;
 }
 
 .prose {

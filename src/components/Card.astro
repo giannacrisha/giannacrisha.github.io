@@ -44,7 +44,7 @@ function excerpt(raw: string, max = 160): string {
   return stripped.length > max ? stripped.slice(0, max).trimEnd() + '…' : stripped;
 }
 
-const preview = body ? excerpt(body) : description ?? null;
+const preview = description ?? (body ? excerpt(body) : null);
 
 const href = `/${collection}/${slug}`;
 

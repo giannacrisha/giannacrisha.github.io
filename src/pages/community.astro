@@ -12,11 +12,20 @@ import CommunityGarden from '../components/CommunityGarden.astro';
 </Garden>
 
 <style is:global>
-  /* Make main fill remaining viewport height */
+  /* Desktop: main fills the remaining viewport height as a flex row */
   body, html { height: 100%; }
   main {
-    height: calc(100vh - 56px); /* 56px = nav height */
+    height: calc(100vh - 56px);
     overflow: hidden;
     display: flex;
+  }
+
+  /* Mobile: let main scroll naturally */
+  @media (max-width: 720px) {
+    main {
+      height: auto;
+      overflow: visible;
+      display: block;
+    }
   }
 </style>

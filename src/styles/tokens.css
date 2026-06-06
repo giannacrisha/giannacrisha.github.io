@@ -24,7 +24,7 @@
   --text-lg:      18px;
   --text-xl:      24px;
   --text-xxl:     36px;
-  --text-hero:    clamp(48px, 8vw, 80px);
+  --text-hero:    clamp(48px, 12vw, 80px);
   --text-section: clamp(28px, 4vw, 40px);
 
   --leading-tight: 1.3;
@@ -44,7 +44,7 @@
   --width-site:    1100px;
   --radius-card:   12px;
   --radius-pill:   20px;
-  --radius-input:  8px;
+  --radius-input:  12px;
   --border:        0.5px solid var(--color-border);
 }
 
@@ -54,7 +54,7 @@
   --color-fg:           #e8e0d0;
   --color-title:        #ffffff;
   --color-card:         #242424;
-  --color-muted:        #9a8f7e;
+  --color-muted:        #b8aa97; /* bumped from #9a8f7e — meets 4.5:1 on #1a1a1a */
   --color-accent:       #b5a07a;
   --color-accent-light: #2a2820;
   --color-border:       #333333;

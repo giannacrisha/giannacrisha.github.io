@@ -102,6 +102,18 @@
   }
   .gi-tab:hover .gi-tab-close,
   .gi-tab-close:focus-visible { opacity: 1; }
+
+  @media (hover: none) {
+    /* Touch devices: always show close button, enlarge tap target */
+    .gi-tab-close {
+      opacity: 1;
+      padding: 15px;
+      margin: -15px;
+      width: 14px;
+      height: 14px;
+      /* visual stays 14px, tap target becomes 44px */
+    }
+  }
   .gi-tab-close:focus-visible {
     outline: 2px solid var(--color-accent);
     outline-offset: 2px;

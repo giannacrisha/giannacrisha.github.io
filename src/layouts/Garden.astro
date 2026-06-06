@@ -25,4 +25,12 @@ const { title, description, ogImage, noFooter = false } = Astro.props;
 
 <style is:global>
   html { background: var(--color-bg); }
+
+  /* Parallax targets — will-change declared so browser composites them */
+  .garden-header,
+  .page-header,
+  .now-header {
+    will-change: transform;
+  }
 </style>
+

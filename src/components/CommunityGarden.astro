@@ -146,13 +146,12 @@ function plantingHTML(s: Submission): string {
 
     <!-- Header -->
     <div class="cg-header">
-      <div class="page-title-row">
-        <h1 class="section-header cg-title">community</h1>
+      <div class="cg-title-row">
+        <h1 class="section-header cg-title">community garden</h1>
+        {submissions.length > 0 && (
+          <span class="cg-count">{submissions.length} planted</span>
+        )}
       </div>
-      <p class="page-def">draw something small and leave it here for other people to find!</p>
-      {submissions.length > 0 && (
-        <p class="cg-count">{submissions.length} planted</p>
-      )}
     </div>
 
     {submissions.length === 0 ? (
@@ -291,13 +290,22 @@ function plantingHTML(s: Submission): string {
     padding-bottom: var(--space-xl);
     border-bottom: 0.5px solid var(--color-border);
   }
+  .cg-title-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+    flex-wrap: wrap;
+  }
   .cg-title { margin: 0; }
   .cg-count {
     font-family: var(--font-body);
-    font-size: var(--text-sm);
+    font-size: var(--text-xs);
     color: var(--color-muted);
-    font-style: italic;
-    padding-left: var(--space-xl);
+    background: var(--color-accent-light);
+    border: 0.5px solid var(--color-border);
+    border-radius: 999px;
+    padding: 3px 10px;
+    white-space: nowrap;
   }
 
   /* Info — plain text, matches page-def style */
@@ -314,7 +322,7 @@ function plantingHTML(s: Submission): string {
 
   /* toolbar — fixed vertical strip, doesn't need to grow */
   .toolbar { display: flex; flex-direction: column; gap: 4px; padding: 6px; background: var(--color-card); border: 0.5px solid var(--color-border); border-radius: var(--radius-card); flex-shrink: 0; }
-  :global(.tool-btn) { width: 34px; height: 34px; border-radius: 8px; border: none; background: none; color: var(--color-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.12s, color 0.12s; }
+  :global(.tool-btn) { width: 34px; height: 34px; border-radius: 12px; border: none; background: none; color: var(--color-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.12s, color 0.12s; }
   :global(.tool-btn:hover) { background: var(--color-accent-light); color: var(--color-fg); }
   :global(.tool-btn.tool-active) { background: var(--color-fg); color: var(--color-bg); }
   :global(.tool-divider) { height: 0.5px; background: var(--color-border); margin: 2px 4px; }
@@ -339,24 +347,24 @@ function plantingHTML(s: Submission): string {
     display: block;
     background: #ffffff;
     border: 0.5px solid var(--color-border);
-    border-radius: 4px;
+    border-radius: 12px;
     cursor: crosshair;
     touch-action: none;
   }
 
   /* size row stretches with canvas */
   .size-row { display: flex; gap: 6px; align-items: center; }
-  .size-btn { width: 32px; height: 32px; border-radius: 8px; border: 0.5px solid var(--color-border); background: var(--color-card); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.12s, border-color 0.12s; flex-shrink: 0; }
+  .size-btn { width: 32px; height: 32px; border-radius: 12px; border: 0.5px solid var(--color-border); background: var(--color-card); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.12s, border-color 0.12s; flex-shrink: 0; }
   .size-btn.size-active { background: var(--color-fg); border-color: var(--color-fg); }
   .size-btn.size-active .size-dot { background: var(--color-bg); }
   .size-dot { border-radius: 50%; background: var(--color-fg); display: block; }
 
   /* zoom button */
-  .zoom-btn { width: 32px; height: 32px; border-radius: 8px; border: 0.5px solid var(--color-border); background: var(--color-card); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.12s; flex-shrink: 0; color: var(--color-muted); }
+  .zoom-btn { width: 32px; height: 32px; border-radius: 12px; border: 0.5px solid var(--color-border); background: var(--color-card); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.12s; flex-shrink: 0; color: var(--color-muted); }
   .zoom-btn:hover, .zoom-btn.zoom-active { background: var(--color-fg); color: var(--color-bg); }
 
-  /* palette reflows naturally with available width */
-  .palette { display: flex; flex-wrap: wrap; gap: 5px; }
+  /* palette matches canvas width */
+  .palette { display: flex; flex-wrap: wrap; gap: 5px; width: 100%; max-width: 480px; }
   :global(.swatch) { width: 20px; height: 20px; border-radius: 5px; border: 1.5px solid transparent; cursor: pointer; transition: transform 0.1s, border-color 0.1s; }
   :global(.swatch:hover) { transform: scale(1.2); }
   :global(.swatch.swatch-active) { border-color: var(--color-fg); transform: scale(1.12); }
@@ -416,7 +424,7 @@ function plantingHTML(s: Submission): string {
   .planting-canvas-wrap {
     position: relative;
     display: block;
-    border-radius: 8px;
+    border-radius: 12px;
     overflow: hidden;
   }
 
@@ -434,7 +442,7 @@ function plantingHTML(s: Submission): string {
     transition: background 0.18s ease, opacity 0.18s ease;
     color: #ffffff;
     padding: 0;
-    border-radius: 8px;
+    border-radius: 12px;
   }
   .planting:hover .heart-overlay { opacity: 1; background: rgba(0,0,0,0.38); }
   .heart-overlay.heart-active { color: #e5534b; }
@@ -582,7 +590,7 @@ function plantingHTML(s: Submission): string {
     width: 96px;
     height: 96px;
     image-rendering: pixelated;
-    border-radius: 8px;
+    border-radius: 12px;
     border: 0.5px solid var(--color-border);
     transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
     cursor: default;

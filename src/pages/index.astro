@@ -126,10 +126,9 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
           <span class="garden-phonetic">[gahr-dn] &nbsp;/ ˈɡɑːr.dən /</span>
         </div>
         <p class="garden-def">
-          a collection of imperfect notes, essays, and ideas growing slowly over time.
+          a space where things grow. <a class="garden-learn-more" href="https://maggieappleton.com/garden-history" target="_blank" rel="noopener" aria-label="learn more about digital gardens (opens in new tab)">learn more →</a>
         </p>
         <div class="garden-links">
-          <a class="garden-link-btn" href="https://maggieappleton.com/garden-history" target="_blank" rel="noopener">what is a digital garden? ↗</a>
           <button class="garden-link-btn" id="btn-story">the story</button>
           <button class="garden-link-btn" id="btn-design">the design</button>
           <button class="garden-link-btn" id="btn-stages">growth stages</button>
@@ -504,7 +503,7 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
     transition: transform 0.1s;
   }
   .hero-enter.spinning .keyhole-svg {
-    animation: keyholeSpin 1.1s ease-in-out forwards;
+    animation: keyholeSpin 0.5s ease-in-out forwards;
   }
   @keyframes keyholeSpin {
     0%   { transform: rotate(0deg); }
@@ -523,7 +522,7 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
     min-height: 100vh;
   }
   .garden-header {
-    padding: var(--space-section) 0 var(--space-xxl);
+    padding: var(--space-xxl) 0 var(--space-xxl);
   }
   .garden-title-row {
     display: flex;
@@ -559,6 +558,18 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
     padding-left: var(--space-xl);
     margin-bottom: var(--space-lg);
   }
+  .garden-learn-more {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    font-style: italic;
+    color: var(--color-muted);
+    text-decoration: underline;
+    text-decoration-color: var(--color-accent-border);
+    text-underline-offset: 3px;
+    white-space: nowrap;
+    transition: color 0.15s;
+  }
+  .garden-learn-more:hover { color: var(--color-fg); }
   .garden-links {
     display: flex;
     gap: var(--space-lg);
@@ -612,6 +623,7 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
     display: flex;
     flex-direction: column;
     position: relative;
+    overflow: hidden;
     transform: translateY(12px);
     transition: transform 0.35s cubic-bezier(0.4,0,0.2,1),
                 max-width 0.35s cubic-bezier(0.4,0,0.2,1),
@@ -620,6 +632,19 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
   }
   .modal-backdrop.open .modal {
     transform: translateY(0);
+  }
+  /* Gradient fade at top to maintain contrast for traffic buttons over scrolled content */
+  .modal::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 56px;
+    background: linear-gradient(to bottom, var(--color-card) 40%, transparent);
+    border-radius: var(--radius-card) var(--radius-card) 0 0;
+    pointer-events: none;
+    z-index: 1;
   }
   /* fullscreen state */
   .modal.modal--fullscreen {
@@ -667,9 +692,45 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
   }
   .modal-traffic:hover .traffic-icon { opacity: 1; }
   .traffic-red:hover { filter: brightness(0.9); }
+  .traffic-dot:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+
+  @media (hover: none) {
+    .modal-traffic { gap: 12px; }
+    .traffic-dot {
+      width: 22px;
+      height: 22px;
+    }
+    .traffic-icon {
+      opacity: 1;
+      width: 12px;
+      height: 12px;
+    }
+  }
   .modal-body {
     overflow-y: auto;
     padding: calc(var(--space-xxl) + 8px) var(--space-xxl) var(--space-xxl);
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border) transparent;
+  }
+  .modal-body::-webkit-scrollbar {
+    width: 6px;
+  }
+  .modal-body::-webkit-scrollbar-track {
+    background: transparent;
+    margin: 12px;
+  }
+  .modal-body::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  .modal-body::-webkit-scrollbar-thumb:hover {
+    background: var(--color-muted);
+    background-clip: padding-box;
   }
   .modal-body iframe {
     width: 100%;
@@ -681,19 +742,27 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
   .modal-tabbar {
     position: fixed;
     bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
+    left: 0;
+    right: 0;
     z-index: 801;
     display: flex;
     align-items: flex-end;
     gap: 4px;
+    padding: 20px var(--space-xl) 0;
     pointer-events: none;
+    overflow-x: auto;
+    overflow-y: visible;
+    scrollbar-width: none;
+    justify-content: center;
+    /* allow shadow to bleed above the scrollable area */
+    clip-path: none;
   }
+  .modal-tabbar::-webkit-scrollbar { display: none; }
   :global(.modal-tab-item) {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 7px 10px 9px 14px;
+    gap: 6px;
+    padding: 7px 8px 9px 14px;
     background: var(--color-card);
     border: 0.5px solid var(--color-border);
     border-bottom: none;
@@ -703,8 +772,8 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
     pointer-events: auto;
     transform: translateY(100%);
     transition: transform 0.28s cubic-bezier(0.4,0,0.2,1), box-shadow 0.18s;
-    min-width: 140px;
-    max-width: 200px;
+    flex-shrink: 0;
+    white-space: nowrap;
   }
   :global(.modal-tab-item.tab-visible) {
     transform: translateY(0);
@@ -713,18 +782,15 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
     box-shadow: 0 -4px 22px rgba(0,0,0,0.13);
   }
   :global(.modal-tab-label) {
-    flex: 1;
     font-family: var(--font-body);
     font-size: var(--text-xs);
     color: var(--color-muted);
     letter-spacing: 0.04em;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    text-align: left;
   }
   :global(.modal-tab-close) {
     flex-shrink: 0;
+    /* visual: 14px red dot */
     width: 14px;
     height: 14px;
     border-radius: 50%;
@@ -735,11 +801,14 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
     align-items: center;
     justify-content: center;
     padding: 0;
-    opacity: 0;
-    transition: opacity 0.15s;
-  }
-  :global(.modal-tab-item:hover .modal-tab-close) {
     opacity: 1;
+    /* 44px touch target via outline box trick */
+    position: relative;
+  }
+  :global(.modal-tab-close::before) {
+    content: '';
+    position: absolute;
+    inset: -15px;
   }
   :global(.modal-tab-close svg) {
     display: block;
@@ -911,7 +980,7 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
     display: flex; flex-direction: column; gap: 4px; align-items: center;
     font-family: var(--font-body); font-size: var(--text-xs); color: var(--color-muted);
   }
-  :global(.ds-swatch-block) { width: 48px; height: 48px; border-radius: 8px; }
+  :global(.ds-swatch-block) { width: 48px; height: 48px; border-radius: 12px; }
   :global(.ds-swatch code) {
     font-family: var(--font-body); font-size: 10px; color: var(--color-muted);
     background: var(--color-accent-light); padding: 1px 5px; border-radius: 4px;
@@ -977,17 +1046,18 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
   /* ── Garden bar (topics + controls in one row) ───────────────────────── */
   .garden-bar {
     display: flex;
-    align-items: center;
-    gap: var(--space-xl);
+    flex-direction: column;
+    gap: var(--space-md);
     margin-bottom: var(--space-xxl);
-    flex-wrap: wrap;
   }
   .topic-pills {
     display: flex;
     gap: var(--space-xs);
-    flex-wrap: wrap;
-    flex: 1;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: 2px; /* prevent clipping active outline */
   }
+  .topic-pills::-webkit-scrollbar { display: none; }
   .topic-pill {
     flex-shrink: 0;
     padding: 4px 14px;
@@ -1085,7 +1155,6 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
     display: flex;
     flex-direction: column;
     gap: var(--space-md);
-    overflow: hidden;
   }
   .shelf-label-link {
     color: inherit;
@@ -1123,10 +1192,11 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
     flex-shrink: 0;
     width: 200px;
     max-width: 200px;
-    overflow: hidden;
+    overflow: visible;
     margin-right: var(--space-lg);
     transition: opacity 0.2s ease, max-width 0.28s ease 0.08s, margin-right 0.28s ease 0.08s;
   }
+  .shelf-item.item-hiding { overflow: hidden; }
   .shelf-item.item-hiding {
     opacity: 0;
     max-width: 0 !important;
@@ -1145,7 +1215,7 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
   .frame-img-wrap {
     position: relative;
     display: inline-block;
-    border-radius: 8px;
+    border-radius: 12px;
     overflow: hidden;
     max-height: 240px;
     box-shadow: inset 0 -60px 40px -10px rgba(0,0,0,0.5);
@@ -1165,7 +1235,7 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
     justify-content: space-between;
     padding: var(--space-sm) var(--space-md);
     background: linear-gradient(to bottom, rgba(0,0,0,0.18) 0%, transparent 35%, transparent 55%, rgba(0,0,0,0.55) 100%);
-    border-radius: 8px;
+    border-radius: 12px;
   }
   .frame-stage {
     align-self: flex-end;
@@ -1217,7 +1287,7 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
     font-size: var(--text-xs);
     color: var(--color-muted);
     background: var(--color-card);
-    border-radius: 8px;
+    border-radius: 12px;
   }
 
   /* ── Book card (library) ──────────────────────────────────────────────── */
@@ -1228,8 +1298,40 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
     text-decoration: none;
     width: 200px;
     transition: transform 0.2s;
+    position: relative;
   }
   .book-card:hover { transform: translateY(-4px); }
+  /* spine + edge shadow overlay — no outer shadow */
+  .book-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 200px;
+    height: 300px;
+    border-radius: 3px 6px 6px 3px;
+    pointer-events: none;
+    background:
+      /* spine shadow (left) */
+      linear-gradient(
+        to right,
+        rgba(0,0,0,0.15) 0%,
+        rgba(0,0,0,0.1) 0.5%,
+        rgba(255,255,255,0.15) 3%,
+        rgba(0,0,0,0.1) 5.5%,
+        rgba(0,0,0,0.15) 6%,
+        rgba(0,0,0,0.15) 6.5%,
+        rgba(0,0,0,0.1) 7.5%,
+        rgba(255,255,255,0.06) 20%,
+        rgba(0,0,0,0) 80%,
+        rgba(0,0,0,0.1) 100%,
+        transparent 22%
+      ),
+      /* top edge */
+      linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, transparent 5%),
+      /* bottom edge */
+      linear-gradient(to top, rgba(0,0,0,0.1) 0%, transparent 5%);
+  }
   .book-cover {
     width: 200px;
     height: 300px;
@@ -1241,7 +1343,7 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
     width: 200px;
     height: 300px;
     background: var(--book-color, #c9b99a);
-    border-radius: 3px 6px 6px 3px;
+    border-radius: 12px;
     box-shadow: none;
     display: flex;
     flex-direction: column;
@@ -1265,7 +1367,7 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
   }
 
   @media (max-width: 600px) {
-    .garden-title { font-size: var(--text-section); }
+    .garden-title { font-size: clamp(48px, 12vw, 80px); }
     .shelf-item { width: 160px; }
     .frame-img { max-height: 220px; }
   }
@@ -1557,7 +1659,7 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
       if (!btn || btn.classList.contains('spinning')) return;
       btn.classList.add('spinning');
       // wait for spin to finish, then hide overlay
-      setTimeout(hideOverlay, 1050);
+      setTimeout(hideOverlay, 480);
     });
 
     // ── Modal ──────────────────────────────────────────────────────────────
@@ -1581,7 +1683,7 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
               <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><rect x="1" y="2" width="10" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M4 1v2M8 1v2M1 5h10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
               last updated June 2025
             </span>
-            <a class="modal-meta-link" href="https://maggieappleton.com/garden-history" target="_blank" rel="noopener">what is a digital garden? ↗</a>
+            <a class="modal-meta-link" href="https://maggieappleton.com/garden-history" target="_blank" rel="noopener" aria-label="what is a digital garden? (opens in new tab)">what is a digital garden? ↗</a>
           </div>
         </div>
         <div class="story-body">
@@ -1595,7 +1697,7 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
           Wordpress blog (close, but the pressure of "posting" still got to me). I needed a space
           where the bar was lower, where things could exist without being finished.</p>
           <p>While browsing the World Wide Web, I found the concept of Digital Gardening through
-          <a href="https://maggieappleton.com" target="_blank" rel="noopener">Maggie Appleton's</a> website.
+          <a href="https://maggieappleton.com" target="_blank" rel="noopener" aria-label="Maggie Appleton's website (opens in new tab)">Maggie Appleton's</a> website.
           A way of thinking about personal websites less like a broadcast and more like a living
           workspace, somewhere ideas could grow slowly, visibly, without shame.</p>
           <blockquote>
@@ -1608,6 +1710,8 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
           knowledge webs and second brains out there, but this is me being okay with the wet paint.</p>
         </div>`;
 
+      var _modalTrigger = null; // element that opened the modal — focus returns here on close
+
       function openModal(content, title, id) {
         currentContent = content;
         currentTitle   = title || 'modal';
@@ -1618,12 +1722,23 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
         document.body.style.overflow = 'hidden';
         // remove this tab from bar if it was minimized
         removeTab(currentId);
+        // move focus to the close button so keyboard users are inside the modal
+        _modalTrigger = document.activeElement;
+        setTimeout(function () {
+          var closeBtn = document.getElementById('modal-close');
+          if (closeBtn) closeBtn.focus();
+        }, 50);
       }
 
       function closeModal() {
         backdrop.classList.remove('open');
         backdrop.setAttribute('aria-hidden', 'true');
         document.body.style.overflow = '';
+        // return focus to the element that triggered the modal
+        if (_modalTrigger && typeof _modalTrigger.focus === 'function') {
+          _modalTrigger.focus();
+          _modalTrigger = null;
+        }
         setTimeout(function () { body.innerHTML = ''; currentContent = ''; currentTitle = ''; currentId = ''; }, 300);
       }
 

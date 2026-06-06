@@ -39,8 +39,11 @@ const filters = [
 <Garden title="gallery">
   <div class="page-wrapper">
     <div class="page-header">
-      <h1 class="section-header">gallery</h1>
-      <p class="page-desc">artwork and visual work</p>
+      <div class="page-title-row">
+        <h1 class="section-header">gallery</h1>
+        <span class="page-phonetic">[gal-uh-ree] &nbsp;/ ˈɡæl.ər.i /</span>
+      </div>
+      <p class="page-def">artwork and visual experiments.</p>
     </div>
     <CollectionFilters filters={filters} />
     <div class="masonry">
@@ -70,8 +73,6 @@ const filters = [
 </Garden>
 
 <style>
-  .page-header { padding: var(--space-section) 0 var(--space-xxl); }
-  .page-desc { font-family: var(--font-body); font-size: var(--text-md); color: var(--color-muted); margin-top: var(--space-sm); }
   .masonry { columns: 2; column-gap: var(--space-xl); }
   .masonry-item { break-inside: avoid; margin-bottom: var(--space-xl); }
   .gallery-card { display: block; background: var(--color-card); border: var(--border); border-radius: var(--radius-card); overflow: hidden; transition: border-color 0.15s ease; }

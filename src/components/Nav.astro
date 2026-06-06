@@ -1,5 +1,6 @@
 ---
 // src/components/Nav.astro
+import ThemeToggle from './ThemeToggle.astro';
 const current = Astro.url.pathname;
 const gardenActive = current === '/' || ['/lab','/archives','/gallery','/library'].some(p => current.startsWith(p));
 const sublinks = [
@@ -76,6 +77,9 @@ const sublinks = [
     <a href="/community" class="mobile-link">community</a>
     <a href="/about" class="mobile-link">about</a>
     <a href="/now" class="mobile-link">now</a>
+    <div class="mobile-theme-wrap">
+      <ThemeToggle id="theme-toggle-nav" />
+    </div>
   </div>
 </nav>
 
@@ -227,10 +231,11 @@ const sublinks = [
     z-index: 200;
     transform: translateX(100%);
     transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: -8px 0 32px rgba(0,0,0,0.18);
+    box-shadow: none;
   }
   .nav-mobile-menu.open {
     transform: translateX(0);
+    box-shadow: -8px 0 32px rgba(0,0,0,0.18);
   }
   .nav-mobile-backdrop {
     position: fixed;
@@ -282,7 +287,21 @@ const sublinks = [
     align-items: center;
     transition: color 0.15s;
   }
-  .mobile-link:last-child { border-bottom: none; }
+  .mobile-link:last-of-type { border-bottom: none; }
+
+  /* theme toggle at bottom of nav drawer */
+  .mobile-theme-wrap {
+    margin-top: auto;
+    padding-top: var(--space-xl);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .mobile-theme-label {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+  }
   .mobile-link:hover,
   .mobile-link:focus-visible { color: var(--color-accent); }
   .mobile-link:focus-visible {

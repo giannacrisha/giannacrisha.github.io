@@ -28,8 +28,11 @@ const filters = [
 <Garden title="lab">
   <div class="page-wrapper">
     <div class="page-header">
-      <h1 class="section-header">lab</h1>
-      <p class="page-desc">design and code projects</p>
+      <div class="page-title-row">
+        <h1 class="section-header">lab</h1>
+        <span class="page-phonetic">[lab] &nbsp;/ læb /</span>
+      </div>
+      <p class="page-def">design and code projects, built in public.</p>
     </div>
     <CollectionFilters filters={filters} />
     <div class="card-grid">
@@ -57,6 +60,4 @@ const filters = [
 </Garden>
 
 <style>
-  .page-header { padding: var(--space-section) 0 var(--space-xxl); }
-  .page-desc { font-family: var(--font-body); font-size: var(--text-md); color: var(--color-muted); margin-top: var(--space-sm); }
 </style>
