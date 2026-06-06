@@ -1,6 +1,6 @@
 ---
 title: Tomodachi
-description: A small wearable wellness device inspired by the Tamagotchi — a round touchscreen pixel art pet that reflects how well you're taking care of yourself. Log sleep, water, and focus breaks and the dog thrives. Skip self-care and it shows.
+description: A wearable digital wellness device inspired by the Tamagotchi
 date_built: 2026-04-20
 tools:
   - ESP32-S3

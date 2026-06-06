@@ -1,6 +1,6 @@
 ---
 title: shlife
-description: A visual bookshelf organizer for side projects — because creative people accumulate work everywhere and deserve a beautiful way to revisit, filter, and share the journey, not just the polished outcome.
+description: A visual bookshelf organizer for side projects
 date_built: 2025-12-01
 tools:
   - Next.js

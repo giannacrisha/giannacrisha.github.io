@@ -1,6 +1,6 @@
 ---
 title: gcalgroups
-description: A Chrome extension that adds calendar grouping to Google Calendar — toggle all related calendars on or off with a single click instead of managing them one by one.
+description: A Chrome extension that adds calendar grouping to Google Calendar
 date_built: 2025-06-01
 tools:
   - Chrome Extension API
