@@ -264,7 +264,7 @@ const showToc = isEssay && tocHeadings.length >= 2;
       const { top, height } = article.getBoundingClientRect();
       const scrolled = Math.max(0, -top);
       const total    = Math.max(1, height - window.innerHeight);
-      bar.style.width = Math.min(100, (scrolled / total) * 100) + '%';
+      bar!.style.width = Math.min(100, (scrolled / total) * 100) + '%';
     }
     window.addEventListener('scroll', updateProgress, { passive: true });
     updateProgress();

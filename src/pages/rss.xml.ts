@@ -5,7 +5,11 @@ import { site } from '../config/design';
 
 export async function GET(context: { site: URL }) {
   const archives = await getCollection('archives');
-  const sorted = archives.sort((a, b) => b.data.date_published.getTime() - a.data.date_published.getTime());
+  const sorted = archives.sort((a, b) => {
+    const dateA = (a.data.date_published ?? a.data.date_written).getTime();
+    const dateB = (b.data.date_published ?? b.data.date_written).getTime();
+    return dateB - dateA;
+  });
 
   return rss({
     title: site.rssTitle,

@@ -1,9 +1,15 @@
 import { defineCollection, z } from 'astro:content';
-import { growthStages, contentTypes, mediaTypes } from '../config/design';
+import { growthStages, contentTypes, mediaTypes, type GrowthStage } from '../config/design';
 
-const stageEnum   = z.enum(Object.keys(growthStages) as [string, ...string[]]);
-const contentEnum = z.enum(Object.keys(contentTypes) as [string, ...string[]]);
-const mediaEnum   = z.enum(Object.keys(mediaTypes)   as [string, ...string[]]);
+// Cast via the exported GrowthStage type so Zod infers the literal union,
+// not widened string — this is what clears the ~10 GrowthPill type errors.
+const stageKeys   = Object.keys(growthStages) as [GrowthStage, ...GrowthStage[]];
+const contentKeys = Object.keys(contentTypes) as [keyof typeof contentTypes, ...Array<keyof typeof contentTypes>];
+const mediaKeys   = Object.keys(mediaTypes)   as [keyof typeof mediaTypes,   ...Array<keyof typeof mediaTypes>];
+
+const stageEnum   = z.enum(stageKeys);
+const contentEnum = z.enum(contentKeys);
+const mediaEnum   = z.enum(mediaKeys);
 
 const lab = defineCollection({
   type: 'content',
@@ -28,7 +34,7 @@ const archives = defineCollection({
     type:           contentEnum,
     date_written:   z.date(),
     date_published: z.date().optional(), // defaults to date_written if omitted
-    tags:           z.array(z.string()).nullish(),
+    tags:           z.array(z.string()).nullish(),   // nullish() allows explicit `tags: null` in frontmatter
     topics:         z.array(z.string()).optional(),
     note:           z.string().optional(),
     growth_stage:   stageEnum,
@@ -46,24 +52,6 @@ const gallery = defineCollection({
     image:          z.string(),
     caption:        z.string().optional(),
     topics:         z.array(z.string()).optional(),
-    growth_stage:   stageEnum,
-  }),
-});
-
-const case_studies = defineCollection({
-  type: 'content',
-  schema: z.object({
-    title:          z.string(),
-    subtitle:       z.string().optional(),
-    description:    z.string().optional(),
-    role:           z.string().optional(),
-    timeline:       z.string().optional(),
-    team:           z.string().optional(),
-    tools:          z.array(z.string()).optional(),
-    cover_image:    z.string().optional(),
-    video_demo:     z.string().optional(),
-    date_built:     z.date(),
-    date_published: z.date().optional(), // defaults to date_built if omitted
     growth_stage:   stageEnum,
     featured:       z.boolean().default(false),
   }),
@@ -93,4 +81,4 @@ const now = defineCollection({
   }),
 });
 
-export const collections = { lab, archives, gallery, library, case_studies, now };
+export const collections = { lab, archives, gallery, library, now };

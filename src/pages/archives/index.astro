@@ -58,7 +58,7 @@ const filters = [
             collection="archives"
             type={entry.data.type}
             stage={entry.data.growth_stage}
-            date_published={entry.data.date_published}
+            date_published={entry.data.date_published ?? entry.data.date_written}
             date_written={entry.data.date_written}
             body={entry.body}
           />

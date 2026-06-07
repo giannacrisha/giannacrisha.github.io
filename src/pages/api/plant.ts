@@ -4,6 +4,20 @@
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
+import { Redis } from '@upstash/redis';
+import { Ratelimit } from '@upstash/ratelimit';
+
+const redis = new Redis({
+  url:   import.meta.env.KV_REST_API_URL,
+  token: import.meta.env.KV_REST_API_TOKEN,
+});
+
+// Sliding window: 3 plantings per IP per 10 minutes, shared across all instances.
+const ratelimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(3, '600 s'),
+  prefix:  'rl:plant',
+});
 
 const REPO_OWNER = import.meta.env.GITHUB_REPO_OWNER ?? 'giannacrisha';
 const REPO_NAME  = import.meta.env.GITHUB_REPO_NAME  ?? 'giannacrisha.github.io';
@@ -20,30 +34,19 @@ function stripHtml(str: string): string {
   });
 }
 
-// Simple in-memory rate limiter: max 3 submissions per IP per 10 minutes
-const submissions = new Map<string, number[]>();
-const RATE_WINDOW = 10 * 60 * 1000; // 10 min
-const RATE_LIMIT  = 3;
-
-function isRateLimited(ip: string): boolean {
-  const now  = Date.now();
-  const times = (submissions.get(ip) ?? []).filter(t => now - t < RATE_WINDOW);
-  if (times.length >= RATE_LIMIT) return true;
-  submissions.set(ip, [...times, now]);
-  return false;
-}
-
 export const POST: APIRoute = async ({ request }) => {
   const token = import.meta.env.GITHUB_TOKEN;
   if (!token) {
     return new Response(JSON.stringify({ error: 'Server misconfigured' }), { status: 500 });
   }
 
-  // ── Rate limiting ─────────────────────────────────────────────────────
-  const ip = request.headers.get('x-forwarded-for')?.split(',')[0].trim()
+  // ── Rate limiting (Upstash Redis — persists across serverless instances) ──
+  const ip = request.headers.get('x-vercel-forwarded-for')
+          ?? request.headers.get('x-forwarded-for')?.split(',')[0].trim()
           ?? request.headers.get('x-real-ip')
           ?? 'unknown';
-  if (isRateLimited(ip)) {
+  const { success } = await ratelimit.limit(ip);
+  if (!success) {
     return new Response(JSON.stringify({ error: 'Too many plantings — try again later.' }), { status: 429 });
   }
 

@@ -5,27 +5,29 @@ export const prerender = false;
 
 import type { APIRoute } from 'astro';
 import { Redis } from '@upstash/redis';
+import { Ratelimit } from '@upstash/ratelimit';
 
 const redis = new Redis({
   url:   import.meta.env.KV_REST_API_URL,
   token: import.meta.env.KV_REST_API_TOKEN,
 });
 
-// Rate limiting: max 30 actions per IP per minute
-const _rl = new Map<string, number[]>();
-function isRateLimited(ip: string): boolean {
-  const now   = Date.now();
-  const times = (_rl.get(ip) ?? []).filter(t => now - t < 60_000);
-  if (times.length >= 30) return true;
-  _rl.set(ip, [...times, now]);
-  return false;
-}
+// Sliding window: 30 heart actions per IP per 60 seconds, shared across all instances.
+const ratelimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(30, '60 s'),
+  prefix:  'rl:heart',
+});
 
 export const POST: APIRoute = async ({ request }) => {
-  const ip = request.headers.get('x-forwarded-for')?.split(',')[0].trim()
+  // Prefer Vercel's trusted header over spoofable x-forwarded-for first-hop.
+  const ip = request.headers.get('x-vercel-forwarded-for')
+          ?? request.headers.get('x-forwarded-for')?.split(',')[0].trim()
           ?? request.headers.get('x-real-ip')
           ?? 'unknown';
-  if (isRateLimited(ip)) {
+
+  const { success } = await ratelimit.limit(ip);
+  if (!success) {
     return new Response(JSON.stringify({ error: 'Too many requests.' }), { status: 429 });
   }
 

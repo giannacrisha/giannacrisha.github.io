@@ -216,7 +216,7 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
           <div class="shelf-row">
             {labSorted.map(entry => (
               <div class="shelf-item" data-topics={JSON.stringify(entry.data.topics??[])} data-stage={entry.data.growth_stage??''} data-date={(entry.data.date_published??entry.data.date_built).getTime()}>
-                <Card title={entry.data.title} slug={entry.slug} collection="lab" type={entry.data.type} stage={entry.data.growth_stage} date_published={entry.data.date_published??entry.data.date_built} date_built={entry.data.date_built} cover_image={entry.data.cover_image} description={entry.data.description} body={entry.body} />
+                <Card title={entry.data.title} slug={entry.slug} collection="lab" stage={entry.data.growth_stage} date_published={entry.data.date_published??entry.data.date_built} date_built={entry.data.date_built} cover_image={entry.data.cover_image} description={entry.data.description} body={entry.body} />
               </div>
             ))}
           </div>
@@ -261,7 +261,7 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
           <div class="shelf-row">
             {archivesSorted.map(entry => (
               <div class="shelf-item" data-topics={JSON.stringify(entry.data.topics??[])} data-stage={entry.data.growth_stage??''} data-date={(entry.data.date_published??entry.data.date_written).getTime()}>
-                <Card title={entry.data.title} slug={entry.slug} collection="archives" type={entry.data.type} stage={entry.data.growth_stage} date_published={entry.data.date_published??entry.data.date_written} date_written={entry.data.date_written} description={entry.data.description} body={entry.body} />
+                <Card title={entry.data.title} slug={entry.slug} collection="archives" type={entry.data.type} stage={entry.data.growth_stage} date_published={entry.data.date_published??entry.data.date_written} date_written={entry.data.date_written} body={entry.body} />
               </div>
             ))}
           </div>

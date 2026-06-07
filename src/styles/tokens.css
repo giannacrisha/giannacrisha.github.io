@@ -1,5 +1,8 @@
 /* src/styles/tokens.css */
-/* Auto-mirrors src/config/design.ts — edit values there, not here */
+/* CSS design tokens — single source of truth for all visual values.
+   NOTE: src/config/design.ts exports growthStages/contentTypes/mediaTypes for
+   TypeScript use and some color/font values used in Base.astro + system.astro.
+   Keep both files in sync when changing shared values (muted, accent, etc.). */
 
 :root {
   --color-bg:           #faf7f2;
