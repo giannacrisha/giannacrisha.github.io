@@ -16,6 +16,7 @@ const sorted = entries.sort((a, b) => b.data.date_added.getTime() - a.data.date_
       <p class="page-def">books, films, albums, and shows worth keeping.</p>
     </div>
     <div class="book-grid">
+      {sorted.length === 0 && <p class="empty">nothing here yet</p>}
       {sorted.map(entry => {
         const d = entry.data;
         return (

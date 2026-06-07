@@ -1,18 +1,22 @@
 ---
 // src/components/Timestamps.astro
 interface Props {
-  primaryLabel:   string;
-  primaryDate:    Date;
-  secondaryLabel: string;
-  secondaryDate:  Date;
+  primaryLabel:    string;
+  primaryDate:     Date;
+  secondaryLabel?: string;
+  secondaryDate?:  Date;
 }
 const { primaryLabel, primaryDate, secondaryLabel, secondaryDate } = Astro.props;
 const fmt = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 ---
 <p class="timestamps">
   <span>{primaryLabel} {fmt(primaryDate)}</span>
-  <span class="dot" aria-hidden="true"></span>
-  <span>{secondaryLabel} {fmt(secondaryDate)}</span>
+  {secondaryLabel && secondaryDate && (
+    <>
+      <span class="dot" aria-hidden="true"></span>
+      <span>{secondaryLabel} {fmt(secondaryDate)}</span>
+    </>
+  )}
 </p>
 
 <style>

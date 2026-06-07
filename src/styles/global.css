@@ -344,3 +344,10 @@ ul, ol {
 @media (max-width: 600px) {
   .card-grid { grid-template-columns: 1fr; }
 }
+
+.empty {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+  padding: var(--space-xxl) 0;
+}

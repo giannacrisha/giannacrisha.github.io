@@ -19,20 +19,8 @@ const ratelimit = new Ratelimit({
   prefix:  'rl:plant',
 });
 
-const REPO_OWNER = import.meta.env.GITHUB_REPO_OWNER ?? 'giannacrisha';
-const REPO_NAME  = import.meta.env.GITHUB_REPO_NAME  ?? 'giannacrisha.github.io';
-const LABEL      = 'community-garden';
-
-// Valid pixel color: null, or a CSS hex color (#rgb, #rrggbb, #rrggbbaa)
-const HEX_COLOR = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
-
-// Strip all HTML tags from a string (defense-in-depth alongside Astro escaping)
-function stripHtml(str: string): string {
-  return str.replace(/<[^>]*>/g, '').replace(/&(?:[a-z]+|#\d+);/gi, (e) => {
-    const map: Record<string, string> = { '&amp;':'&','&lt;':'<','&gt;':'>','&quot;':'"','&#39;':"'" };
-    return map[e] ?? e;
-  });
-}
+import { REPO_OWNER, REPO_NAME, LABEL } from '../../config/github';
+import { stripHtml, sanitizePixel } from '../../lib/sanitize';
 
 export const POST: APIRoute = async ({ request }) => {
   const token = import.meta.env.GITHUB_TOKEN;
@@ -69,11 +57,7 @@ export const POST: APIRoute = async ({ request }) => {
     return new Response(JSON.stringify({ error: 'Invalid pixel data' }), { status: 400 });
   }
   // Each pixel must be null or a valid hex color string — no arbitrary strings
-  const safePixels: (string | null)[] = pixels.map(p => {
-    if (p === null || p === undefined) return null;
-    if (typeof p === 'string' && HEX_COLOR.test(p)) return p;
-    return null; // silently drop any invalid value
-  });
+  const safePixels: (string | null)[] = pixels.map(sanitizePixel);
   const painted = safePixels.filter(Boolean).length;
   if (painted < 4) {
     return new Response(JSON.stringify({ error: 'Draw something first!' }), { status: 400 });

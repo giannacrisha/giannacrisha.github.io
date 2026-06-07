@@ -679,7 +679,7 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
     padding: 0;
     transition: filter 0.15s;
   }
-  .traffic-red    { background: #ff6059; cursor: pointer; }
+  .traffic-red    { background: var(--color-traffic-red); cursor: pointer; }
   .traffic-yellow { background: #ffbd2e; cursor: pointer; }
   .traffic-green  { background: #28c841; cursor: pointer; }
   .traffic-icon {
@@ -791,7 +791,7 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
     width: 14px;
     height: 14px;
     border-radius: 50%;
-    background: #ff6059;
+    background: var(--color-traffic-red);
     border: none;
     cursor: pointer;
     display: flex;
