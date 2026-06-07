@@ -19,12 +19,18 @@ Items are grouped by effort. Fixed items are removed from this list.
 | 8 | Removed dead `case_studies` collection from `content/config.ts` | Jun 2026 |
 | 9 | Added `featured` field to gallery schema (was silently missing) | Jun 2026 |
 | 10 | Fixed `date_published ?? date_built/written` coalescing in Card call sites | Jun 2026 |
+| 11 | Added `--color-danger` + `--color-traffic-red` tokens; replaced all hardcoded hex in MinimizeBar, CommunityGarden, index.astro | Jun 2026 |
+| 12 | Made `Timestamps` secondary props optional; removed duplicate `date_added` in `library/[slug].astro` | Jun 2026 |
+| 13 | `garden-push.sh` reads `VAULT_PATH`/`CONTENT_PATH` from env; runs `npm run check` before commit | Jun 2026 |
+| 14 | `sync-content.mjs` now syncs `now` collection; reads `VAULT_PATH` from env | Jun 2026 |
+| 15 | Created `src/config/github.ts`; both `CommunityGarden.astro` and `plant.ts` import from it | Jun 2026 |
+| 16 | Added empty-state guard (`nothing here yet`) + `.empty` style to all 5 collection pages | Jun 2026 |
 
 ---
 
 ## Architecture
 
-### 🟠 Extract inline scripts from `src/pages/index.astro` (2,175 lines)
+### 🟠 Extract inline scripts from `src/pages/index.astro` (~2,175 lines)
 **Risk:** High coupling — modal, sparkle, and filter logic share one risk surface.  
 **Fix:** Extract to `src/lib/{modal,overlay,sparkle}.ts` and import as `<script type="module">`.  
 **Start with:** The modal/tab system — it's the most self-contained chunk (~400 lines).
@@ -33,11 +39,6 @@ Items are grouped by effort. Fixed items are removed from this list.
 **Risk:** Drawing logic untestable; grid math invisible until a user reports a broken drawing.  
 **Fix:** Move pure grid functions (`idx`, `inBounds`, flood-fill, mirror) to `src/lib/pixel.ts`.  
 **Bonus:** Once extracted, add Vitest unit tests — these are pure functions.
-
-### 🟡 Shared `src/config/github.ts` for repo constants
-`REPO_OWNER`/`REPO_NAME` are read from env in both `CommunityGarden.astro` and `plant.ts`.  
-`plant.ts` hardcodes `LABEL = 'community-garden'` instead of reading the env var.  
-**Fix:** Create `src/config/github.ts` and import in both files.
 
 ### 🟡 Duplicated book-spine shadow CSS
 Near-identical 3-layer gradient `::after` in `index.astro:1302–1330` and `library/index.astro:77–87`.  
@@ -65,31 +66,6 @@ requires Astro 6. Astro 6 migration requires:
 
 ## Content Pipeline
 
-### 🟡 `garden-push.sh` — hardcoded absolute paths
-```bash
-# line 9-10
-VAULT="/Users/giannacrisha/Library/Mobile Documents/..."
-DEST="/Users/giannacrisha/projects/..."
-```
-**Fix:** Read from env vars (`VAULT_PATH`, `DEST_PATH`) with the current values as documented defaults.
-
-### 🟡 `garden-push.sh` — no frontmatter validation before sync
-A bad YAML field in Obsidian syncs fine, then fails the Vercel build.  
-You've already hit this (`makerflow.md` had `date_started` instead of `date_built`).  
-**Fix:** Run `npm run check` (or a frontmatter linter) in `garden-push.sh` before `git commit`, abort on failure.
-```bash
-npm run check || { echo "⛔ Type errors — fix before pushing"; exit 1; }
-```
-
-### 🟡 `scripts/sync-content.mjs` is missing `now`
-`npm run sync` covers `[archives, gallery, lab, library]` but not `now`.  
-`garden-push.sh` does include `now`. Two sync paths with different coverage.  
-**Fix:** Add `'now'` to `sync-content.mjs` — or delete one of the two sync scripts.
-
-### 🟡 `library/[slug].astro` — duplicate timestamp
-`Timestamps` receives `primaryDate` and `secondaryDate` both equal to `date_added` — renders the same date twice.  
-**Fix:** Drop the redundant secondary.
-
 ---
 
 ## DX & Tooling
@@ -103,13 +79,3 @@ Optional but helps catch structural issues early.
 `plant.ts` validators (`stripHtml`, hex-pixel sanitize) are the only code path that touches
 attacker-controlled input. They have no coverage.  
 **Fix:** Add `vitest`, extract the pure helpers, write ~15 lines of tests.
-
-### 🟡 Orphan brand colors bypassing tokens
-`#e5534b` (danger/heart red) hardcoded in `MinimizeBar.astro:92`, `CommunityGarden.astro:544,613`.  
-`#ff6059` hardcoded in `index.astro:682,794`.  
-**Fix:** Add `--color-danger: #e5534b` to `tokens.css`; reference via `var()`.
-
-### 🟡 Empty state handling on collection pages
-Index pages (`lab`, `archives`, `gallery`, `library`, `now`) have no `length === 0` guard.  
-An rsync failure or empty Obsidian vault would render a silent blank grid.  
-**Fix:** `{sorted.length === 0 ? <p class="empty">nothing here yet</p> : sorted.map(...)}`

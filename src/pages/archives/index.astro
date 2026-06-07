@@ -46,6 +46,7 @@ const filters = [
     </div>
     <CollectionFilters filters={filters} />
     <div class="card-grid">
+      {sorted.length === 0 && <p class="empty">nothing here yet</p>}
       {sorted.map(entry => (
         <div
           data-filter={JSON.stringify({ type: entry.data.type, stage: entry.data.growth_stage })}

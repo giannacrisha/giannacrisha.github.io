@@ -6,8 +6,8 @@
 
 set -e
 
-VAULT="/Users/giannacrisha/Library/Mobile Documents/iCloud~md~obsidian/Documents/gi-garden-vault"
-CONTENT="/Users/giannacrisha/projects/giannacrisha.github.io/src/content"
+VAULT="${VAULT_PATH:-"/Users/giannacrisha/Library/Mobile Documents/iCloud~md~obsidian/Documents/gi-garden-vault"}"
+CONTENT="${CONTENT_PATH:-"/Users/giannacrisha/projects/giannacrisha.github.io/src/content"}"
 
 echo "🌱 Syncing Obsidian → src/content..."
 
@@ -45,11 +45,14 @@ rsync -av --delete \
 echo ""
 
 # Check if there's anything to commit
-cd "/Users/giannacrisha/projects/giannacrisha.github.io"
+REPO="${CONTENT%/src/content}"
+cd "$REPO"
 if git diff --quiet && git diff --staged --quiet; then
   echo "✓ Nothing changed — already up to date."
   exit 0
 fi
+
+npm run check || { echo "⛔ Type errors — fix before pushing"; exit 1; }
 
 # Commit message: use argument or default with date
 MSG="${1:-"content: sync from Obsidian $(date '+%Y-%m-%d')"}"

@@ -15,6 +15,8 @@
   --color-pill-bg:      #E8DDD0;
   --color-pill-text:    #6B5C47;
   --color-accent-border:#C4B49A;
+  --color-danger:       #e5534b;
+  --color-traffic-red:  #ff6059;
 
   --font-display: 'Jacquard 12', monospace;
   --font-serif:   'Lora', serif;
@@ -111,4 +113,6 @@
   --color-pill-text:    #c8b898;
   --color-accent-border:#4a4840;
   --color-surface:      #242424;
+  --color-danger:       #e5534b;
+  --color-traffic-red:  #ff6059;
 }

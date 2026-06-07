@@ -47,6 +47,7 @@ const filters = [
     </div>
     <CollectionFilters filters={filters} />
     <div class="masonry">
+      {sorted.length === 0 && <p class="empty">nothing here yet</p>}
       {sorted.map(entry => (
         <div
           class="masonry-item"
