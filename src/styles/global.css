@@ -26,6 +26,7 @@ html {
 
 body {
   min-height: 100vh;
+  overflow-x: clip;
 }
 
 a {
@@ -338,7 +339,8 @@ ul, ol {
 }
 
 @media (max-width: 767px) {
-  .page-wrapper { padding: 0 var(--space-lg); }
+  .page-wrapper,
+  .content-with-sidebar { padding: 0 var(--space-lg); }
 }
 
 @media (max-width: 600px) {
