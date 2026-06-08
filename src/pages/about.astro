@@ -383,122 +383,92 @@ import Icon from '../components/Icon.astro';
 </style>
 
 
-<script is:inline>
-(function () {
-  const stops = [
-    {
-      name: 'antipolo',
-      sub: 'philippines · 2004 – 2014',
-      lat: 14.5888, lng: 121.1228, zoom: 13,
-      text: 'i was born in quezon city and raised in purok maligaya 2 in antipolo city. my family owned a small internet cafe, one of the firsts in the area — this is where i fell in love with computers. our house had two spaces: the back was our living space, and the front was the cafe, where i spent my after-school hours playing games and exploring the web. at six, i troubleshot my first computer problem to save my family repair costs, becoming a little technician before i knew the word for it.',
-    },
-    {
-      name: 'abu dhabi',
-      sub: 'uae · 2014 – 2017',
-      lat: 24.4539, lng: 54.3773, zoom: 11,
-      text: 'we moved to abu dhabi after my fourth grade. i did my research internship at NYU Abu Dhabi here years later. full circle.',
-    },
-    {
-      name: 'butuan',
-      sub: 'philippines · 2017 – 2021',
-      lat: 8.9475, lng: 125.5406, zoom: 12,
-      text: 'my family moved back to the philippines after my sixth grade. butuan is a quieter city, known as the city of golden tara.',
-    },
-    {
-      name: 'cagayan de oro',
-      sub: 'philippines · 2021 – 2024',
-      lat: 8.4542, lng: 124.6319, zoom: 12,
-      text: 'i moved to cagayan de oro for senior high school after getting a scholarship for junior high school valedictorians. i went to xavier university ateneo de cagayan, debated, made things, figured out who i was. grandfinalist at PDA world congress 2021. this city gave me a lot.',
-    },
-    {
-      name: 'boston',
-      sub: 'usa · 2024 – present ✦',
-      lat: 42.3601, lng: -71.0589, zoom: 12,
-      text: 'after getting the wien international scholarship at brandeis university that covers my full cost of attendance, i packed up everything and moved to boston. co-founding clubs, leading hackathons, going into legislators\' offices, building things every day. still figuring it all out, but happily.',
-    },
-  ];
+<script>
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
-  let current = 0;
-  let map, markers;
+const stops = [
+  {
+    name: 'antipolo',
+    sub: 'philippines · 2004 – 2014',
+    lat: 14.5888, lng: 121.1228, zoom: 13,
+    text: 'i was born in quezon city and raised in purok maligaya 2 in antipolo city. my family owned a small internet cafe, one of the firsts in the area — this is where i fell in love with computers. our house had two spaces: the back was our living space, and the front was the cafe, where i spent my after-school hours playing games and exploring the web. at six, i troubleshot my first computer problem to save my family repair costs, becoming a little technician before i knew the word for it.',
+  },
+  {
+    name: 'abu dhabi',
+    sub: 'uae · 2014 – 2017',
+    lat: 24.4539, lng: 54.3773, zoom: 11,
+    text: 'we moved to abu dhabi after my fourth grade. i did my research internship at NYU Abu Dhabi here years later. full circle.',
+  },
+  {
+    name: 'butuan',
+    sub: 'philippines · 2017 – 2021',
+    lat: 8.9475, lng: 125.5406, zoom: 12,
+    text: 'my family moved back to the philippines after my sixth grade. butuan is a quieter city, known as the city of golden tara.',
+  },
+  {
+    name: 'cagayan de oro',
+    sub: 'philippines · 2021 – 2024',
+    lat: 8.4542, lng: 124.6319, zoom: 12,
+    text: 'i moved to cagayan de oro for senior high school after getting a scholarship for junior high school valedictorians. i went to xavier university ateneo de cagayan, debated, made things, figured out who i was. grandfinalist at PDA world congress 2021. this city gave me a lot.',
+  },
+  {
+    name: 'boston',
+    sub: 'usa · 2024 – present ✦',
+    lat: 42.3601, lng: -71.0589, zoom: 12,
+    text: "after getting the wien international scholarship at brandeis university that covers my full cost of attendance, i packed up everything and moved to boston. co-founding clubs, leading hackathons, going into legislators' offices, building things every day. still figuring it all out, but happily.",
+  },
+];
 
-  function initMap(L) {
-    const nameEl  = document.getElementById('migration-city-name');
-    const subEl   = document.getElementById('migration-city-sub');
-    const textEl  = document.getElementById('migration-city-text');
-    const stepEl  = document.getElementById('migration-step');
-    const prevBtn = document.getElementById('migration-prev');
-    const nextBtn = document.getElementById('migration-next');
+let current = 0;
 
-    map = L.map('migration-leaflet', {
-      zoomControl: false,
-      scrollWheelZoom: false,
-      dragging: true,
-      attributionControl: true,
-    });
+const nameEl  = document.getElementById('migration-city-name') as HTMLElement;
+const subEl   = document.getElementById('migration-city-sub') as HTMLElement;
+const textEl  = document.getElementById('migration-city-text') as HTMLElement;
+const stepEl  = document.getElementById('migration-step') as HTMLElement;
+const prevBtn = document.getElementById('migration-prev') as HTMLButtonElement;
+const nextBtn = document.getElementById('migration-next') as HTMLButtonElement;
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>',
-      maxZoom: 19,
-    }).addTo(map);
+const map = L.map('migration-leaflet', {
+  zoomControl: false,
+  scrollWheelZoom: false,
+  dragging: true,
+  attributionControl: true,
+});
 
-    function makeIcon(active) {
-      return L.divIcon({
-        className: '',
-        html: '<div style="width:12px;height:12px;border-radius:50%;background:' +
-          (active ? '#3d2f1f' : '#9C8B6E') +
-          ';border:2px solid #ffffff;box-shadow:0 0 0 3px rgba(156,139,110,0.3);"></div>',
-        iconSize: [12, 12],
-        iconAnchor: [6, 6],
-      });
-    }
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>',
+  maxZoom: 19,
+}).addTo(map);
 
-    markers = stops.map(s => L.marker([s.lat, s.lng], { icon: makeIcon(false) }).addTo(map));
+function makeIcon(active: boolean) {
+  return L.divIcon({
+    className: '',
+    html: `<div style="width:12px;height:12px;border-radius:50%;background:${active ? '#3d2f1f' : '#9C8B6E'};border:2px solid #ffffff;box-shadow:0 0 0 3px rgba(156,139,110,0.3);"></div>`,
+    iconSize: [12, 12],
+    iconAnchor: [6, 6],
+  });
+}
 
-    function goTo(index) {
-      const s = stops[index];
-      map.flyTo([s.lat, s.lng], s.zoom, { duration: 1.6, easeLinearity: 0.4 });
+const markers = stops.map(s => L.marker([s.lat, s.lng], { icon: makeIcon(false) }).addTo(map));
 
-      nameEl.textContent = s.name;
-      subEl.textContent  = s.sub;
-      textEl.textContent = s.text;
-      stepEl.textContent = String(index + 1);
+function goTo(index: number) {
+  const s = stops[index];
+  map.flyTo([s.lat, s.lng], s.zoom, { duration: 1.6, easeLinearity: 0.4 });
+  nameEl.textContent = s.name;
+  subEl.textContent  = s.sub;
+  textEl.textContent = s.text;
+  stepEl.textContent = String(index + 1);
+  prevBtn.disabled = index === 0;
+  nextBtn.disabled = index === stops.length - 1;
+  markers.forEach((m, i) => m.setIcon(makeIcon(i === index)));
+  current = index;
+}
 
-      prevBtn.disabled = index === 0;
-      nextBtn.disabled = index === stops.length - 1;
+const s0 = stops[0];
+map.setView([s0.lat, s0.lng], s0.zoom);
+goTo(0);
 
-      markers.forEach(function(m, i) {
-        m.setIcon(makeIcon(i === index));
-      });
-
-      current = index;
-    }
-
-    const s0 = stops[0];
-    map.setView([s0.lat, s0.lng], s0.zoom);
-    goTo(0);
-
-    prevBtn.addEventListener('click', function() { if (current > 0) goTo(current - 1); });
-    nextBtn.addEventListener('click', function() { if (current < stops.length - 1) goTo(current + 1); });
-  }
-
-  function loadLeaflet() {
-    // inject CSS
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-    document.head.appendChild(link);
-
-    // inject JS
-    const script = document.createElement('script');
-    script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-    script.onload = function() { requestAnimationFrame(function() { initMap(window.L); }); };
-    document.head.appendChild(script);
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', loadLeaflet);
-  } else {
-    loadLeaflet();
-  }
-})();
+prevBtn.addEventListener('click', () => { if (current > 0) goTo(current - 1); });
+nextBtn.addEventListener('click', () => { if (current < stops.length - 1) goTo(current + 1); });
 </script>
