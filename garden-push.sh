@@ -44,6 +44,21 @@ rsync -av --delete \
 
 echo ""
 
+# Convert HEIC images (often iPhone photos with a faked .jpg extension) to real
+# JPEG — Astro's image pipeline reads the actual bytes and rejects HEIC at build.
+echo "🖼  Checking for HEIC images..."
+converted=0
+while IFS= read -r -d '' img; do
+  if file -b "$img" | grep -q "ISO Media"; then
+    sips -s format jpeg "$img" --out "$img" >/dev/null 2>&1
+    echo "   ↳ converted $(basename "$img")"
+    converted=$((converted + 1))
+  fi
+done < <(find "$CONTENT" -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' \) -print0)
+[ "$converted" -eq 0 ] && echo "   ✓ none found" || echo "   ✓ converted $converted image(s)"
+
+echo ""
+
 # Check if there's anything to commit
 REPO="${CONTENT%/src/content}"
 cd "$REPO"

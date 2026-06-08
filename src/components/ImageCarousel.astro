@@ -1,0 +1,222 @@
+---
+// src/components/ImageCarousel.astro
+// Scroll-snap image carousel with dots + prev/next navigation.
+// Accepts an array of {src, alt?, caption?} image objects from a content collection
+// schema using Astro's image() helper — images are fully optimized at build time.
+//
+// Usage:
+//   <ImageCarousel images={entry.data.images} label="process" />
+import { Image } from 'astro:assets';
+
+interface ImageEntry {
+  src: ImageMetadata;
+  alt?: string;
+  caption?: string;
+}
+
+interface Props {
+  images:  ImageEntry[];
+  /** Optional heading above the carousel, e.g. "process" or "stages" */
+  label?:  string;
+  /** Alt text fallback when an image entry has no alt */
+  title?:  string;
+}
+
+const { images, label, title = '' } = Astro.props;
+---
+
+<div class="carousel" data-carousel>
+  {label && <p class="carousel-label">{label}</p>}
+
+  <div class="carousel-stage">
+    <div class="carousel-track" data-track>
+      {images.map((img, i) => (
+        <figure class="carousel-slide" data-slide aria-label={`Image ${i + 1} of ${images.length}`}>
+          <Image
+            src={img.src}
+            alt={img.alt ?? title}
+            widths={[480, 800, 1200]}
+            sizes="(max-width: 600px) 100vw, 720px"
+            class="carousel-img"
+          />
+          {img.caption && <figcaption class="carousel-caption">{img.caption}</figcaption>}
+        </figure>
+      ))}
+    </div>
+
+    {images.length > 1 && (
+      <>
+        <button class="carousel-arrow carousel-arrow--prev" data-prev aria-label="Previous image">
+          ‹
+        </button>
+        <button class="carousel-arrow carousel-arrow--next" data-next aria-label="Next image">
+          ›
+        </button>
+      </>
+    )}
+  </div>
+
+  {images.length > 1 && (
+    <div class="carousel-dots" role="tablist" aria-label="Image navigation">
+      {images.map((_, i) => (
+        <button
+          class:list={['dot', { active: i === 0 }]}
+          data-dot={i}
+          role="tab"
+          aria-label={`Go to image ${i + 1}`}
+          aria-selected={i === 0 ? 'true' : 'false'}
+        />
+      ))}
+    </div>
+  )}
+</div>
+
+<style>
+  .carousel { display: flex; flex-direction: column; gap: var(--space-md); }
+
+  .carousel-label {
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    color: var(--color-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .carousel-stage {
+    position: relative;
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    background: var(--color-accent-light);
+  }
+
+  .carousel-track {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .carousel-track::-webkit-scrollbar { display: none; }
+
+  .carousel-slide {
+    flex: 0 0 100%;
+    scroll-snap-align: start;
+    margin: 0;
+  }
+
+  .carousel-img {
+    width: 100%;
+    max-height: 60vh;
+    object-fit: contain;
+    display: block;
+  }
+
+  .carousel-caption {
+    padding: var(--space-sm) var(--space-lg);
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    color: var(--color-muted);
+    font-style: italic;
+    text-align: center;
+    background: var(--color-card);
+    border-top: var(--border);
+  }
+
+  /* ── Arrows ──────────────────────────────────────────────────────────────── */
+  .carousel-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--color-card);
+    border: var(--border);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    line-height: 1;
+    color: var(--color-fg);
+    cursor: pointer;
+    opacity: 0.85;
+    transition: opacity 0.15s, background 0.15s;
+    z-index: 2;
+  }
+  .carousel-arrow:hover { opacity: 1; background: var(--color-fg); color: var(--color-bg); }
+  .carousel-arrow--prev { left: var(--space-md); }
+  .carousel-arrow--next { right: var(--space-md); }
+  .carousel-arrow[disabled] { opacity: 0.2; pointer-events: none; }
+
+  /* ── Dots ────────────────────────────────────────────────────────────────── */
+  .carousel-dots {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-xs);
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    border: none;
+    background: var(--color-accent-border);
+    cursor: pointer;
+    padding: 0;
+    transition: background 0.15s, transform 0.15s;
+  }
+  .dot.active {
+    background: var(--color-fg);
+    transform: scale(1.4);
+  }
+  .dot:hover:not(.active) { background: var(--color-accent); }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-carousel]').forEach(carousel => {
+    const track  = carousel.querySelector<HTMLElement>('[data-track]')!;
+    const slides = carousel.querySelectorAll<HTMLElement>('[data-slide]');
+    const dots   = carousel.querySelectorAll<HTMLButtonElement>('[data-dot]');
+    const prev   = carousel.querySelector<HTMLButtonElement>('[data-prev]');
+    const next   = carousel.querySelector<HTMLButtonElement>('[data-next]');
+
+    if (!track || !slides.length) return;
+
+    let current = 0;
+
+    function goTo(i: number) {
+      current = Math.max(0, Math.min(i, slides.length - 1));
+      track.scrollTo({ left: slides[current].offsetLeft, behavior: 'smooth' });
+      sync();
+    }
+
+    function sync() {
+      dots.forEach((d, i) => {
+        d.classList.toggle('active', i === current);
+        d.setAttribute('aria-selected', String(i === current));
+      });
+      if (prev) prev.disabled = current === 0;
+      if (next) next.disabled = current === slides.length - 1;
+    }
+
+    prev?.addEventListener('click', () => goTo(current - 1));
+    next?.addEventListener('click', () => goTo(current + 1));
+    dots.forEach((dot, i) => dot.addEventListener('click', () => goTo(i)));
+
+    // Sync dots/arrows when user swipes manually
+    const observer = new IntersectionObserver(
+      entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            current = Array.from(slides).indexOf(entry.target as HTMLElement);
+            sync();
+          }
+        });
+      },
+      { root: track, threshold: 0.6 },
+    );
+    slides.forEach(slide => observer.observe(slide));
+
+    sync(); // initial state
+  });
+</script>

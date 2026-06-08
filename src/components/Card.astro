@@ -71,6 +71,11 @@ const showCoverThumb = hasImage && isLibrary;
       </div>
     )}
     <div class:list={['card-body', { 'card-body--gallery': isGallery && hasImage }]}>
+      {stage && (
+        <div class="card-stage-pill">
+          <GrowthPill stage={stage} forceColor={isGallery && hasImage ? 'rgba(255,255,255,0.9)' : undefined} />
+        </div>
+      )}
       {showCoverThumb && (
         <img class="card-cover-thumb" src={cover_image} alt={title} loading="lazy" />
       )}
@@ -83,7 +88,6 @@ const showCoverThumb = hasImage && isLibrary;
       {rating !== undefined && <StarRating rating={rating} />}
       <div class="card-footer">
         {primaryDate && <span class="card-date">{fmt(primaryDate)}</span>}
-        {stage && <GrowthPill stage={stage} forceColor={isGallery && hasImage ? 'rgba(255,255,255,0.9)' : undefined} />}
       </div>
     </div>
   </a>
@@ -126,6 +130,13 @@ const showCoverThumb = hasImage && isLibrary;
     position: relative;
   }
 
+  .card-stage-pill {
+    position: absolute;
+    top: var(--space-lg);
+    right: var(--space-lg);
+    z-index: 1;
+  }
+
   .card-cover-thumb {
     position: absolute;
     top: var(--space-lg);
@@ -142,7 +153,13 @@ const showCoverThumb = hasImage && isLibrary;
     font-size: var(--text-md);
     color: var(--color-fg);
     line-height: var(--leading-tight);
+    padding-right: 76px; /* reserve space for the stage pill (~63px wide + breathing room) */
   }
+  /* when both stage pill and cover thumb are present, push thumb below the pill */
+  .card-stage-pill + .card-cover-thumb {
+    top: calc(var(--space-lg) + 24px);
+  }
+
   /* leave room for the cover thumbnail */
   .card-cover-thumb ~ * .card-title,
   :has(.card-cover-thumb) .card-title {

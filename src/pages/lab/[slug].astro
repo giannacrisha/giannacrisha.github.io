@@ -4,8 +4,10 @@ import Garden from '../../layouts/Garden.astro';
 import GrowthPill from '../../components/GrowthPill.astro';
 import Timestamps from '../../components/Timestamps.astro';
 import Recommended from '../../components/Recommended.astro';
-import MinimizePageBtn from '../../components/MinimizePageBtn.astro';
-import Icon from '../../components/Icon.astro';
+import ArticleBreadcrumb from '../../components/ArticleBreadcrumb.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
+import ImageCarousel from '../../components/ImageCarousel.astro';
+import MuxVideo from '../../components/MuxVideo.astro';
 import { getCollection } from 'astro:content';
 
 export async function getStaticPaths() {
@@ -14,8 +16,8 @@ export async function getStaticPaths() {
 }
 
 const { entry } = Astro.props;
-const { Content } = await entry.render();
-const { title, description, date_built, date_published, tools, cover_image, link, growth_stage } = entry.data;
+const { Content, headings } = await entry.render();
+const { title, description, date_built, date_published, tools, cover_image, link, growth_stage, images, mux_video_id, topics } = entry.data;
 const published = date_published ?? date_built;
 
 const allEntries = await getCollection('lab');
@@ -32,78 +34,77 @@ const related = allEntries
   <div class="content-with-sidebar">
 
     <div class="content-main">
-      <article class="lab-article">
+      <article class="article">
 
-        <nav class="breadcrumb" aria-label="Breadcrumb">
-          <a href="/">garden</a>
-          <span class="breadcrumb-sep" aria-hidden="true">/</span>
-          <a href="/lab">lab</a>
-          <span class="breadcrumb-sep" aria-hidden="true">/</span>
-          <MinimizePageBtn title={title} />
-        </nav>
+        <ArticleBreadcrumb section="lab" title={title} />
 
-        {cover_image && (
-          <div class="cover-image">
-            <img src={cover_image} alt={title} />
-          </div>
-        )}
-        <h1 class="entry-title">{title}</h1>
-        <div class="entry-meta">
+        <div class="entry-label-row">
           <GrowthPill stage={growth_stage} />
+        </div>
+        <div class="entry-title-row">
+          <h1 class="entry-title">{title}</h1>
+        </div>
+        <div class="entry-meta-row">
+          <div class="entry-topics">
+            {topics && topics.map((t: string) => (
+              <a href={`/lab?topic=${encodeURIComponent(t)}`} class="topic-tag">{t}</a>
+            ))}
+          </div>
           <Timestamps
             primaryLabel="built"
             primaryDate={date_built}
             secondaryLabel="planted"
             secondaryDate={published}
           />
-          {link && (
-            <a href={link} target="_blank" rel="noopener noreferrer" class="external-link" aria-label={`view ${title} (opens in new tab)`}>
-              view project
-              <Icon name="external-link" size={12} />
-            </a>
-          )}
         </div>
+
         {tools && tools.length > 0 && (
-          <div class="tools">
-            {tools.map(tool => <span class="pill">{tool}</span>)}
+          <div class="entry-tools">
+            {tools.map((tool: string) => <span class="pill">{tool}</span>)}
           </div>
         )}
-        {description && <p class="description">{description}</p>}
+
+        {mux_video_id
+          ? <MuxVideo playbackId={mux_video_id} title={title} />
+          : cover_image && (
+              <div class="image-full">
+                <img src={cover_image} alt={title} />
+              </div>
+            )
+        }
+
+        {description && <p class="entry-caption">{description}</p>}
+
+        <hr class="article-divider" />
+
+        {images && images.length > 0 && (
+          <div class="process-carousel">
+            <ImageCarousel images={images} label="process" title={title} />
+          </div>
+        )}
+
+        <TableOfContents headings={headings} variant="inline" />
+
         <div class="prose">
           <Content />
         </div>
+
+        {link && (
+          <a href={link} target="_blank" rel="noopener noreferrer" class="article-link">
+            view project
+            <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+              <path d="M2 10L10 2M10 2H5M10 2V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+          </a>
+        )}
 
       </article>
     </div>
 
     <div class="content-sidebar">
+      <TableOfContents headings={headings} variant="sidebar" />
       <Recommended entries={related} />
     </div>
 
   </div>
 </Garden>
-
-<style>
-  .lab-article { padding: var(--space-section) 0; }
-  .breadcrumb {
-    display: flex;
-    align-items: center;
-    gap: var(--space-sm);
-    font-family: var(--font-body);
-    font-size: var(--text-xs);
-    color: var(--color-muted);
-    margin-bottom: var(--space-xl);
-  }
-  .breadcrumb a { color: var(--color-muted); text-decoration: none; }
-  .breadcrumb a:hover { color: var(--color-fg); }
-  .breadcrumb-sep { color: var(--color-accent-border); font-size: 10px; }
-  .breadcrumb :global(.minimize-page-btn) { margin-left: auto; }
-  .cover-image { margin-bottom: var(--space-xxl); }
-  .cover-image img { width: 100%; max-height: 400px; object-fit: cover; border-radius: var(--radius-card); }
-  .entry-title { font-family: var(--font-serif); font-size: var(--text-xxl); color: var(--color-fg); line-height: var(--leading-tight); margin-bottom: var(--space-lg); }
-  .entry-meta { display: flex; flex-wrap: wrap; gap: var(--space-md); align-items: center; margin-bottom: var(--space-lg); }
-  .external-link { display: inline-flex; align-items: center; gap: var(--space-xs); font-family: var(--font-body); font-size: var(--text-xs); color: var(--color-accent); letter-spacing: 0.06em; }
-  .tools { display: flex; gap: var(--space-sm); flex-wrap: wrap; margin-bottom: var(--space-lg); }
-  .description { font-family: var(--font-body); font-size: var(--text-md); color: var(--color-muted); margin-bottom: var(--space-xl); line-height: var(--leading-base); }
-  .prose { margin-top: var(--space-xxl); }
-</style>

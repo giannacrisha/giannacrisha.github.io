@@ -17,15 +17,14 @@ const { title } = Astro.props;
   id="minimize-page-btn"
 >
   <Icon name="minimize" size={14} />
-  minimize
+  <span class="minimize-label">minimize</span>
 </button>
 
 <style is:global>
   .minimize-page-btn {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 5px 12px 5px 10px;
+    padding: 6px;
     border-radius: 999px;
     border: 0.5px solid var(--color-border);
     background: var(--color-card);
@@ -36,9 +35,26 @@ const { title } = Astro.props;
     letter-spacing: 0.04em;
     transition: background 0.15s, color 0.15s;
   }
-  .minimize-page-btn:hover {
+  /* Label is collapsed to icon-only by default; expands on hover/focus. */
+  .minimize-label {
+    display: inline-block;
+    max-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    opacity: 0;
+    margin-left: 0;
+    transition: max-width 0.2s ease, opacity 0.2s ease, margin-left 0.2s ease;
+  }
+  .minimize-page-btn:hover,
+  .minimize-page-btn:focus-visible {
     background: var(--color-accent-light);
     color: var(--color-fg);
+  }
+  .minimize-page-btn:hover .minimize-label,
+  .minimize-page-btn:focus-visible .minimize-label {
+    max-width: 80px;
+    opacity: 1;
+    margin-left: 6px;
   }
   .minimize-page-btn:focus-visible {
     outline: 2px solid var(--color-accent);
@@ -85,8 +101,10 @@ const { title } = Astro.props;
     var title    = rawTitle || document.title.replace(/\s*[–|]\s*gi.*$/, '').trim();
     var id       = url;
 
-    // Destination: back if same-origin referrer, else home
-    var dest = (document.referrer && document.referrer.includes(window.location.host))
+    // Destination: back if same-origin referrer that isn't the current page, else home
+    var dest = (document.referrer
+      && document.referrer.includes(window.location.host)
+      && document.referrer !== window.location.href)
       ? document.referrer
       : '/';
 

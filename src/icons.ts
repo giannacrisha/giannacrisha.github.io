@@ -19,11 +19,11 @@ export const ICONS = {
   // ── Controls ──────────────────────────────────────────────────────────────
   filter: {
     viewBox: '0 0 24 24',
-    body: '<path fill="currentColor" d="m1,2v4h1v1h1v1h1v1h1v1h1v1h1v1h1v2h1v3h1v1h1v1h1v1h1v1h1v1h1v-8h1v-2h1v-1h1v-1h1v-1h1v-1h1v-1h1v-1h1V2H1Zm20,3h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v3h-1v3h-1v-1h-1v-2h-1v-3h-1v-1h-1v-1h-1v-1h-1v-1h-1v-1h-1v-1h-1v-1h18v1Z"/>',
+    body: '<path fill="currentColor" d="M2 2H22V5H19V8H16V11H14V19H17V22H10V11H8V8H5V5H2Z"/>',
   },
   sort: {
-    viewBox: '0 0 13 13',
-    body: '<path d="M1 2.5h5M1 6.5h8M1 10.5h11" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>',
+    viewBox: '0 0 24 24',
+    body: '<path fill="currentColor" d="M8 6h2v2h2v2H8v10H6V10H2V8h2V6h2V4h2v2Zm10 8h4v2h-2v2h-2v2h-2v-2h-2v-2h-2v-2h4V4h2v10Z"/>',
   },
 
   // ── Navigation / chrome ─────────────────────────────────────────────────────
@@ -66,6 +66,10 @@ export const ICONS = {
   clock: {
     viewBox: '0 0 12 12',
     body: '<circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.2"/><path d="M6 3.5v3l1.5 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>',
+  },
+  lines: {
+    viewBox: '0 0 12 12',
+    body: '<line x1="1" y1="3" x2="11" y2="3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="1" y1="6" x2="9" y2="6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="1" y1="9" x2="6.5" y2="9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>',
   },
 
   // ── Theme toggle ──────────────────────────────────────────────────────────────

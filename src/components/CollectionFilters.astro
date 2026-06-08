@@ -2,7 +2,6 @@
 // src/components/CollectionFilters.astro
 // Same chip+dropdown style as GardenFilters, but driven by props
 // so it works on any collection index page.
-import Icon from './Icon.astro';
 
 interface FilterOption {
   value: string;
@@ -26,8 +25,8 @@ const { filters, showSort = true } = Astro.props;
   <!-- Filters chip -->
   <div class="chip-wrap">
     <button class="control-chip" id="col-filters-btn" aria-expanded="false" aria-haspopup="true">
-      <Icon name="filter" size={13} />
-      filters
+      <i class="hn hn-filter-solid"></i>
+      <span class="chip-label">filters</span>
     </button>
     <div class="dropdown" id="col-filters-dropdown" aria-hidden="true">
       {filters.map(group => (
@@ -53,8 +52,8 @@ const { filters, showSort = true } = Astro.props;
   {showSort && (
     <div class="chip-wrap">
       <button class="control-chip" id="col-sort-btn" aria-expanded="false" aria-haspopup="true">
-        <Icon name="sort" size={13} />
-        sort
+        <i class="hn hn-sort-solid"></i>
+        <span class="chip-label">sort</span>
       </button>
       <div class="dropdown" id="col-sort-dropdown" aria-hidden="true">
         <div class="dropdown-section">
@@ -99,7 +98,7 @@ const { filters, showSort = true } = Astro.props;
     background: var(--color-fg);
     color: #ffffff;
   }
-  .control-chip[aria-expanded="true"] svg { stroke: #ffffff; }
+  .control-chip .hn { font-size: 16px; line-height: 1; }
 
   .dropdown {
     display: none;
@@ -158,14 +157,18 @@ const { filters, showSort = true } = Astro.props;
     border-color: var(--color-accent);
     color: var(--color-fg);
   }
+
+  @media (max-width: 600px) {
+    .chip-label { display: none; }
+  }
 </style>
 
 <script>
   // ── toggle dropdowns ─────────────────────────────────────────────────────
   function toggle(btnId: string, dropId: string, otherId: string, otherBtnId: string) {
-    const btn   = document.getElementById(btnId)!;
-    const drop  = document.getElementById(dropId)!;
-    const other = document.getElementById(otherId);
+    const btn      = document.getElementById(btnId)!;
+    const drop     = document.getElementById(dropId)!;
+    const other    = document.getElementById(otherId);
     const otherBtn = document.getElementById(otherBtnId);
     btn.addEventListener('click', (e) => {
       e.stopPropagation();

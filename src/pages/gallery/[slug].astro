@@ -4,7 +4,10 @@ import Garden from '../../layouts/Garden.astro';
 import GrowthPill from '../../components/GrowthPill.astro';
 import Timestamps from '../../components/Timestamps.astro';
 import Recommended from '../../components/Recommended.astro';
-import MinimizePageBtn from '../../components/MinimizePageBtn.astro';
+import ArticleBreadcrumb from '../../components/ArticleBreadcrumb.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
+import ImageCarousel from '../../components/ImageCarousel.astro';
+import MuxVideo from '../../components/MuxVideo.astro';
 import { getCollection } from 'astro:content';
 
 export async function getStaticPaths() {
@@ -13,7 +16,8 @@ export async function getStaticPaths() {
 }
 
 const { entry } = Astro.props;
-const { title, medium, date_made, date_published, image, caption, growth_stage } = entry.data;
+const { Content, headings } = await entry.render();
+const { title, medium, date_made, date_published, image, caption, growth_stage, images, link, topics, mux_video_id } = entry.data;
 const published = date_published ?? date_made;
 
 const allEntries = await getCollection('gallery');
@@ -30,23 +34,23 @@ const related = allEntries
   <div class="content-with-sidebar">
 
     <div class="content-main">
-      <article class="gallery-article">
+      <article class="article">
 
-        <nav class="breadcrumb" aria-label="Breadcrumb">
-          <a href="/">garden</a>
-          <span class="breadcrumb-sep" aria-hidden="true">/</span>
-          <a href="/gallery">gallery</a>
-          <span class="breadcrumb-sep" aria-hidden="true">/</span>
-          <MinimizePageBtn title={title} />
-        </nav>
+        <ArticleBreadcrumb section="gallery" title={title} />
 
-        <div class="image-full">
-          <img src={image} alt={title} />
-        </div>
-        <h1 class="entry-title">{title}</h1>
-        <div class="entry-meta">
+        <div class="entry-label-row">
           <span class="pill">{medium}</span>
           <GrowthPill stage={growth_stage} />
+        </div>
+        <div class="entry-title-row">
+          <h1 class="entry-title">{title}</h1>
+        </div>
+        <div class="entry-meta-row">
+          <div class="entry-topics">
+            {topics && topics.map((t: string) => (
+              <a href={`/gallery?topic=${encodeURIComponent(t)}`} class="topic-tag">{t}</a>
+            ))}
+          </div>
           <Timestamps
             primaryLabel="made"
             primaryDate={date_made}
@@ -54,36 +58,47 @@ const related = allEntries
             secondaryDate={published}
           />
         </div>
-        {caption && <p class="caption">{caption}</p>}
+
+        {mux_video_id
+          ? <MuxVideo playbackId={mux_video_id} title={title} />
+          : (
+              <div class="image-full">
+                <img src={image} alt={title} />
+              </div>
+            )
+        }
+        {caption && <p class="entry-caption">{caption}</p>}
+
+        <hr class="article-divider" />
+
+        {images && images.length > 0 && (
+          <div class="process-carousel">
+            <ImageCarousel images={images} label="stages" title={title} />
+          </div>
+        )}
+
+        <TableOfContents headings={headings} variant="inline" />
+
+        <div class="prose">
+          <Content />
+        </div>
+
+        {link && (
+          <a href={link} target="_blank" rel="noopener noreferrer" class="article-link">
+            view more about this work
+            <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+              <path d="M2 10L10 2M10 2H5M10 2V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+          </a>
+        )}
 
       </article>
     </div>
 
     <div class="content-sidebar">
+      <TableOfContents headings={headings} variant="sidebar" />
       <Recommended entries={related} />
     </div>
 
   </div>
 </Garden>
-
-<style>
-  .gallery-article { padding: var(--space-section) 0; }
-  .breadcrumb {
-    display: flex;
-    align-items: center;
-    gap: var(--space-sm);
-    font-family: var(--font-body);
-    font-size: var(--text-xs);
-    color: var(--color-muted);
-    margin-bottom: var(--space-xl);
-  }
-  .breadcrumb a { color: var(--color-muted); text-decoration: none; }
-  .breadcrumb a:hover { color: var(--color-fg); }
-  .breadcrumb-sep { color: var(--color-accent-border); font-size: 10px; }
-  .breadcrumb :global(.minimize-page-btn) { margin-left: auto; }
-  .image-full { background: var(--color-accent-light); border-radius: var(--radius-card); overflow: hidden; margin-bottom: var(--space-xxl); }
-  .image-full img { width: 100%; max-height: 70vh; object-fit: contain; display: block; }
-  .entry-title { font-family: var(--font-serif); font-size: var(--text-xxl); color: var(--color-fg); margin-bottom: var(--space-lg); }
-  .entry-meta { display: flex; flex-wrap: wrap; gap: var(--space-md); align-items: center; }
-  .caption { font-family: var(--font-body); font-size: var(--text-md); color: var(--color-muted); font-style: italic; margin-top: var(--space-xl); }
-</style>

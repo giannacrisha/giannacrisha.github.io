@@ -4,7 +4,7 @@ import ThemeToggle from './ThemeToggle.astro';
 import Icon from './Icon.astro';
 const current = Astro.url.pathname;
 const gardenActive = current === '/' || ['/lab','/archives','/gallery','/library'].some(p => current.startsWith(p));
-const sublinks = [
+const sublinks: { href: string; label: string; desc: string; icon?: string }[] = [
   { href: '/lab',      label: 'lab',      desc: 'design and code projects', icon: '/icons/lab-icon.png'     },
   { href: '/archives', label: 'archives', desc: 'essays, poems, thoughts',  icon: '/icons/archive-icon.png' },
   { href: '/gallery',  label: 'gallery',  desc: 'artwork and visual work',  icon: '/icons/gallery-icon.png' },
@@ -27,7 +27,10 @@ const sublinks = [
           <div class="garden-dropdown-inner">
             {sublinks.map(l => (
               <a href={l.href} class:list={['dropdown-link', { active: current.startsWith(l.href) }]}>
-                <img src={l.icon} alt="" class="dropdown-link-icon" aria-hidden="true" />
+                {l.icon
+                  ? <img src={l.icon} alt="" class="dropdown-link-icon" aria-hidden="true" />
+                  : <span class="dropdown-link-dot" aria-hidden="true"></span>
+                }
                 <span class="dropdown-link-text">
                   <span class="dropdown-link-label">{l.label}</span>
                   <span class="dropdown-link-desc">{l.desc}</span>
@@ -47,6 +50,15 @@ const sublinks = [
         <a href="/now" class:list={['nav-link', { active: current.startsWith('/now') }]}>now</a>
       </li>
     </ul>
+
+    <!-- search trigger -->
+    <button class="nav-search" id="nav-search-btn" aria-label="Search (⌘K)">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+        <circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.3"/>
+        <line x1="9.5" y1="9.5" x2="13" y2="13" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+      </svg>
+      <kbd class="nav-search-hint">⌘K</kbd>
+    </button>
 
     <!-- mobile hamburger -->
     <button class="nav-hamburger" aria-label="open menu" aria-expanded="false" id="hamburger">
@@ -178,6 +190,27 @@ const sublinks = [
   .dropdown-link.active .dropdown-link-icon {
     opacity: 1;
   }
+  .dropdown-link-dot {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .dropdown-link-dot::after {
+    content: '';
+    display: block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-accent-border);
+    transition: background 0.12s;
+  }
+  .dropdown-link:hover .dropdown-link-dot::after,
+  .dropdown-link.active .dropdown-link-dot::after {
+    background: var(--color-accent);
+  }
   .dropdown-link-text {
     display: flex;
     flex-direction: column;
@@ -197,6 +230,31 @@ const sublinks = [
     color: var(--color-muted);
     letter-spacing: 0.03em;
   }
+
+  /* search */
+  .nav-search {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--color-accent-light);
+    border: var(--border);
+    border-radius: var(--radius-pill);
+    color: var(--color-muted);
+    cursor: pointer;
+    padding: 5px 10px;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+  }
+  .nav-search:hover {
+    background: var(--color-card);
+    border-color: var(--color-accent);
+    color: var(--color-fg);
+  }
+  .nav-search-hint {
+    font-family: var(--font-body);
+    font-size: 11px;
+    letter-spacing: 0.02em;
+  }
+  @media (max-width: 767px) { .nav-search-hint { display: none; } }
 
   /* hamburger */
   .nav-hamburger {
@@ -319,6 +377,11 @@ const sublinks = [
 </style>
 
 <script>
+  // Search button → open SearchModal directly via window bridge
+  document.getElementById('nav-search-btn')?.addEventListener('click', () => {
+    (window as any).__searchOpen?.();
+  });
+
   const btn      = document.getElementById('hamburger');
   const menu     = document.getElementById('nav-mobile-menu');
   const backdrop = document.getElementById('nav-backdrop');

@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "astro build",
+    "build": "astro build && pagefind --site dist",
     "preview": "astro preview",
     "astro": "astro",
     "check": "astro check",
@@ -18,12 +18,15 @@
     "@astrojs/rss": "^4.0.18",
     "@astrojs/sitemap": "^3.7.3",
     "@astrojs/vercel": "^9.0.5",
+    "@hackernoon/pixel-icon-library": "^1.1.0",
+    "@mux/mux-player": "^3.13.0",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.38.0",
     "astro": "^5.18.2"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.2",
+    "pagefind": "^1.5.2",
     "prettier": "^3.0.0",
     "prettier-plugin-astro": "^0.14.0",
     "typescript": "^5.0.0",
