@@ -25,6 +25,7 @@ const lab = defineCollection({
     growth_stage:   stageEnum,
     featured:       z.boolean().default(false),
     images:         z.array(z.object({ src: image(), alt: z.string().optional(), caption: z.string().optional() })).optional(),
+    mux_video_id:   z.string().optional(),
   }),
 });
 
@@ -55,6 +56,7 @@ const gallery = defineCollection({
     topics:         z.array(z.string()).optional(),
     growth_stage:   stageEnum,
     featured:       z.boolean().default(false),
+    link:           z.string().url().optional(),
     images:         z.array(z.object({ src: image(), alt: z.string().optional(), caption: z.string().optional() })).optional(),
   }),
 });
@@ -83,13 +85,4 @@ const now = defineCollection({
   }),
 });
 
-const inbox = defineCollection({
-  type: 'content',
-  schema: z.object({
-    date:  z.date(),
-    title: z.string().optional(),
-    tags:  z.array(z.string()).optional(),
-  }),
-});
-
-export const collections = { lab, archives, gallery, library, now, inbox };
+export const collections = { lab, archives, gallery, library, now };
