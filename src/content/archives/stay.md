@@ -12,7 +12,7 @@ and the moment would freeze
 maybe then i wont have to choose
 between staying or going with the breeze
 
-the souls i met are now intertwined w mine
+the souls i met are now intertwined with mine
 if the wind takes me, a piece of me will always stay behind
 even if my fragrance taints the city
 or if my fragments get lost in the daze of reality
