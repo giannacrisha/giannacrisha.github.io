@@ -1,6 +1,7 @@
 ---
 // src/components/CommunityGarden.astro
 import { REPO_OWNER, REPO_NAME, LABEL } from '../config/github';
+import Icon from './Icon.astro';
 
 function timeAgo(dateStr: string): string {
   const now = Date.now();
@@ -60,8 +61,8 @@ try {
 const featuredSubmissions = submissions.slice(0, FEATURED_COUNT);
 const lockedSubmissions   = submissions.slice(FEATURED_COUNT);
 
-const HEART_EMPTY = `<svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="currentColor" aria-hidden="true"><path d="m480-120-58-52q-101-91-167-157T150-447.5Q111-500 95.5-544T80-634q0-94 63-157t157-63q52 0 99 22t81 62q34-40 81-62t99-22q94 0 157 63t63 157q0 46-15.5 90T810-447.5Q771-395 705-329T538-172l-58 52Zm0-108q96-86 158-147.5t98-107q36-45.5 50-81t14-70.5q0-60-40-100t-100-40q-47 0-87 26.5T518-680h-76q-15-41-55-67.5T300-774q-60 0-100 40t-40 100q0 35 14 70.5t50 81q36 45.5 98 107T480-228Zm0-273Z"/></svg>`;
-const HEART_FILLED = `<svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="currentColor" aria-hidden="true"><path d="m480-120-58-52q-101-91-167-157T150-447.5Q111-500 95.5-544T80-634q0-94 63-157t157-63q52 0 99 22t81 62q34-40 81-62t99-22q94 0 157 63t63 157q0 46-15.5 90T810-447.5Q771-395 705-329T538-172l-58 52Z"/></svg>`;
+const HEART_EMPTY = `<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="m22,6v-1h-1v-1h-1v-1h-6v1h-1v1h-2v-1h-1v-1h-6v1h-1v1h-1v1h-1v5h1v1h1v1h1v1h1v1h1v1h1v1h1v1h1v1h1v1h1v1h2v-1h1v-1h1v-1h1v-1h1v-1h1v-1h1v-1h1v-1h1v-1h1v-1h1v-5h-1Zm-2,4v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-2v-1h-1v-1h-1v-1h-1v-1h-1v-1h-1v-1h-1v-1h-1v-1h-1v-3h1v-1h1v-1h4v1h1v1h1v1h2v-1h1v-1h1v-1h4v1h1v1h1v3h-1Z"/></svg>`;
+const HEART_FILLED = `<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><polygon points="23 6 23 11 22 11 22 12 21 12 21 13 20 13 20 14 19 14 19 15 18 15 18 16 17 16 17 17 16 17 16 18 15 18 15 19 14 19 14 20 13 20 13 21 11 21 11 20 10 20 10 19 9 19 9 18 8 18 8 17 7 17 7 16 6 16 6 15 5 15 5 14 4 14 4 13 3 13 3 12 2 12 2 11 1 11 1 6 2 6 2 5 3 5 3 4 4 4 4 3 10 3 10 4 11 4 11 5 13 5 13 4 14 4 14 3 20 3 20 4 21 4 21 5 22 5 22 6 23 6"/></svg>`;
 
 ---
 
@@ -176,7 +177,9 @@ const HEART_FILLED = `<svg xmlns="http://www.w3.org/2000/svg" height="20px" view
                 {s.ts && <span class="planting-tooltip-time">{timeAgo(s.ts)}</span>}
               </div>
               <div class="planting-meta">
-                <span class="heart-count" data-issue={String(s.issueNumber)}>{s.hearts > 0 ? s.hearts : ''}</span>
+                <span class="heart-count" data-issue={String(s.issueNumber)}>
+                  <Icon name="heart" size={10} /><span class="heart-count-num">{s.hearts > 0 ? s.hearts : ''}</span>
+                </span>
                 {s.ts && <span class="planting-time">{timeAgo(s.ts)}</span>}
               </div>
             </div>
@@ -206,7 +209,9 @@ const HEART_FILLED = `<svg xmlns="http://www.w3.org/2000/svg" height="20px" view
                     {s.ts && <span class="planting-tooltip-time">{timeAgo(s.ts)}</span>}
                   </div>
                   <div class="planting-meta">
-                    <span class="heart-count" data-issue={String(s.issueNumber)}>{s.hearts > 0 ? s.hearts : ''}</span>
+                    <span class="heart-count" data-issue={String(s.issueNumber)}>
+                  <Icon name="heart" size={10} /><span class="heart-count-num">{s.hearts > 0 ? s.hearts : ''}</span>
+                </span>
                     {s.ts && <span class="planting-time">{timeAgo(s.ts)}</span>}
                   </div>
                 </div>
@@ -221,7 +226,6 @@ const HEART_FILLED = `<svg xmlns="http://www.w3.org/2000/svg" height="20px" view
         )}
       </>
     )}
-    <button class="cg-canvas-btn" id="cg-canvas-btn">plant pixels</button>
   </section>
 
   <hr class="cg-section-divider" />
@@ -482,7 +486,7 @@ const HEART_FILLED = `<svg xmlns="http://www.w3.org/2000/svg" height="20px" view
 
   .plantings {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     gap: var(--space-xl);
   }
 
@@ -582,6 +586,9 @@ const HEART_FILLED = `<svg xmlns="http://www.w3.org/2000/svg" height="20px" view
 
   /* heart count */
   .heart-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
     font-family: var(--font-body);
     font-size: 10px;
     color: var(--color-muted);
@@ -589,6 +596,7 @@ const HEART_FILLED = `<svg xmlns="http://www.w3.org/2000/svg" height="20px" view
     min-width: 10px;
     text-align: center;
   }
+  .heart-icon { flex-shrink: 0; }
   .heart-count.heart-count--active { color: var(--color-danger); }
 
   @keyframes count-up {
@@ -651,7 +659,9 @@ const HEART_FILLED = `<svg xmlns="http://www.w3.org/2000/svg" height="20px" view
 
   /* canvas button — mobile only */
   .cg-canvas-btn {
-    display: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     background: var(--color-fg);
     color: var(--color-bg);
     border: none;
@@ -662,6 +672,8 @@ const HEART_FILLED = `<svg xmlns="http://www.w3.org/2000/svg" height="20px" view
     cursor: pointer;
     transition: opacity 0.15s;
     width: fit-content;
+    margin-left: auto;
+    flex-shrink: 0;
   }
   .cg-canvas-btn:hover { opacity: 0.8; }
 
@@ -710,18 +722,9 @@ const HEART_FILLED = `<svg xmlns="http://www.w3.org/2000/svg" height="20px" view
       padding: var(--space-xl) var(--space-lg);
     }
     .cg-resizer { display: none; }
+    .cg-left { border-top: var(--border); }
     .cg-right { min-height: 100vh; }
     .cg-section-divider { display: block; }
-    .cg-canvas-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: fixed;
-      bottom: var(--space-lg);
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 100;
-    }
   }
 </style>
 
@@ -1250,7 +1253,7 @@ import { GRID, idx, inBounds, bresenham, rectOutline, ellipseOutline, floodFill 
       .then((counts: Record<string, number>) => {
         Object.entries(counts).forEach(([issue, count]) => {
           const el = document.querySelector<HTMLElement>(`.heart-count[data-issue="${issue}"]`);
-          if (el) el.textContent = count > 0 ? String(count) : '';
+          if (el) { const num = el.querySelector('.heart-count-num'); if (num) num.textContent = count > 0 ? String(count) : ''; }
         });
       })
       .catch(() => {});
@@ -1274,8 +1277,9 @@ import { GRID, idx, inBounds, bresenham, rectOutline, ellipseOutline, floodFill 
         btn.classList.remove('heart-active');
         removeHearted(issue);
         if (countEl) {
-          const current = parseInt(countEl.textContent || '0') || 0;
-          countEl.textContent = current > 1 ? String(current - 1) : '';
+          const numEl = countEl.querySelector('.heart-count-num');
+          const current = parseInt(numEl?.textContent || '0') || 0;
+          if (numEl) numEl.textContent = current > 1 ? String(current - 1) : '';
           countEl.classList.remove('heart-count--active');
         }
         fetch('/api/heart', {
@@ -1288,8 +1292,9 @@ import { GRID, idx, inBounds, bresenham, rectOutline, ellipseOutline, floodFill 
         btn.classList.add('heart-active', 'heart-popping');
         setTimeout(() => btn.classList.remove('heart-popping'), 450);
         if (countEl) {
-          const current = parseInt(countEl.textContent || '0') || 0;
-          countEl.textContent = String(current + 1);
+          const numEl = countEl.querySelector('.heart-count-num');
+          const current = parseInt(numEl?.textContent || '0') || 0;
+          if (numEl) numEl.textContent = String(current + 1);
           countEl.classList.add('heart-count--active', 'animating');
           setTimeout(() => countEl.classList.remove('animating'), 200);
         }
