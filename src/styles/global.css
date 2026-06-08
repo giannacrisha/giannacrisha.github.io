@@ -35,6 +35,7 @@ html {
 
 body {
   min-height: 100vh;
+  overflow-x: clip;
 }
 
 a {
@@ -400,7 +401,10 @@ ul, ol {
 /* sidebar layout for all entry pages */
 .content-with-sidebar {
   display: grid;
-  grid-template-columns: 1fr;
+  /* minmax(0, …) lets the track shrink below its content's min-content size,
+     so long prose / pill rows wrap to the viewport instead of blowing the
+     column out horizontally. Matches the desktop track sizing below. */
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-xxl);
   max-width: var(--width-site);
   margin: 0 auto;
@@ -417,6 +421,7 @@ ul, ol {
   min-width: 0;
 }
 .content-sidebar {
+  min-width: 0;
   position: sticky;
   top: calc(56px + var(--space-xl));
 }
@@ -429,7 +434,8 @@ ul, ol {
 }
 
 @media (max-width: 767px) {
-  .page-wrapper { padding: 0 var(--space-lg); }
+  .page-wrapper,
+  .content-with-sidebar { padding: 0 var(--space-lg); }
 }
 
 @media (max-width: 600px) {
