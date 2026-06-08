@@ -132,7 +132,7 @@ ul, ol {
 }
 .page-def {
   font-family: var(--font-body);
-  font-size: var(--text-lg);
+  font-size: var(--text-md);
   color: var(--color-muted);
   line-height: var(--leading-loose);
   max-width: 560px;

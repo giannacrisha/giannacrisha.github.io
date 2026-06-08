@@ -13,6 +13,7 @@ topics:
 growth_stage: spark
 featured: false
 link: https://github.com/giannacrisha/shlife
+cover_image: /lab/shlife.png
 ---
 
 ## Problem

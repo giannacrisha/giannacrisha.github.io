@@ -56,21 +56,21 @@ if (collection === 'library'  && date_added)   primaryDate = date_added;
 
 const fmt = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 const isGallery = collection === 'gallery';
+const isLab = collection === 'lab';
 const isLibrary = collection === 'library';
 const hasImage = !!cover_image;
 // Library cards show cover as a corner thumbnail, not full-width
 const showFullImage = hasImage && !isGallery && !isLibrary;
 const showCoverThumb = hasImage && isLibrary;
+const useLabHorizontal = false; // reserved for future 3D model feature
 ---
-<article class:list={['card', { 'card--gallery': isGallery && hasImage }]}
+<article class:list={['card', { 'card--gallery': isGallery && hasImage, 'card--lab': isLab && hasImage }]}
          style={isGallery && hasImage ? `background-image: url(${cover_image}); background-size: cover; background-position: center;` : ''}>
   <a href={href} class="card-link">
     {showFullImage && (
-      <div class="card-image">
-        <img src={cover_image} alt={title} loading="lazy" />
-      </div>
+      <img class="card-image-raw" src={cover_image} alt={title} loading="lazy" />
     )}
-    <div class:list={['card-body', { 'card-body--gallery': isGallery && hasImage }]}>
+    <div class:list={['card-body', { 'card-body--gallery': isGallery && hasImage, 'card-body--lab': isLab && hasImage }]}>
       {stage && (
         <div class="card-stage-pill">
           <GrowthPill stage={stage} forceColor={isGallery && hasImage ? 'rgba(255,255,255,0.9)' : undefined} />
@@ -119,6 +119,33 @@ const showCoverThumb = hasImage && isLibrary;
     display: block;
     object-fit: cover;
     max-height: 200px;
+  }
+
+  /* lab variant — transparent card, image on top, card-body as its own rounded box */
+  .card--lab {
+    border: none;
+    background: transparent;
+    box-shadow: none;
+  }
+  .card--lab:hover { border-color: transparent; }
+  .card--lab .card-link {
+    gap: var(--space-sm);
+  }
+  .card-image-raw {
+    width: 100%;
+    display: block;
+    object-fit: cover;
+    max-height: 200px;
+    mix-blend-mode: multiply;
+  }
+  .card-body--lab {
+    background: var(--color-card);
+    border: 0.5px solid var(--color-border);
+    border-radius: var(--radius-card);
+    transition: border-color 0.15s ease;
+  }
+  .card--lab:hover .card-body--lab {
+    border-color: var(--color-accent);
   }
 
   .card-body {

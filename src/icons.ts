@@ -99,6 +99,10 @@ export const ICONS = {
     viewBox: '0 0 24 24',
     body: '<path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16zm-1-5h2V9h-2v6zm0-8h2V5h-2v2z" fill="currentColor"/>',
   },
+  heart: {
+    viewBox: '0 0 24 24',
+    body: '<polygon points="23 6 23 11 22 11 22 12 21 12 21 13 20 13 20 14 19 14 19 15 18 15 18 16 17 16 17 17 16 17 16 18 15 18 15 19 14 19 14 20 13 20 13 21 11 21 11 20 10 20 10 19 9 19 9 18 8 18 8 17 7 17 7 16 6 16 6 15 5 15 5 14 4 14 4 13 3 13 3 12 2 12 2 11 1 11 1 6 2 6 2 5 3 5 3 4 4 4 4 3 10 3 10 4 11 4 11 5 13 5 13 4 14 4 14 3 20 3 20 4 21 4 21 5 22 5 22 6 23 6" fill="currentColor"/>',
+  },
 } satisfies Record<string, IconDef>;
 
 export type IconName = keyof typeof ICONS;

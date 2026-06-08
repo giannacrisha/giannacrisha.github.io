@@ -213,9 +213,9 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
         <!-- Lab -->
         <section class="shelf-section" id="section-lab" data-collection="lab">
           <h2 class="shelf-label"><a href="/lab" class="shelf-label-link">lab</a></h2>
-          <div class="shelf-row">
+          <div class="shelf-row shelf-row--lab">
             {labSorted.map(entry => (
-              <div class="shelf-item" data-topics={JSON.stringify(entry.data.topics??[])} data-stage={entry.data.growth_stage??''} data-date={(entry.data.date_published??entry.data.date_built).getTime()}>
+              <div class:list={['shelf-item', { 'shelf-item--lab-img': !!entry.data.cover_image }]} data-topics={JSON.stringify(entry.data.topics??[])} data-stage={entry.data.growth_stage??''} data-date={(entry.data.date_published??entry.data.date_built).getTime()}>
                 <Card title={entry.data.title} slug={entry.slug} collection="lab" stage={entry.data.growth_stage} date_published={entry.data.date_published??entry.data.date_built} date_built={entry.data.date_built} cover_image={entry.data.cover_image} description={entry.data.description} body={entry.body} />
               </div>
             ))}
@@ -1276,6 +1276,7 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
   }
   .shelf-row--gallery .shelf-item,
   .shelf-row--library .shelf-item { width: auto; max-width: 2000px; }
+  .shelf-item--lab-img { width: 260px; }
 
   /* ── Frame card (gallery) ─────────────────────────────────────────────── */
   .frame-card {
