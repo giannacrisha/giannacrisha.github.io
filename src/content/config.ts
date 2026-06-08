@@ -13,7 +13,7 @@ const mediaEnum   = z.enum(mediaKeys);
 
 const lab = defineCollection({
   type: 'content',
-  schema: z.object({
+  schema: ({ image }) => z.object({
     title:          z.string(),
     description:    z.string(),
     date_built:     z.date(),
@@ -24,6 +24,7 @@ const lab = defineCollection({
     topics:         z.array(z.string()).optional(),
     growth_stage:   stageEnum,
     featured:       z.boolean().default(false),
+    images:         z.array(z.object({ src: image(), alt: z.string().optional(), caption: z.string().optional() })).optional(),
   }),
 });
 
@@ -44,7 +45,7 @@ const archives = defineCollection({
 
 const gallery = defineCollection({
   type: 'content',
-  schema: z.object({
+  schema: ({ image }) => z.object({
     title:          z.string(),
     medium:         z.string(),
     date_made:      z.date(),
@@ -54,6 +55,7 @@ const gallery = defineCollection({
     topics:         z.array(z.string()).optional(),
     growth_stage:   stageEnum,
     featured:       z.boolean().default(false),
+    images:         z.array(z.object({ src: image(), alt: z.string().optional(), caption: z.string().optional() })).optional(),
   }),
 });
 
@@ -81,4 +83,13 @@ const now = defineCollection({
   }),
 });
 
-export const collections = { lab, archives, gallery, library, now };
+const inbox = defineCollection({
+  type: 'content',
+  schema: z.object({
+    date:  z.date(),
+    title: z.string().optional(),
+    tags:  z.array(z.string()).optional(),
+  }),
+});
+
+export const collections = { lab, archives, gallery, library, now, inbox };

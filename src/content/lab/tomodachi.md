@@ -1,5 +1,5 @@
 ---
-title: Tomodachi
+title: tomodachi
 description: A wearable digital wellness device inspired by the Tamagotchi
 date_built: 2026-04-20
 tools:

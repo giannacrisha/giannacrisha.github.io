@@ -6,7 +6,6 @@ date_published: 2026-05-30
 growth_stage: star
 featured: false
 ---
-
 i wish things would stay as it is
 i would press pause
 and the moment would freeze
