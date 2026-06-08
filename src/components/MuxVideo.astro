@@ -1,0 +1,35 @@
+---
+// src/components/MuxVideo.astro
+interface Props {
+  playbackId: string;
+  title?: string;
+}
+const { playbackId, title = '' } = Astro.props;
+---
+
+<div class="mux-video-wrap">
+  <mux-player
+    playback-id={playbackId}
+    metadata-video-title={title}
+    accent-color="var(--color-accent)"
+    style="--media-object-fit: contain;"
+  ></mux-player>
+</div>
+
+<script>
+  import '@mux/mux-player';
+</script>
+
+<style>
+  .mux-video-wrap {
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    background: #000;
+    margin-bottom: var(--space-xxl);
+  }
+  .mux-video-wrap mux-player {
+    width: 100%;
+    display: block;
+    aspect-ratio: 16 / 9;
+  }
+</style>

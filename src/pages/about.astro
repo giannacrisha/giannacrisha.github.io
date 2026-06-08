@@ -16,9 +16,6 @@ import Icon from '../components/Icon.astro';
           whether that's building interfaces or advocating for tech policy, i'm always thinking about
           how the things we make shape the people who use them.
         </p>
-        <button class="scroll-down" id="scroll-down-btn" aria-label="scroll to next section">
-          <Icon name="chevron-down" size={24} />
-        </button>
       </section>
 
       <!-- migration history -->
@@ -209,33 +206,6 @@ import Icon from '../components/Icon.astro';
     max-width: 480px;
     margin-top: var(--space-sm);
   }
-  .scroll-down {
-    position: absolute;
-    bottom: var(--space-xl);
-    left: 50%;
-    transform: translateX(-50%);
-    background: none;
-    border: 1px solid var(--color-border);
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--color-muted);
-    cursor: pointer;
-    transition: color 0.15s, border-color 0.15s;
-    animation: bounce 2s ease-in-out infinite;
-  }
-  .scroll-down:hover {
-    color: var(--color-fg);
-    border-color: var(--color-fg);
-  }
-  @keyframes bounce {
-    0%, 100% { transform: translateX(-50%) translateY(0); }
-    50% { transform: translateX(-50%) translateY(5px); }
-  }
-
   @media (min-width: 600px) {
     .portrait { width: 200px; }
   }
@@ -412,24 +382,6 @@ import Icon from '../components/Icon.astro';
   }
 </style>
 
-<script is:inline>
-(function () {
-  function initScrollBtn() {
-    const btn = document.getElementById('scroll-down-btn');
-    const hero = document.getElementById('about-top');
-    if (!btn || !hero) return;
-    btn.addEventListener('click', function () {
-      const next = hero.nextElementSibling;
-      if (next) next.scrollIntoView({ behavior: 'smooth' });
-    });
-  }
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initScrollBtn);
-  } else {
-    initScrollBtn();
-  }
-})();
-</script>
 
 <script is:inline>
 (function () {

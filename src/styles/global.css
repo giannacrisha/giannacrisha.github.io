@@ -1,6 +1,15 @@
 /* src/styles/global.css */
 /* No emoji anywhere in this codebase. All visual indicators use SVG. */
 
+/* ── Obsidian wikilinks ────────────────────────────────────────────────────── */
+.wikilink-unresolved {
+  color: var(--color-muted);
+  border-bottom: 1px dashed var(--color-accent-border);
+  cursor: help;
+  font-style: italic;
+  opacity: 0.7;
+}
+
 /* Pixel-art icons */
 img[src$="-icon.png"],
 img[src^="/icons/"],
@@ -130,9 +139,91 @@ ul, ol {
   margin-bottom: 0;
 }
 
+/* ── Article layout ───────────────────────────────────────────────────────── */
+/* Shared structure for every article page (gallery, lab, archives):
+   label row → title row → meta row → media → divider → prose. */
+.article { padding: var(--space-section) 0; }
+
+.entry-label-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  margin-bottom: 0;
+}
+.entry-title-row { margin-bottom: 0; }
+.entry-title {
+  font-family: var(--font-serif);
+  font-size: var(--text-xxl);
+  color: var(--color-fg);
+  line-height: var(--leading-tight);
+  margin: 0;
+}
+.entry-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  margin-top: var(--space-sm);
+  margin-bottom: var(--space-lg);
+  flex-wrap: wrap;
+}
+.entry-topics { display: flex; flex-wrap: wrap; gap: var(--space-sm); }
+.topic-tag {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  text-decoration: none;
+  border-bottom: 1px solid var(--color-accent-border);
+  padding-bottom: 1px;
+  transition: color 0.15s, border-color 0.15s;
+}
+.topic-tag:hover { color: var(--color-fg); border-color: var(--color-fg); }
+
+.reading-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  letter-spacing: 0.04em;
+}
+
+.entry-tools { display: flex; gap: var(--space-sm); flex-wrap: wrap; margin-bottom: var(--space-lg); }
+
+.image-full { background: var(--color-accent-light); border-radius: var(--radius-card); overflow: hidden; }
+.image-full img { width: 100%; max-height: 70vh; object-fit: contain; display: block; }
+
+.entry-caption {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  font-style: italic;
+  margin-top: var(--space-sm);
+}
+
+.article-divider { border: none; border-top: var(--border); margin: var(--space-xxl) 0; }
+.process-carousel { margin-top: var(--space-xxl); }
+
+.article-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: var(--space-xl);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  text-decoration: underline;
+  text-decoration-color: var(--color-accent-border);
+  text-underline-offset: 3px;
+  transition: color 0.15s;
+}
+.article-link:hover { color: var(--color-fg); }
+
 .prose {
   font-family: var(--font-body);
-  font-size: var(--text-lg);
+  font-size: var(--text-md);
   line-height: var(--leading-loose);
   color: var(--color-fg);
   max-width: var(--width-content);

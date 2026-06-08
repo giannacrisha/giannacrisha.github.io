@@ -99,6 +99,7 @@
   --border:        0.5px solid var(--color-border);
 }
 
+
 /* Dark mode — must come after :root to win the cascade */
 :root[data-theme="dark"] {
   --color-bg:           #1a1a1a;

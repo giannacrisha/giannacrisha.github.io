@@ -1,0 +1,157 @@
+---
+// src/components/TableOfContents.astro
+// Renders a table of contents from rendered-markdown headings (h2 + h3).
+// Use variant="inline" inside the article body (mobile) and variant="sidebar"
+// inside the content sidebar (desktop); CSS shows whichever fits the viewport.
+// Self-hides when there are fewer than two headings. The active-heading
+// highlight and smooth-scroll script are emitted once no matter how many
+// instances appear on the page.
+interface Heading { depth: number; slug: string; text: string }
+interface Props {
+  headings: Heading[];
+  variant?: 'inline' | 'sidebar';
+  label?: string;
+}
+const { headings, variant = 'inline', label = 'in this article' } = Astro.props;
+const tocHeadings = headings.filter(h => h.depth === 2 || h.depth === 3);
+const isSidebar = variant === 'sidebar';
+---
+{tocHeadings.length >= 2 && (
+  <nav
+    class:list={['toc', isSidebar ? 'toc-sidebar' : 'toc-inline']}
+    aria-label="Table of contents"
+    id={isSidebar ? 'toc-sidebar' : undefined}
+  >
+    <details class="toc-details" open>
+      <summary class="toc-label">
+        {label}
+        <svg class="toc-chevron" viewBox="0 0 12 12" width="11" height="11" fill="none" aria-hidden="true">
+          <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </summary>
+      <div class="toc-content">
+        <ol class="toc-list">
+          {tocHeadings.map(h => (
+            <li class:list={['toc-item', { 'toc-item--h3': h.depth === 3 }]}>
+              <a href={`#${h.slug}`} class="toc-link" data-heading={isSidebar ? h.slug : undefined}>{h.text}</a>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </details>
+  </nav>
+)}
+
+<style>
+  .toc-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    color: var(--color-muted);
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+    transition: color 0.15s;
+  }
+  .toc-label::-webkit-details-marker { display: none; }
+  .toc-label:hover { color: var(--color-fg); }
+  .toc-chevron {
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+  }
+  .toc-details[open] .toc-chevron { transform: rotate(180deg); }
+
+  /* Smooth collapse: a grid wrapper animates between 0fr and 1fr.
+     The author display:grid overrides the UA `display:none` that <details>
+     applies to closed content, so the list stays in flow and can transition. */
+  .toc-content {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.25s ease;
+  }
+  .toc-details[open] .toc-content { grid-template-rows: 1fr; }
+  .toc-list {
+    list-style: none;
+    padding-top: var(--space-md);
+    margin: 0;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .toc-item { padding: 0; }
+  .toc-item--h3 { padding-left: var(--space-lg); }
+  .toc-link {
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    color: var(--color-muted);
+    text-decoration: none;
+    line-height: 1.8;
+    display: block;
+    transition: color 0.15s;
+    border-left: 2px solid transparent;
+    padding-left: var(--space-sm);
+  }
+  .toc-link:hover { color: var(--color-fg); }
+  .toc-link.active {
+    color: var(--color-fg);
+    border-left-color: var(--color-accent);
+  }
+  .toc-inline {
+    margin: var(--space-xxl) 0;
+    padding: var(--space-lg) var(--space-xl);
+    background: var(--color-accent-light);
+    border-radius: var(--radius-card);
+    border: 0.5px solid var(--color-border);
+  }
+  .toc-sidebar {
+    margin-bottom: var(--space-xxl);
+    padding: var(--space-lg) var(--space-xl);
+    background: var(--color-card);
+    border: 0.5px solid var(--color-border);
+    border-radius: var(--radius-card);
+  }
+  @media (min-width: 900px) { .toc-inline { display: none; } }
+  @media (max-width: 899px) { .toc-sidebar { display: none; } }
+</style>
+
+<script>
+  // Active-heading highlight tracks the sidebar links (the ones with data-heading).
+  const tocLinks = document.querySelectorAll('.toc-link[data-heading]') as NodeListOf<HTMLAnchorElement>;
+  if (tocLinks.length > 0) {
+    const headingEls = Array.from(tocLinks)
+      .map(link => document.getElementById(link.dataset.heading!))
+      .filter(Boolean) as HTMLElement[];
+
+    function updateActive() {
+      let active = headingEls[0];
+      for (const el of headingEls) {
+        if (el.getBoundingClientRect().top <= 120) active = el;
+      }
+      tocLinks.forEach(link => {
+        link.classList.toggle('active', link.dataset.heading === active?.id);
+      });
+    }
+    window.addEventListener('scroll', updateActive, { passive: true });
+    updateActive();
+  }
+
+  // Smooth scroll applies to every TOC link (inline + sidebar).
+  document.querySelectorAll('.toc-link').forEach(link => {
+    link.addEventListener('click', (e) => {
+      const href = (link as HTMLAnchorElement).getAttribute('href');
+      if (!href?.startsWith('#')) return;
+      e.preventDefault();
+      const target = document.querySelector(href);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        history.pushState(null, '', href);
+      }
+    });
+  });
+</script>

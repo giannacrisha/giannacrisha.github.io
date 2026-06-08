@@ -1,4 +1,4 @@
-import { defineCollection, z } from 'astro:content';
+import { defineCollection, z, type SchemaContext } from 'astro:content';
 import { growthStages, contentTypes, mediaTypes, type GrowthStage } from '../config/design';
 
 // Cast via the exported GrowthStage type so Zod infers the literal union,
@@ -11,53 +11,50 @@ const stageEnum   = z.enum(stageKeys);
 const contentEnum = z.enum(contentKeys);
 const mediaEnum   = z.enum(mediaKeys);
 
+// Fields shared by every article collection (lab, archives, gallery).
+// Each collection adds its own primary date + collection-specific fields.
+// Keeping this in one place is what keeps the article schemas consistent.
+const articleFields = ({ image }: { image: SchemaContext['image'] }) => ({
+  title:          z.string(),
+  date_published: z.date().optional(), // defaults to the collection's primary date if omitted
+  topics:         z.array(z.string()).optional(),
+  growth_stage:   stageEnum,
+  featured:       z.boolean().default(false),
+  link:           z.string().url().optional(),
+  cover_image:    z.string().optional(),
+  mux_video_id:   z.string().optional(),
+  images:         z.array(z.object({ src: image(), alt: z.string().optional(), caption: z.string().optional() })).optional(),
+});
+
 const lab = defineCollection({
   type: 'content',
   schema: ({ image }) => z.object({
-    title:          z.string(),
+    ...articleFields({ image }),
     description:    z.string(),
     date_built:     z.date(),
-    date_published: z.date().optional(), // defaults to date_built if omitted
     tools:          z.array(z.string()).optional(),
-    cover_image:    z.string().optional(),
-    link:           z.string().url().optional(),
-    topics:         z.array(z.string()).optional(),
-    growth_stage:   stageEnum,
-    featured:       z.boolean().default(false),
-    images:         z.array(z.object({ src: image(), alt: z.string().optional(), caption: z.string().optional() })).optional(),
-    mux_video_id:   z.string().optional(),
   }),
 });
 
 const archives = defineCollection({
   type: 'content',
-  schema: z.object({
-    title:          z.string(),
+  schema: ({ image }) => z.object({
+    ...articleFields({ image }),
     type:           contentEnum,
     date_written:   z.date(),
-    date_published: z.date().optional(), // defaults to date_written if omitted
     tags:           z.array(z.string()).nullish(),   // nullish() allows explicit `tags: null` in frontmatter
-    topics:         z.array(z.string()).optional(),
     note:           z.string().optional(),
-    growth_stage:   stageEnum,
-    featured:       z.boolean().default(false),
   }),
 });
 
 const gallery = defineCollection({
   type: 'content',
   schema: ({ image }) => z.object({
-    title:          z.string(),
+    ...articleFields({ image }),
     medium:         z.string(),
     date_made:      z.date(),
-    date_published: z.date().optional(), // defaults to date_made if omitted
     image:          z.string(),
     caption:        z.string().optional(),
-    topics:         z.array(z.string()).optional(),
-    growth_stage:   stageEnum,
-    featured:       z.boolean().default(false),
-    link:           z.string().url().optional(),
-    images:         z.array(z.object({ src: image(), alt: z.string().optional(), caption: z.string().optional() })).optional(),
   }),
 });
 

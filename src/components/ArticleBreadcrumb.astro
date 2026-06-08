@@ -1,0 +1,34 @@
+---
+// src/components/ArticleBreadcrumb.astro
+// Shared breadcrumb for every article page: garden / <section> / minimize.
+import MinimizePageBtn from './MinimizePageBtn.astro';
+interface Props {
+  section: string;       // route segment, e.g. "gallery"
+  title: string;         // page title, passed to the minimize button
+  label?: string;        // visible section label; defaults to section
+}
+const { section, title, label = section } = Astro.props;
+---
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <a href="/">garden</a>
+  <span class="breadcrumb-sep" aria-hidden="true">/</span>
+  <a href={`/${section}`}>{label}</a>
+  <span class="breadcrumb-sep" aria-hidden="true">/</span>
+  <MinimizePageBtn title={title} />
+</nav>
+
+<style>
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    color: var(--color-muted);
+    margin-bottom: var(--space-xl);
+  }
+  .breadcrumb a { color: var(--color-muted); text-decoration: none; }
+  .breadcrumb a:hover { color: var(--color-fg); }
+  .breadcrumb-sep { color: var(--color-accent-border); font-size: 10px; }
+  .breadcrumb :global(.minimize-page-btn) { margin-left: auto; }
+</style>

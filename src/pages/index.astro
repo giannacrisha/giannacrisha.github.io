@@ -63,6 +63,12 @@ const allTopics = [...new Set([
   ...gallery.flatMap(e=>e.data.topics??[]),
 ])].sort();
 
+// Growth stage weather — counts across all collections (excluding library, which has no stage)
+const allStaged = [...lab, ...archives, ...gallery] as { data: { growth_stage?: string } }[];
+const dustCount  = allStaged.filter(e => e.data.growth_stage === 'dust').length;
+const sparkCount = allStaged.filter(e => e.data.growth_stage === 'spark').length;
+const starCount  = allStaged.filter(e => e.data.growth_stage === 'star').length;
+
 // Book spine color from title hash
 function bookColor(s: string) {
   const p = ['#c9b99a','#b5c4b1','#b5a8c0','#c4b1b1','#a8bec4','#c4bdb5','#b1c4b5','#c4b5a8'];
@@ -166,20 +172,21 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
       <!-- ── Garden bar: topics + filters + sort ──────────────────────────── -->
       <div class="garden-bar">
         {allTopics.length > 0 && (
-          <div class="topic-pills" id="topic-cloud" role="group" aria-label="Filter by topic">
-            <button class="topic-pill active" data-topic="all">all</button>
-            {allTopics.map(t => <button class="topic-pill" data-topic={t}>{t}</button>)}
+          <div class="topic-pills-scroll">
+            <div class="topic-pills" id="topic-cloud" role="group" aria-label="Filter by topic">
+              <button class="topic-pill active" data-topic="all">all</button>
+              {allTopics.map(t => <button class="topic-pill" data-topic={t}>{t}</button>)}
+            </div>
           </div>
         )}
         <div class="bar-controls">
           <div class="chip-wrap">
-            <button class="control-chip" id="filters-btn" aria-expanded="false" aria-haspopup="true">
-              <Icon name="filter" size={13} />
-              filters
+            <button class="control-chip control-chip--icon" id="filters-btn" aria-expanded="false" aria-haspopup="true" aria-label="Filter and sort">
+              <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960" width="16px" fill="currentColor" aria-hidden="true"><path d="M400-240v-80h160v80H400ZM240-440v-80h480v80H240ZM120-640v-80h720v80H120Z"/></svg>
             </button>
             <div class="dropdown" id="filters-dropdown" aria-hidden="true">
               <div class="dropdown-section">
-                <span class="dropdown-label">growth stage</span>
+                <span class="dropdown-label">filter by stage</span>
                 <div class="dropdown-pills">
                   <button class="dpill active" data-filter-param="stage" data-filter-value="all">all</button>
                   <button class="dpill" data-filter-param="stage" data-filter-value="dust">dust</button>
@@ -187,15 +194,8 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
                   <button class="dpill" data-filter-param="stage" data-filter-value="star">star</button>
                 </div>
               </div>
-            </div>
-          </div>
-          <div class="chip-wrap">
-            <button class="control-chip" id="sort-btn" aria-expanded="false" aria-haspopup="true">
-              <Icon name="sort" size={13} />
-              sort
-            </button>
-            <div class="dropdown" id="sort-dropdown" aria-hidden="true">
               <div class="dropdown-section">
+                <span class="dropdown-label">sort</span>
                 <div class="dropdown-pills">
                   <button class="dpill active" data-sort-value="newest">most recent</button>
                   <button class="dpill" data-sort-value="oldest">oldest first</button>
@@ -567,6 +567,55 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
     transition: color 0.15s;
   }
   .garden-learn-more:hover { color: var(--color-fg); }
+  .garden-weather-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    margin-bottom: var(--space-lg);
+    padding-left: var(--space-xl);
+  }
+  .weather-info-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--color-muted);
+    cursor: default;
+    opacity: 0.5;
+    transition: opacity 0.15s;
+  }
+  .weather-info-btn:hover { opacity: 1; }
+  .weather-info-btn:hover + .garden-weather,
+  .garden-weather:hover { opacity: 1; pointer-events: auto; }
+
+  .garden-weather {
+    position: absolute;
+    left: calc(var(--space-xl) + 18px);
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    color: var(--color-muted);
+    letter-spacing: 0.06em;
+    background: var(--color-card);
+    border: var(--border);
+    border-radius: var(--radius-pill);
+    padding: 3px 10px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s;
+  }
+  .weather-sep { opacity: 0.4; }
+  .weather-item--dust  { color: var(--color-muted);  }
+  .weather-item--spark { color: var(--color-accent);  }
+  .weather-item--star  { color: var(--color-fg); font-weight: 600; }
+
   .garden-links {
     display: flex;
     gap: var(--space-lg);
@@ -1043,18 +1092,24 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
   /* ── Garden bar (topics + controls in one row) ───────────────────────── */
   .garden-bar {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    align-items: center;
     gap: var(--space-md);
     margin-bottom: var(--space-xxl);
   }
+  .topic-pills-scroll {
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: visible;
+    scrollbar-width: none;
+  }
+  .topic-pills-scroll::-webkit-scrollbar { display: none; }
   .topic-pills {
     display: flex;
     gap: var(--space-xs);
-    overflow-x: auto;
-    scrollbar-width: none;
     padding-bottom: 2px; /* prevent clipping active outline */
   }
-  .topic-pills::-webkit-scrollbar { display: none; }
   .topic-pill {
     flex-shrink: 0;
     padding: 4px 14px;
@@ -1076,8 +1131,11 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
     display: flex;
     gap: var(--space-sm);
     flex-shrink: 0;
+    border-left: 1px solid var(--color-border);
+    padding-left: var(--space-md);
   }
   .chip-wrap { position: relative; }
+  .chip-wrap:last-child .dropdown { left: auto; right: 0; }
   .control-chip {
     display: inline-flex;
     align-items: center;
@@ -1093,6 +1151,12 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
     cursor: pointer;
     transition: border-color 0.12s, background 0.12s;
   }
+  .control-chip--icon {
+    padding: 5px 8px;
+    color: var(--color-muted);
+    border-color: transparent;
+    background: transparent;
+  }
   .control-chip:hover,
   .control-chip[aria-expanded="true"] {
     border-color: var(--color-fg);
@@ -1100,6 +1164,7 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
     color: #fff;
   }
   .control-chip[aria-expanded="true"] svg { stroke: #fff; }
+  .control-chip .hn { font-size: 16px; line-height: 1; }
   .dropdown {
     display: none;
     position: absolute;
@@ -1116,6 +1181,15 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
     gap: var(--space-lg);
   }
   .dropdown.open { display: flex; }
+  .bar-controls .chip-wrap:hover .dropdown { display: flex; }
+  .bar-controls .chip-wrap::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    height: 12px;
+  }
   .dropdown-section { display: flex; flex-direction: column; gap: var(--space-sm); }
   .dropdown-label {
     font-family: var(--font-body);
@@ -1367,6 +1441,7 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
     .garden-title { font-size: clamp(48px, 12vw, 80px); }
     .shelf-item { width: 160px; }
     .frame-img { max-height: 220px; }
+    .chip-label { display: none; }
   }
 </style>
 
@@ -2171,5 +2246,4 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
   });
 
   initDropdown('filters-btn', 'filters-dropdown');
-  initDropdown('sort-btn',    'sort-dropdown');
 </script>
