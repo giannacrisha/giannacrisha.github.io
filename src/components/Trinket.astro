@@ -1,0 +1,149 @@
+---
+// src/components/Trinket.astro
+// ─────────────────────────────────────────────────────────────────────────────
+// Decorative overlay trinket — stamps, stickers, doodles, etc.
+//
+// Usage:
+//   <Trinket
+//     type="stamp"
+//     top="12%" left="8%"
+//     rot={-8}
+//     delay={0.3}
+//   >
+//     <img src="/trinkets/stamp-brandeis.png" alt="" />
+//   </Trinket>
+//
+// Props:
+//   type    — visual preset: "stamp" | "sticker" | "doodle" | "tape" | "badge"
+//   top / bottom / left / right — CSS position values (strings, e.g. "10%", "80px")
+//   rot     — rotation in degrees (positive = clockwise). Default 0.
+//   delay   — float-animation delay in seconds. Default 0.
+//   scale   — base scale multiplier. Default 1.
+//   flip    — mirror horizontally. Default false.
+//   class   — extra class names forwarded to the root element.
+//   style   — extra inline styles forwarded to the root element.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface Props {
+  type?: 'stamp' | 'sticker' | 'doodle' | 'tape' | 'badge';
+  top?: string;
+  bottom?: string;
+  left?: string;
+  right?: string;
+  rot?: number;
+  delay?: number;
+  scale?: number;
+  flip?: boolean;
+  class?: string;
+  style?: string;
+}
+
+const {
+  type = 'sticker',
+  top,
+  bottom,
+  left,
+  right,
+  rot = 0,
+  delay = 0,
+  scale = 1,
+  flip = false,
+  class: extraClass = '',
+  style: extraStyle = '',
+} = Astro.props;
+
+// Build inline position + transform CSS vars
+const positionParts: string[] = [];
+if (top    !== undefined) positionParts.push(`top:${top}`);
+if (bottom !== undefined) positionParts.push(`bottom:${bottom}`);
+if (left   !== undefined) positionParts.push(`left:${left}`);
+if (right  !== undefined) positionParts.push(`right:${right}`);
+
+const cssVars = [
+  `--trinket-rot:${rot}deg`,
+  `--trinket-delay:${delay}s`,
+  `--trinket-scale:${scale}`,
+  `--trinket-flip:${flip ? -1 : 1}`,
+].join(';');
+
+const inlineStyle = [positionParts.join(';'), cssVars, extraStyle].filter(Boolean).join(';');
+---
+
+<div
+  class:list={['trinket', `trinket--${type}`, extraClass]}
+  style={inlineStyle}
+  aria-hidden="true"
+>
+  <div class="trinket-inner">
+    <slot />
+  </div>
+</div>
+
+<style>
+  .trinket {
+    position: absolute;
+    pointer-events: auto;
+    user-select: none;
+    cursor: grab;
+    z-index: 2;
+    /* float animation — cancelled by physics JS once it takes over */
+    animation: trinketFloat 5s ease-in-out infinite;
+    animation-delay: var(--trinket-delay, 0s);
+    transform:
+      rotate(var(--trinket-rot, 0deg))
+      scaleX(var(--trinket-flip, 1))
+      scale(var(--trinket-scale, 1));
+  }
+
+  .trinket:active { cursor: grabbing; }
+
+  @keyframes trinketFloat {
+    0%, 100% { translate: 0 0; }
+    50%       { translate: 0 -6px; }
+  }
+
+  /* ── Inner wrapper (keeps transform-origin clean) ─────────────────────── */
+  .trinket-inner {
+    display: block;
+    line-height: 0;
+  }
+
+  /* ── Type presets ─────────────────────────────────────────────────────── */
+
+  /* stamp: transparent, image only */
+  .trinket--stamp .trinket-inner {}
+
+  /* sticker: just a gentle drop shadow, no frame */
+  .trinket--sticker .trinket-inner {
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.18));
+  }
+
+  /* doodle: pure image, no decoration */
+  .trinket--doodle .trinket-inner {
+    opacity: 0.85;
+  }
+
+  /* tape: translucent horizontal strip — child becomes the tape content */
+  .trinket--tape .trinket-inner {
+    background: color-mix(in srgb, var(--color-accent, #9C8B6E) 28%, transparent);
+    backdrop-filter: blur(1px);
+    padding: 5px 18px;
+    min-width: 60px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.10);
+  }
+
+  /* badge: circle badge */
+  .trinket--badge .trinket-inner {
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow:
+      0 2px 10px rgba(0,0,0,0.15),
+      0 0 0 2px var(--color-bg, #fff),
+      0 0 0 4px color-mix(in srgb, var(--color-fg, #3d2f1f) 20%, transparent);
+  }
+
+  /* ── Reduced motion ───────────────────────────────────────────────────── */
+  @media (prefers-reduced-motion: reduce) {
+    .trinket { animation: none; }
+  }
+</style>

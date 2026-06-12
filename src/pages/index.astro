@@ -5,6 +5,7 @@ import Card from '../components/Card.astro';
 import TopicCloud from '../components/TopicCloud.astro';
 import GrowthPill from '../components/GrowthPill.astro';
 import Icon from '../components/Icon.astro';
+import Trinket from '../components/Trinket.astro';
 import { getCollection } from 'astro:content';
 import { site } from '../config/design';
 
@@ -21,16 +22,19 @@ const featuredWidgets = [
     title: e.data.title, slug: e.slug, collection: 'lab' as const,
     type: 'project', preview: e.data.description ?? '',
     date: e.data.date_published ?? e.data.date_built,
+    image: (e.data as any).cover_image ?? null,
   })),
   ...archives.filter(e => e.data.featured).map(e => ({
     title: e.data.title, slug: e.slug, collection: 'archives' as const,
     type: e.data.type, preview: '',
     date: e.data.date_published ?? e.data.date_written,
+    image: null,
   })),
   ...gallery.filter(e => e.data.featured).map(e => ({
     title: e.data.title, slug: e.slug, collection: 'gallery' as const,
     type: e.data.medium, preview: e.data.caption ?? '',
     date: e.data.date_published ?? e.data.date_made,
+    image: (e.data as any).image ?? null,
   })),
 ].slice(0, 6);
 
@@ -92,22 +96,42 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
       const pos = positions[i];
       const posStyle = `top:${pos.top};${'left' in pos ? `left:${pos.left}` : `right:${pos.right}`};--rot:${pos.rot};--float-delay:${pos.delay}`;
       return (
-        <a
-          href={`/${w.collection}/${w.slug}`}
+        <div
           class="widget"
           style={posStyle}
-          tabindex="-1"
           aria-hidden="true"
+          data-href={`/${w.collection}/${w.slug}`}
         >
-          <div class="widget-top">
-            <img src={colIcons[w.collection]} class="widget-icon" alt="" />
-            <span class="widget-type">{w.type}</span>
+          <div class="widget-flipper">
+            {/* Front: cover image (or fallback icon) */}
+            <div class="widget-face widget-front">
+              {w.image
+                ? <img src={w.image} class="widget-cover" alt={w.title} draggable="false" />
+                : <div class="widget-cover-fallback">
+                    <img src={colIcons[w.collection]} class="widget-fallback-icon" alt="" />
+                  </div>
+              }
+            </div>
+            {/* Back: info */}
+            <div class="widget-face widget-back">
+              <div class="widget-top">
+                <img src={colIcons[w.collection]} class="widget-icon" alt="" />
+                <span class="widget-type">{w.type}</span>
+              </div>
+              <p class="widget-title">{w.title}</p>
+              {w.preview && <p class="widget-preview">{w.preview.slice(0, 60)}{w.preview.length > 60 ? '…' : ''}</p>}
+              <a href={`/${w.collection}/${w.slug}`} class="widget-visit" tabindex="-1">open →</a>
+            </div>
           </div>
-          <p class="widget-title">{w.title}</p>
-          {w.preview && <p class="widget-preview">{w.preview.slice(0, 60)}{w.preview.length > 60 ? '…' : ''}</p>}
-        </a>
+        </div>
       );
     })}
+
+    <!-- ── Trinkets ──────────────────────────────────────────────────────── -->
+    {/* ph stamp */}
+    <Trinket type="stamp" bottom="8%" left="5%" rot={-6} delay={0.4}>
+      <img src="/trinkets/ph-stamp.png" width="96" height="96" alt="" draggable="false" />
+    </Trinket>
 
     <!-- hero -->
     <div class="hero-inner" id="hero-inner">
@@ -338,36 +362,80 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
   .widget {
     position: absolute;
     cursor: grab;
-    width: 172px;
-    background: var(--color-card);
-    border: 0.5px solid var(--color-border);
-    border-radius: var(--radius-card);
-    padding: var(--space-md) var(--space-lg);
-    text-decoration: none;
-    color: inherit;
-    transform: rotate(var(--rot, 0deg)) translateY(0px);
+    width: 160px;
+    z-index: 2;
+    transform: rotate(var(--rot, 0deg));
     animation: widgetIn 0.7s ease both, widgetFloat 4s ease-in-out infinite;
     animation-delay: var(--float-delay, 0s), var(--float-delay, 0s);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-    transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
-    z-index: 2;
+    perspective: 600px;
+  }
+  .widget:active { cursor: grabbing; }
+
+  @keyframes widgetIn {
+    from { opacity: 0; translate: 0 12px; }
+    to   { opacity: 1; translate: 0 0; }
+  }
+  @keyframes widgetFloat {
+    0%, 100% { translate: 0 0; }
+    50%       { translate: 0 -8px; }
+  }
+
+  /* flipper — rotates on .flipped */
+  .widget-flipper {
+    position: relative;
+    width: 100%;
+    /* height set by front face (aspect-ratio) */
+    transform-style: preserve-3d;
+    transition: transform 0.55s cubic-bezier(0.4, 0.2, 0.2, 1);
+    border-radius: var(--radius-card);
+  }
+  .widget.flipped .widget-flipper {
+    transform: rotateY(180deg);
+  }
+
+  /* shared face styles */
+  .widget-face {
+    border-radius: var(--radius-card);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    overflow: hidden;
+  }
+
+  /* front — cover image, natural size, no crop */
+  .widget-front {
+    width: 100%;
+  }
+  .widget-cover {
+    width: 100%;
+    height: auto;
+    display: block;
+    pointer-events: none;
+  }
+  .widget-cover-fallback {
+    width: 100%;
+    height: 100%;
+    background: var(--color-accent-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .widget-fallback-icon {
+    width: 36px;
+    height: 36px;
+    opacity: 0.4;
+  }
+
+  /* back — info card */
+  .widget-back {
+    position: absolute;
+    inset: 0;
+    transform: rotateY(180deg);
+    background: var(--color-card);
+    border: 0.5px solid var(--color-border);
+    padding: var(--space-md) var(--space-lg);
     display: flex;
     flex-direction: column;
     gap: var(--space-xs);
-  }
-  @keyframes widgetIn {
-    from { opacity: 0; transform: rotate(var(--rot, 0deg)) translateY(12px); }
-    to   { opacity: 1; transform: rotate(var(--rot, 0deg)) translateY(0); }
-  }
-  @keyframes widgetFloat {
-    0%, 100% { transform: rotate(var(--rot, 0deg)) translateY(0px); }
-    50%       { transform: rotate(var(--rot, 0deg)) translateY(-8px); }
-  }
-  .widget:hover {
-    border-color: var(--color-accent);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-    transform: rotate(0deg) translateY(-4px) scale(1.02);
-    animation-play-state: paused;
   }
   .widget-top {
     display: flex;
@@ -375,8 +443,8 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
     gap: var(--space-xs);
   }
   .widget-icon {
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
     opacity: 0.6;
   }
   .widget-type {
@@ -404,7 +472,19 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    flex: 1;
   }
+  .widget-visit {
+    font-family: var(--font-body);
+    font-size: 10px;
+    color: var(--color-accent);
+    text-decoration: none;
+    letter-spacing: 0.05em;
+    align-self: flex-end;
+    pointer-events: auto;
+  }
+  .widget-visit:hover { text-decoration: underline; }
+
   @media (max-width: 768px) { .widget { display: none; } }
 
   /* ── Hero ────────────────────────────────────────────────────────────── */
@@ -1615,13 +1695,15 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
     function initWidgetPhysics() {
       if (physicsInited) return;
       physicsInited = true;
-      document.querySelectorAll('.widget').forEach(function(el) {
+      document.querySelectorAll('.widget, .trinket').forEach(function(el) {
         var rect = el.getBoundingClientRect();
-        var rot = parseFloat(el.style.getPropertyValue('--rot') || '0');
+        // widgets use --rot; trinkets use --trinket-rot (parseFloat strips "deg" suffix)
+        var rotRaw = el.style.getPropertyValue('--rot') || el.style.getPropertyValue('--trinket-rot') || '0';
+        var rot = parseFloat(rotRaw) || 0;
         var pw = { el: el, x: rect.left, y: rect.top, w: rect.width, h: rect.height, vx: 0, vy: 0, rot: rot };
         el.style.animation = 'none';
         el.style.position = 'fixed';
-        el.style.left = '0'; el.style.top = '0'; el.style.right = 'auto';
+        el.style.left = '0'; el.style.top = '0'; el.style.right = 'auto'; el.style.bottom = 'auto';
         el.style.transform = 'translate(' + pw.x + 'px,' + pw.y + 'px) rotate(' + pw.rot + 'deg)';
         pWidgets.push(pw);
 
@@ -1649,7 +1731,18 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
           el.style.zIndex = '2'; el.style.cursor = 'grab';
         });
         el.addEventListener('click', function(e) {
-          if (pw.wasDragged) { e.preventDefault(); pw.wasDragged = false; }
+          if (pw.wasDragged) { pw.wasDragged = false; return; }
+          // widgets: toggle flip; trinkets: no action
+          if (el.classList.contains('widget')) {
+            el.classList.toggle('flipped');
+            // if flipped open, wire the visit link
+            var link = el.querySelector('.widget-visit');
+            if (link && el.classList.contains('flipped')) {
+              link.setAttribute('tabindex', '0');
+            } else if (link) {
+              link.setAttribute('tabindex', '-1');
+            }
+          }
         });
       });
       runPhysics();

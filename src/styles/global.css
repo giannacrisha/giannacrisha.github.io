@@ -14,7 +14,8 @@
 img[src$="-icon.png"],
 img[src^="/icons/"],
 img[src^="/key"],
-img[src^="/keyhole"] {
+img[src^="/keyhole"],
+img[src^="/trinkets/"] {
   image-rendering: pixelated;
   image-rendering: crisp-edges;
 }
