@@ -6,10 +6,9 @@ export const prerender = false;
 import type { APIRoute } from 'astro';
 import { Redis } from '@upstash/redis';
 
-const redis = new Redis({
-  url:   import.meta.env.KV_REST_API_URL,
-  token: import.meta.env.KV_REST_API_TOKEN,
-});
+const kvUrl   = import.meta.env.KV_REST_API_URL;
+const kvToken = import.meta.env.KV_REST_API_TOKEN;
+const redis = kvUrl && kvToken ? new Redis({ url: kvUrl, token: kvToken }) : null;
 
 export const GET: APIRoute = async ({ url }) => {
   const param = url.searchParams.get('issues') ?? '';
@@ -21,6 +20,12 @@ export const GET: APIRoute = async ({ url }) => {
 
   if (!issueNumbers.length) {
     return new Response(JSON.stringify({}), { status: 200 });
+  }
+
+  if (!redis) {
+    const counts: Record<number, number> = {};
+    issueNumbers.forEach(n => { counts[n] = 0; });
+    return new Response(JSON.stringify(counts), { status: 200, headers: { 'Cache-Control': 'no-store' } });
   }
 
   const keys    = issueNumbers.map(n => `hearts:${n}`);

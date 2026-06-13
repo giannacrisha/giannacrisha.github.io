@@ -7,17 +7,14 @@ import type { APIRoute } from 'astro';
 import { Redis } from '@upstash/redis';
 import { Ratelimit } from '@upstash/ratelimit';
 
-const redis = new Redis({
-  url:   import.meta.env.KV_REST_API_URL,
-  token: import.meta.env.KV_REST_API_TOKEN,
-});
+const kvUrl   = import.meta.env.KV_REST_API_URL;
+const kvToken = import.meta.env.KV_REST_API_TOKEN;
+const redis = kvUrl && kvToken ? new Redis({ url: kvUrl, token: kvToken }) : null;
 
 // Sliding window: 30 heart actions per IP per 60 seconds, shared across all instances.
-const ratelimit = new Ratelimit({
-  redis,
-  limiter: Ratelimit.slidingWindow(30, '60 s'),
-  prefix:  'rl:heart',
-});
+const ratelimit = redis
+  ? new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(30, '60 s'), prefix: 'rl:heart' })
+  : null;
 
 export const POST: APIRoute = async ({ request }) => {
   // Prefer Vercel's trusted header over spoofable x-forwarded-for first-hop.
@@ -26,9 +23,11 @@ export const POST: APIRoute = async ({ request }) => {
           ?? request.headers.get('x-real-ip')
           ?? 'unknown';
 
-  const { success } = await ratelimit.limit(ip);
-  if (!success) {
-    return new Response(JSON.stringify({ error: 'Too many requests.' }), { status: 429 });
+  if (ratelimit) {
+    const { success } = await ratelimit.limit(ip);
+    if (!success) {
+      return new Response(JSON.stringify({ error: 'Too many requests.' }), { status: 429 });
+    }
   }
 
   let body: { issueNumber?: unknown; action?: unknown };
@@ -41,6 +40,10 @@ export const POST: APIRoute = async ({ request }) => {
   }
   if (action !== 'like' && action !== 'unlike') {
     return new Response(JSON.stringify({ error: 'Invalid action' }), { status: 400 });
+  }
+
+  if (!redis) {
+    return new Response(JSON.stringify({ ok: true, count: 0 }), { status: 200 });
   }
 
   const key = `hearts:${issueNumber}`;

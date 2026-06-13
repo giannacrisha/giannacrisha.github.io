@@ -232,6 +232,14 @@ const HEART_FILLED = `<svg viewBox="0 0 24 24" width="20" height="20" fill="curr
 
 </div>
 
+<!-- ── Submit success modal ──────────────────────────────────── -->
+<div id="cg-modal" class="cg-modal" aria-modal="true" role="dialog" aria-label="Submission confirmed" hidden>
+  <div class="cg-modal-card">
+    <p class="cg-modal-headline">you're in the garden ♡</p>
+    <p class="cg-modal-sub">your submission will be live soon!</p>
+  </div>
+</div>
+
 <style>
   /* ── Full-height split layout ───────────────────────── */
   .cg-layout {
@@ -609,7 +617,8 @@ const HEART_FILLED = `<svg viewBox="0 0 24 24" width="20" height="20" fill="curr
   .cg-locked {
     position: relative;
     overflow: hidden;
-    max-height: 180px;
+    max-height: 320px;
+    min-height: 280px;
   }
   .plantings-peek {
     opacity: 0.35;
@@ -725,6 +734,55 @@ const HEART_FILLED = `<svg viewBox="0 0 24 24" width="20" height="20" fill="curr
     .cg-left { border-top: var(--border); }
     .cg-right { min-height: 100vh; }
     .cg-section-divider { display: block; }
+  }
+
+  /* ── Submit success modal ────────────────────────────────── */
+  .cg-modal {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    pointer-events: none;
+  }
+  .cg-modal[hidden] { display: none; }
+  .cg-modal-card {
+    background: var(--color-bg);
+    border: 0.5px solid var(--color-border);
+    border-radius: var(--radius-card);
+    padding: var(--space-xxl) var(--space-section);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+    animation: modal-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+  .cg-modal.modal-out .cg-modal-card {
+    animation: modal-out 0.25s ease-in forwards;
+  }
+  @keyframes modal-in {
+    from { opacity: 0; transform: scale(0.88) translateY(8px); }
+    to   { opacity: 1; transform: scale(1)    translateY(0);   }
+  }
+  @keyframes modal-out {
+    from { opacity: 1; transform: scale(1)    translateY(0);   }
+    to   { opacity: 0; transform: scale(0.94) translateY(-6px); }
+  }
+  .cg-modal-headline {
+    font-family: var(--font-body);
+    font-size: var(--text-md);
+    font-weight: 600;
+    color: var(--color-fg);
+    margin: 0;
+  }
+  .cg-modal-sub {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+    margin: 0;
   }
 </style>
 
@@ -1165,6 +1223,14 @@ import { GRID, idx, inBounds, bresenham, rectOutline, ellipseOutline, floodFill 
       unlockGarden();
       form.style.opacity='0'; form.style.transition='opacity 0.2s';
       setTimeout(()=>{form.style.display='none';confirm2.removeAttribute('hidden');},200);
+      // Flash success modal
+      const modal = document.getElementById('cg-modal')!;
+      modal.removeAttribute('hidden');
+      modal.classList.remove('modal-out');
+      setTimeout(() => {
+        modal.classList.add('modal-out');
+        setTimeout(() => modal.setAttribute('hidden', ''), 260);
+      }, 2800);
     } catch(err:any){
       errorEl.textContent=err.message; errorEl.removeAttribute('hidden');
       plantBtn.disabled=false; plantBtn.textContent='plant';
