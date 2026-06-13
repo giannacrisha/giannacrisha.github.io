@@ -1,5 +1,7 @@
 ---
 // src/pages/community.astro
+// SSR so every visit fetches fresh submissions from GitHub Issues
+export const prerender = false;
 import Garden from '../layouts/Garden.astro';
 import CommunityGarden from '../components/CommunityGarden.astro';
 ---

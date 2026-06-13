@@ -7,17 +7,18 @@ import type { APIRoute } from 'astro';
 import { Redis } from '@upstash/redis';
 import { Ratelimit } from '@upstash/ratelimit';
 
-const redis = new Redis({
-  url:   import.meta.env.KV_REST_API_URL,
-  token: import.meta.env.KV_REST_API_TOKEN,
-});
+const kvUrl   = import.meta.env.KV_REST_API_URL;
+const kvToken = import.meta.env.KV_REST_API_TOKEN;
+const redisConfigured = kvUrl && kvToken;
+
+const redis = redisConfigured
+  ? new Redis({ url: kvUrl, token: kvToken })
+  : null;
 
 // Sliding window: 3 plantings per IP per 10 minutes, shared across all instances.
-const ratelimit = new Ratelimit({
-  redis,
-  limiter: Ratelimit.slidingWindow(3, '600 s'),
-  prefix:  'rl:plant',
-});
+const ratelimit = redis
+  ? new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(3, '600 s'), prefix: 'rl:plant' })
+  : null;
 
 import { REPO_OWNER, REPO_NAME, LABEL } from '../../config/github';
 import { stripHtml, sanitizePixel } from '../../lib/sanitize';
@@ -33,9 +34,11 @@ export const POST: APIRoute = async ({ request }) => {
           ?? request.headers.get('x-forwarded-for')?.split(',')[0].trim()
           ?? request.headers.get('x-real-ip')
           ?? 'unknown';
-  const { success } = await ratelimit.limit(ip);
-  if (!success) {
-    return new Response(JSON.stringify({ error: 'Too many plantings — try again later.' }), { status: 429 });
+  if (ratelimit) {
+    const { success } = await ratelimit.limit(ip);
+    if (!success) {
+      return new Response(JSON.stringify({ error: 'Too many plantings — try again later.' }), { status: 429 });
+    }
   }
 
   let body: { pixels?: unknown[]; name?: string; note?: string; website?: string; hp?: string };
