@@ -14,6 +14,7 @@ topics:
   - design
 growth_stage: spark
 featured: true
+frame_shape: circle
 cover_image: /lab/tomodachi.png
 mux_video_id: xdu9rPbCOjatVb0201gxzmoIX3upeMtUA8KARhAGM6kgM
 ---
