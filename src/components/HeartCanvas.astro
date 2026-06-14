@@ -37,25 +37,6 @@ const { model = '/heart.glb' } = Astro.props;
   import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
   import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 
-  // extruded 3D heart — fallback shown until the .glb loads (or if it fails)
-  function makeHeartGeometry() {
-    const s = new THREE.Shape();
-    const x = 0, y = 0;
-    s.moveTo(x + 25, y + 25);
-    s.bezierCurveTo(x + 25, y + 25, x + 20, y, x, y);
-    s.bezierCurveTo(x - 30, y, x - 30, y + 35, x - 30, y + 35);
-    s.bezierCurveTo(x - 30, y + 55, x - 10, y + 77, x + 25, y + 95);
-    s.bezierCurveTo(x + 60, y + 77, x + 80, y + 55, x + 80, y + 35);
-    s.bezierCurveTo(x + 80, y + 35, x + 80, y, x + 50, y);
-    s.bezierCurveTo(x + 35, y, x + 25, y + 25, x + 25, y + 25);
-    const geo = new THREE.ExtrudeGeometry(s, {
-      depth: 18, bevelEnabled: true, bevelSegments: 10,
-      bevelSize: 8, bevelThickness: 10, curveSegments: 28,
-    });
-    geo.center();
-    return geo;
-  }
-
   function fitToView(obj, camera, fitRatio = 1.15) {
     const box = new THREE.Box3().setFromObject(obj);
     const size = box.getSize(new THREE.Vector3());
@@ -161,12 +142,7 @@ const { model = '/heart.glb' } = Astro.props;
       uMaxY.value = box.max.y;
     }
 
-    // show the extruded fallback immediately…
-    const fallback = new THREE.Mesh(makeHeartGeometry(), gold);
-    fallback.rotation.z = Math.PI;   // point the extruded heart downward
-    setModel(fallback);
-
-    // …then upgrade to the real model (meshopt-compressed)
+    // load the real model (meshopt-compressed); canvas stays empty until it arrives
     const loader = new GLTFLoader();
     loader.setMeshoptDecoder(MeshoptDecoder);
     loader.load(
@@ -181,7 +157,7 @@ const { model = '/heart.glb' } = Astro.props;
         }
       },
       undefined,
-      () => { /* model failed to load — keep the fallback heart */ },
+      () => { /* model failed to load — canvas stays empty */ },
     );
 
     function resize() {
