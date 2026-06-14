@@ -3,8 +3,9 @@
 // Single source of truth for all design tokens.
 
 export const colors = {
-  bg:           '#faf7f2',
+  bg:           '#fffdfa',
   fg:           '#3d2f1f',
+  heading:      '#90642f',
   card:         '#ffffff',
   muted:        '#7A6035',
   accent:       '#9C8B6E',
@@ -19,7 +20,7 @@ export const fonts = {
   display: "'Jacquard 12', monospace",
   serif:   "'Lora', serif",
   body:    "'Atkinson Hyperlegible Next', sans-serif",
-  googleFontsUrl: "https://fonts.googleapis.com/css2?family=Jacquard+12&family=Lora:wght@500&family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,700;1,400&display=swap",
+  googleFontsUrl: "https://fonts.googleapis.com/css2?family=Jacquard+12&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600;1,700&family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,700;1,400&display=swap",
 } as const;
 
 export const fontSizes = {

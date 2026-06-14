@@ -1,0 +1,218 @@
+---
+// HeartCanvas.astro — gold anatomical heart, Three.js.
+// Loads a heart .glb and applies a gold PBR material + a procedural muscle-
+// contraction beat (vertex wall-flex + directional squeeze + systolic twist).
+// The model is meshopt-compressed, so the loader needs the meshopt decoder.
+const { model = '/heart.glb' } = Astro.props;
+---
+
+<div class="heart-stage" data-heart-model={model}>
+  <canvas class="heart-canvas" aria-hidden="true"></canvas>
+</div>
+
+<style>
+  .heart-stage {
+    width: clamp(260px, 34vw, 420px);
+    aspect-ratio: 1 / 1;
+    position: relative;
+    z-index: 3;
+    cursor: pointer;
+  }
+  .heart-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    /* white glow (no offset → reads as light, not a shadow) */
+    filter: drop-shadow(0 0 26px rgba(255, 255, 255, 0.65))
+            drop-shadow(0 0 64px rgba(255, 255, 255, 0.40));
+  }
+  @media (max-width: 768px) {
+    .heart-stage { width: clamp(220px, 64vw, 320px); }
+  }
+</style>
+
+<script>
+  import * as THREE from 'three';
+  import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+  import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
+  import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
+
+  // extruded 3D heart — fallback shown until the .glb loads (or if it fails)
+  function makeHeartGeometry() {
+    const s = new THREE.Shape();
+    const x = 0, y = 0;
+    s.moveTo(x + 25, y + 25);
+    s.bezierCurveTo(x + 25, y + 25, x + 20, y, x, y);
+    s.bezierCurveTo(x - 30, y, x - 30, y + 35, x - 30, y + 35);
+    s.bezierCurveTo(x - 30, y + 55, x - 10, y + 77, x + 25, y + 95);
+    s.bezierCurveTo(x + 60, y + 77, x + 80, y + 55, x + 80, y + 35);
+    s.bezierCurveTo(x + 80, y + 35, x + 80, y, x + 50, y);
+    s.bezierCurveTo(x + 35, y, x + 25, y + 25, x + 25, y + 25);
+    const geo = new THREE.ExtrudeGeometry(s, {
+      depth: 18, bevelEnabled: true, bevelSegments: 10,
+      bevelSize: 8, bevelThickness: 10, curveSegments: 28,
+    });
+    geo.center();
+    return geo;
+  }
+
+  function fitToView(obj, camera, fitRatio = 1.15) {
+    const box = new THREE.Box3().setFromObject(obj);
+    const size = box.getSize(new THREE.Vector3());
+    const center = box.getCenter(new THREE.Vector3());
+    obj.position.sub(center);                          // center at origin
+    const maxDim = Math.max(size.x, size.y, size.z);
+    const dist = (maxDim / 2) / Math.tan((camera.fov * Math.PI) / 360) * fitRatio;
+    camera.position.set(0, 0, dist);
+    camera.lookAt(0, 0, 0);
+  }
+
+  function initHeart(stage) {
+    const canvas = stage.querySelector('.heart-canvas');
+    if (!canvas) return;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const dpr = Math.min(window.devicePixelRatio, 2);
+
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    renderer.setPixelRatio(dpr);
+    renderer.setClearColor(0x000000, 0);
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 1000);
+
+    // studio reflections so the gold reads as metal
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    const key = new THREE.DirectionalLight(0xfff4d6, 2.2);
+    key.position.set(2, 3, 4);
+    scene.add(key);
+
+    // pivot wraps the heart so it rotates around its OWN centre (in place),
+    // not the model's far-off local origin (which would swing it out of frame)
+    const pivot = new THREE.Group();
+    scene.add(pivot);
+
+    // cardiac-cycle uniforms (shared across all meshes → one coherent beat)
+    const uTime = { value: 0 };
+    const uMinY = { value: 0 };       // world-space vertical bounds of the model
+    const uMaxY = { value: 1 };
+    const uPeriod = { value: 1.7 };   // seconds per beat — slow & calm
+    const uAmpV = { value: 0.15 };    // ventricular squeeze depth (fraction of radius)
+    const uAmpA = { value: 0.09 };    // atrial squeeze depth
+    const uShorten = { value: 0.05 }; // longitudinal shortening during ventricular systole
+
+    const gold = new THREE.MeshStandardMaterial({
+      color: 0xe6b94e, metalness: 1.0, roughness: 0.26, envMapIntensity: 1.25,
+    });
+    // Procedural cardiac cycle: spatial regions of the shell stand in for chambers.
+    // Sequence per beat: atrial systole (upper region squeezes) → ventricular systole
+    // (lower bulk squeezes hard + heart shortens) → diastole (everything fills).
+    // Reciprocal: when one region contracts the other relaxes (blood moving through).
+    // All in WORLD space so meshopt vertex-quantization can't distort the scale.
+    gold.onBeforeCompile = (shader) => {
+      shader.uniforms.uTime = uTime;
+      shader.uniforms.uMinY = uMinY;
+      shader.uniforms.uMaxY = uMaxY;
+      shader.uniforms.uPeriod = uPeriod;
+      shader.uniforms.uAmpV = uAmpV;
+      shader.uniforms.uAmpA = uAmpA;
+      shader.uniforms.uShorten = uShorten;
+      shader.vertexShader =
+        'uniform float uTime;\nuniform float uMinY;\nuniform float uMaxY;\nuniform float uPeriod;\nuniform float uAmpV;\nuniform float uAmpA;\nuniform float uShorten;\n'
+        + shader.vertexShader;
+      shader.vertexShader = shader.vertexShader.replace(
+        '#include <begin_vertex>',
+        `#include <begin_vertex>
+         vec4 _wp = modelMatrix * vec4(transformed, 1.0);
+         float _range = max(0.0001, uMaxY - uMinY);
+         float _v = clamp((_wp.y - uMinY) / _range, 0.0, 1.0);   // 0 apex .. 1 base
+         float _p = fract(uTime / uPeriod);                       // cardiac phase 0..1
+         float _atr  = exp(-pow((_p - 0.06) / 0.075, 2.0));       // atrial systole (early)
+         float _vent = exp(-pow((_p - 0.26) / 0.130, 2.0));       // ventricular systole (the "lub")
+         float _ventMask = smoothstep(0.65, 0.40, _v);            // lower bulk = ventricles
+         float _atrMask  = smoothstep(0.58, 0.82, _v);            // upper base = atria
+         // reciprocal filling: a region relaxes while its partner contracts
+         float _ventEff = uAmpV * (_vent - 0.30 * _atr);
+         float _atrEff  = uAmpA * (_atr  - 0.60 * _vent);
+         float _squeeze = _ventEff * _ventMask + _atrEff * _atrMask;
+         _wp.xz -= _wp.xz * _squeeze;                             // radial squeeze about the axis
+         // longitudinal shortening during ventricular systole (symmetric about mid → no drift)
+         float _mid = 0.5 * (uMinY + uMaxY);
+         _wp.y -= (_wp.y - _mid) * (uShorten * _vent);
+         transformed = (inverse(modelMatrix) * _wp).xyz;`,
+      );
+    };
+
+    let model = null;        // current heart object
+    let mixer = null;        // plays a .glb's baked animation if present
+
+    function setModel(obj) {
+      // swap obj into the pivot; reset so centering math is in identity space
+      while (pivot.children.length) pivot.remove(pivot.children[0]);
+      pivot.rotation.set(0, 0, 0);
+      pivot.add(obj);
+      model = obj;
+      fitToView(model, camera);   // centers obj within the pivot + frames camera
+      // world-space vertical bounds drive the height-based cardiac cycle
+      const box = new THREE.Box3().setFromObject(obj);
+      uMinY.value = box.min.y;
+      uMaxY.value = box.max.y;
+    }
+
+    // show the extruded fallback immediately…
+    const fallback = new THREE.Mesh(makeHeartGeometry(), gold);
+    fallback.rotation.z = Math.PI;   // point the extruded heart downward
+    setModel(fallback);
+
+    // …then upgrade to the real model (meshopt-compressed)
+    const loader = new GLTFLoader();
+    loader.setMeshoptDecoder(MeshoptDecoder);
+    loader.load(
+      stage.dataset.heartModel || '/heart.glb',
+      (gltf) => {
+        const root = gltf.scene;
+        root.traverse((o) => { if (o.isMesh) o.material = gold; });
+        setModel(root);
+        if (gltf.animations.length && !reduce) {
+          mixer = new THREE.AnimationMixer(root);
+          mixer.clipAction(gltf.animations[0]).play();
+        }
+      },
+      undefined,
+      () => { /* model failed to load — keep the fallback heart */ },
+    );
+
+    function resize() {
+      const w = stage.clientWidth, h = stage.clientHeight;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+    new ResizeObserver(resize).observe(stage);
+    resize();
+
+    // hover → gently rotate (turntable); eases back to rest on leave
+    let spin = 0, targetSpin = 0;
+    stage.addEventListener('pointerenter', () => { targetSpin = 0.9; });
+    stage.addEventListener('pointerleave', () => { targetSpin = 0; });
+
+    const start = performance.now();
+    let last = start;
+    function loop(now) {
+      const t = reduce ? 0 : (now - start) / 1000;
+      const delta = (now - last) / 1000; last = now;
+      if (mixer) mixer.update(delta);
+      uTime.value = t;     // drives the cardiac cycle in the gold shader
+      // ease spin speed in/out and rotate the heart in place (around the pivot)
+      spin += (targetSpin - spin) * 0.05;
+      pivot.rotation.y += spin * delta;
+      renderer.render(scene, camera);
+      requestAnimationFrame(loop);
+    }
+    requestAnimationFrame(loop);
+  }
+
+  document.querySelectorAll('.heart-stage').forEach(initHeart);
+</script>

@@ -5,8 +5,9 @@
    Keep both files in sync when changing shared values (muted, accent, etc.). */
 
 :root {
-  --color-bg:           #faf7f2;
+  --color-bg:           #fffdfa;
   --color-fg:           #3d2f1f;
+  --color-heading:      #90642f; /* gold-brown — home headings & display text */
   --color-card:         #ffffff;
   --color-muted:        #6B5234; /* WCAG AA on white: ~4.6:1 */
   --color-accent:       #9C8B6E;
@@ -94,9 +95,11 @@
   --width-content: 720px;
   --width-site:    1100px;
   --radius-card:   12px;
+  --radius-lg:     30px;   /* large rounded cards (home sections, frames) */
   --radius-pill:   20px;
   --radius-input:  12px;
   --border:        0.5px solid var(--color-border);
+  --shadow-gold:   0 4px 16px rgba(144, 100, 47, 0.25); /* gold-tinted card shadow */
 }
 
 
@@ -104,6 +107,7 @@
 :root[data-theme="dark"] {
   --color-bg:           #1a1a1a;
   --color-fg:           #e8e0d0;
+  --color-heading:      #d8af78; /* lighter gold so it reads on dark */
   --color-title:        #ffffff;
   --color-card:         #242424;
   --color-muted:        #b8aa97; /* bumped from #9a8f7e — meets 4.5:1 on #1a1a1a */

@@ -3,7 +3,7 @@
 import ThemeToggle from './ThemeToggle.astro';
 import Icon from './Icon.astro';
 const current = Astro.url.pathname;
-const gardenActive = current === '/' || ['/lab','/archives','/gallery','/library'].some(p => current.startsWith(p));
+const gardenActive = current.startsWith('/garden') || ['/lab','/archives','/gallery','/library'].some(p => current.startsWith(p));
 const sublinks: { href: string; label: string; desc: string; icon?: string }[] = [
   { href: '/lab',      label: 'lab',      desc: 'design and code projects', icon: '/icons/lab-icon.png'     },
   { href: '/archives', label: 'archives', desc: 'essays, poems, thoughts',  icon: '/icons/archive-icon.png' },
@@ -19,7 +19,7 @@ const sublinks: { href: string; label: string; desc: string; icon?: string }[] =
     <ul class="nav-links">
       <!-- the garden with hover dropdown -->
       <li class="nav-item nav-item--garden">
-        <a href="/" class:list={['nav-link', { active: gardenActive }]} aria-haspopup="true" aria-expanded="false" id="garden-nav-trigger">
+        <a href="/garden" class:list={['nav-link', { active: gardenActive }]} aria-haspopup="true" aria-expanded="false" id="garden-nav-trigger">
           the garden
           <Icon name="chevron-down" size={10} class="caret" />
         </a>
@@ -74,7 +74,7 @@ const sublinks: { href: string; label: string; desc: string; icon?: string }[] =
     <button class="mobile-close" id="nav-close" aria-label="close menu">
       <Icon name="close" size={20} />
     </button>
-    <a href="/" class="mobile-link">the garden</a>
+    <a href="/garden" class="mobile-link">the garden</a>
     {sublinks.map(l => (
       <a href={l.href} class="mobile-link mobile-link--sub">{l.label}</a>
     ))}
