@@ -29,6 +29,36 @@ const fmtLong = (d: Date) => d.toLocaleDateString('en-US', { month: 'long', day:
 const fmtShort = (d: Date) => d.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: '2-digit' });
 
 const phonetic = '[gahr-dn]  / ˈɡɑːr.dən /';
+
+type FrameShape = 'rect' | 'circle' | 'square' | 'oval';
+type FrameItem  = { shape: FrameShape; href: string; image: string; title: string };
+
+const featuredFrames: FrameItem[] = [
+  ...lab.filter(e => e.data.featured && e.data.frame_shape && e.data.cover_image).map(e => ({
+    shape: e.data.frame_shape as FrameShape,
+    href:  `/lab/${e.slug}`,
+    image: e.data.cover_image!,
+    title: e.data.title,
+  })),
+  ...gallery.filter(e => e.data.featured && e.data.frame_shape).map(e => ({
+    shape: e.data.frame_shape as FrameShape,
+    href:  `/gallery/${e.slug}`,
+    image: e.data.image,
+    title: e.data.title,
+  })),
+  ...archives.filter(e => e.data.featured && e.data.frame_shape && e.data.cover_image).map(e => ({
+    shape: e.data.frame_shape as FrameShape,
+    href:  `/archives/${e.slug}`,
+    image: e.data.cover_image!,
+    title: e.data.title,
+  })),
+];
+
+// Split into rows of 4
+const frameRows: FrameItem[][] = [];
+for (let i = 0; i < featuredFrames.length; i += 4) {
+  frameRows.push(featuredFrames.slice(i, i + 4));
+}
 ---
 
 <Garden title={site.name} description={site.description}>
@@ -45,20 +75,20 @@ const phonetic = '[gahr-dn]  / ˈɡɑːr.dən /';
     </section>
 
     <!-- ── Art wall ─────────────────────────────────────────────────────── -->
-    <section class="artwall" aria-label="a wall of work">
-      <div class="artwall-row">
-        <img class="frame frame--rect"   src="/home/frame-rect.png"   alt="" />
-        <img class="frame frame--circle" src="/home/frame-circle.png" alt="" />
-        <img class="frame frame--square" src="/home/frame-square.png" alt="" />
-        <img class="frame frame--oval"   src="/home/frame-oval.png"   alt="" />
-      </div>
-      <div class="artwall-row">
-        <img class="frame frame--oval"   src="/home/frame-oval.png"   alt="" />
-        <img class="frame frame--rect"   src="/home/frame-rect.png"   alt="" />
-        <img class="frame frame--circle" src="/home/frame-circle.png" alt="" />
-        <img class="frame frame--square" src="/home/frame-square.png" alt="" />
-      </div>
-    </section>
+    {frameRows.length > 0 && (
+      <section class="artwall" aria-label="a wall of work">
+        {frameRows.map(row => (
+          <div class="artwall-row">
+            {row.map(item => (
+              <a class={`frame-slot frame-slot--${item.shape}`} href={item.href} title={item.title}>
+                <img class="frame-project-img" src={item.image} alt={item.title} loading="lazy" />
+                <img class="frame-overlay" src={`/home/frame-${item.shape}.png`} alt="" aria-hidden="true" />
+              </a>
+            ))}
+          </div>
+        ))}
+      </section>
+    )}
 
     <!-- ── The garden (summary of collections) ──────────────────────────── -->
     <section class="garden-summary">
@@ -222,13 +252,35 @@ const phonetic = '[gahr-dn]  / ˈɡɑːr.dən /';
     justify-content: center;
     gap: clamp(8px, 1.5vw, 16px);
   }
-  .frame {
+  .frame-slot {
+    position: relative;
+    display: block;
     height: clamp(120px, 18vw, 216px);
-    width: auto;
+    flex-shrink: 0;
+    text-decoration: none;
+  }
+  .frame-slot--rect   { aspect-ratio: 900 / 492; }
+  .frame-slot--circle { aspect-ratio: 900 / 894; }
+  .frame-slot--square { aspect-ratio: 900 / 891; }
+  .frame-slot--oval   { aspect-ratio: 667 / 900; height: clamp(150px, 24vw, 291px); }
+
+  .frame-project-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .frame-overlay {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
     object-fit: contain;
+    pointer-events: none;
+    z-index: 1;
     filter: drop-shadow(0 6px 14px rgba(120, 90, 20, 0.22));
   }
-  .frame--oval { height: clamp(150px, 24vw, 291px); }
 
   /* ── The garden summary ───────────────────────────────────────────────── */
   .garden-summary { padding-block: clamp(56px, 9vw, 128px); }

@@ -20,6 +20,7 @@ const articleFields = ({ image }: { image: SchemaContext['image'] }) => ({
   topics:         z.array(z.string()).optional(),
   growth_stage:   stageEnum,
   featured:       z.boolean().default(false),
+  frame_shape:    z.enum(['rect', 'circle', 'square', 'oval']).optional(),
   link:           z.string().url().optional(),
   cover_image:    z.string().optional(),
   mux_video_id:   z.string().optional(),
