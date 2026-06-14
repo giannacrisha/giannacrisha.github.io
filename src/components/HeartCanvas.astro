@@ -37,7 +37,7 @@ const { model = '/heart.glb' } = Astro.props;
   import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
   import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 
-  function fitToView(obj, camera, fitRatio = 1.15) {
+  function fitToView(obj: THREE.Object3D, camera: THREE.PerspectiveCamera, fitRatio = 1.15) {
     const box = new THREE.Box3().setFromObject(obj);
     const size = box.getSize(new THREE.Vector3());
     const center = box.getCenter(new THREE.Vector3());
@@ -48,7 +48,7 @@ const { model = '/heart.glb' } = Astro.props;
     camera.lookAt(0, 0, 0);
   }
 
-  function initHeart(stage) {
+  function initHeart(stage: HTMLElement) {
     const canvas = stage.querySelector('.heart-canvas');
     if (!canvas) return;
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -126,10 +126,10 @@ const { model = '/heart.glb' } = Astro.props;
       );
     };
 
-    let model = null;        // current heart object
-    let mixer = null;        // plays a .glb's baked animation if present
+    let model: THREE.Object3D | null = null;
+    let mixer: THREE.AnimationMixer | null = null;
 
-    function setModel(obj) {
+    function setModel(obj: THREE.Object3D) {
       // swap obj into the pivot; reset so centering math is in identity space
       while (pivot.children.length) pivot.remove(pivot.children[0]);
       pivot.rotation.set(0, 0, 0);
@@ -149,7 +149,7 @@ const { model = '/heart.glb' } = Astro.props;
       stage.dataset.heartModel || '/heart.glb',
       (gltf) => {
         const root = gltf.scene;
-        root.traverse((o) => { if (o.isMesh) o.material = gold; });
+        root.traverse((o) => { if ((o as THREE.Mesh).isMesh) (o as THREE.Mesh).material = gold; });
         setModel(root);
         if (gltf.animations.length && !reduce) {
           mixer = new THREE.AnimationMixer(root);
@@ -176,7 +176,7 @@ const { model = '/heart.glb' } = Astro.props;
 
     const start = performance.now();
     let last = start;
-    function loop(now) {
+    function loop(now: number) {
       const t = reduce ? 0 : (now - start) / 1000;
       const delta = (now - last) / 1000; last = now;
       if (mixer) mixer.update(delta);
@@ -190,5 +190,5 @@ const { model = '/heart.glb' } = Astro.props;
     requestAnimationFrame(loop);
   }
 
-  document.querySelectorAll('.heart-stage').forEach(initHeart);
+  document.querySelectorAll<HTMLElement>('.heart-stage').forEach(initHeart);
 </script>
