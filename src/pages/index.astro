@@ -74,11 +74,11 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
       </div>
     </section>
 
-    <!-- ── Art wall ─────────────────────────────────────────────────────── -->
+    <!-- ── Feature wall ──────────────────────────────────────────────────── -->
     {frameRows.length > 0 && (
-      <section class="artwall" aria-label="a wall of work">
+      <section class="featurewall" aria-label="featured work">
         {frameRows.map(row => (
-          <div class="artwall-row">
+          <div class="featurewall-row">
             {row.map(item => (
               <a class={`frame-slot frame-slot--${item.shape}`} href={item.href} title={item.title}>
                 <img class="frame-project-img" src={item.image} alt={item.title} loading="lazy" />
@@ -235,7 +235,7 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
   }
 
   /* ── Art wall ─────────────────────────────────────────────────────────── */
-  .artwall {
+  .featurewall {
     background-image: url('/home/wall-texture.png');
     background-size: 240px 240px;
     background-position: top left;
@@ -246,7 +246,7 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
     gap: clamp(8px, 1.5vw, 16px);
     overflow: hidden;
   }
-  .artwall-row {
+  .featurewall-row {
     display: flex;
     align-items: center;
     justify-content: center;
