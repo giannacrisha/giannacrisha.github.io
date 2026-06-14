@@ -84,9 +84,16 @@ const { model = '/heart.glb' } = Astro.props;
     const uAmpA = { value: 0.09 };    // atrial squeeze depth
     const uShorten = { value: 0.05 }; // longitudinal shortening during ventricular systole
 
+    const goldColor = () => {
+      const css = getComputedStyle(document.documentElement).getPropertyValue('--color-heading').trim();
+      return new THREE.Color(css || '#90642f');
+    };
     const gold = new THREE.MeshStandardMaterial({
-      color: 0xe6b94e, metalness: 1.0, roughness: 0.26, envMapIntensity: 1.25,
+      color: goldColor(), metalness: 1.0, roughness: 0.26, envMapIntensity: 1.25,
     });
+    new MutationObserver(() => gold.color.set(goldColor())).observe(
+      document.documentElement, { attributes: true, attributeFilter: ['data-theme'] },
+    );
     // Procedural cardiac cycle: spatial regions of the shell stand in for chambers.
     // Sequence per beat: atrial systole (upper region squeezes) → ventricular systole
     // (lower bulk squeezes hard + heart shortens) → diastole (everything fills).
