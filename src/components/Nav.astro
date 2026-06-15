@@ -153,26 +153,10 @@ const sublinks: { href: string; label: string; desc: string }[] = [
     left: 0;
     min-width: 220px;
     padding-top: 12px;
-    --dd-stroke:
-      -2px 0 0 #fff,
-      2px 0 0 #fff,
-      0 -2px 0 #fff,
-      0 2px 0 #fff,
-      -1px -1px 0 #fff,
-      1px -1px 0 #fff,
-      -1px 1px 0 #fff,
-      1px 1px 0 #fff,
-      0 0 3px #fff;
-    --dd-stroke-dark:
-      -2px 0 0 rgba(20, 20, 20, 0.95),
-      2px 0 0 rgba(20, 20, 20, 0.95),
-      0 -2px 0 rgba(20, 20, 20, 0.95),
-      0 2px 0 rgba(20, 20, 20, 0.95),
-      -1px -1px 0 rgba(20, 20, 20, 0.95),
-      1px -1px 0 rgba(20, 20, 20, 0.95),
-      -1px 1px 0 rgba(20, 20, 20, 0.95),
-      1px 1px 0 rgba(20, 20, 20, 0.95),
-      0 0 3px rgba(20, 20, 20, 0.9);
+    --dd-stroke: 2.5px #fff;
+    --dd-stroke-desc: 2px #fff;
+    --dd-stroke-dark: 2.5px rgba(20, 20, 20, 0.95);
+    --dd-stroke-desc-dark: 2px rgba(20, 20, 20, 0.95);
   }
   /* panel wraps LiquidGlass — glass layer is sized to match via JS (same as heart-cursor) */
   .garden-dropdown-panel {
@@ -221,10 +205,7 @@ const sublinks: { href: string; label: string; desc: string }[] = [
   }
   .dropdown-link:hover  { background: rgba(255, 255, 255, 0.5); }
   .dropdown-link:hover .dropdown-link-label {
-    text-shadow:
-      var(--dd-stroke),
-      0 0 0.6px var(--color-fg),
-      0 0 0.6px var(--color-fg);
+    text-shadow: 0 0 0.6px var(--color-fg), 0 0 0.6px var(--color-fg);
   }
   .dropdown-link-text {
     display: flex;
@@ -236,33 +217,31 @@ const sublinks: { href: string; label: string; desc: string }[] = [
     font-size: var(--text-sm);
     color: var(--color-fg);
     letter-spacing: 0.01em;
-    text-shadow: var(--dd-stroke);
+    -webkit-text-stroke: var(--dd-stroke);
+    paint-order: stroke fill;
     transition: text-shadow 0.2s ease;
   }
   .dropdown-link.active .dropdown-link-label {
     color: var(--color-heading);
-    text-shadow:
-      var(--dd-stroke),
-      0 0 0.6px var(--color-heading),
-      0 0 0.6px var(--color-heading);
+    text-shadow: 0 0 0.6px var(--color-heading), 0 0 0.6px var(--color-heading);
   }
   .dropdown-link-desc {
     font-family: var(--font-body);
     font-size: 11px;
     color: var(--color-muted);
     letter-spacing: 0.02em;
-    text-shadow: var(--dd-stroke);
+    -webkit-text-stroke: var(--dd-stroke-desc);
+    paint-order: stroke fill;
   }
-  :global(:root[data-theme="dark"]) .dropdown-link-label,
+  :global(:root[data-theme="dark"]) .dropdown-link-label {
+    -webkit-text-stroke: var(--dd-stroke-dark);
+  }
   :global(:root[data-theme="dark"]) .dropdown-link-desc {
-    text-shadow: var(--dd-stroke-dark);
+    -webkit-text-stroke: var(--dd-stroke-desc-dark);
   }
   :global(:root[data-theme="dark"]) .dropdown-link:hover .dropdown-link-label,
   :global(:root[data-theme="dark"]) .dropdown-link.active .dropdown-link-label {
-    text-shadow:
-      var(--dd-stroke-dark),
-      0 0 0.6px currentColor,
-      0 0 0.6px currentColor;
+    text-shadow: 0 0 0.6px currentColor, 0 0 0.6px currentColor;
   }
 
   /* search */
