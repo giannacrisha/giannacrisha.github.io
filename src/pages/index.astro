@@ -199,11 +199,9 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
 
     <!-- ── Our garden (community) ───────────────────────────────────────── -->
     <section class="community-summary">
-      <header class="sec-head sec-head--end">
-        <div class="comm-title-block">
-          <a class="sec-title" href="/community">community</a>
-          <p class="comm-subtitle">be part of the community and draw a pixel-art plant! <a href="/community" class="comm-arrow">→</a></p>
-        </div>
+      <header class="sec-head sec-head--center">
+        <a class="sec-title" href="/community">community</a>
+        <p class="comm-subtitle">be part of the community and draw a pixel-art plant! <a href="/community" class="comm-arrow">→</a></p>
       </header>
       <div class="comm-row-wrap">
         <div class="comm-row">
@@ -581,13 +579,14 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
 
   /* ── Community ────────────────────────────────────────────────────────── */
   .community-summary { padding-block: clamp(40px, 7vw, 96px); }
-  .comm-title-block { display: flex; flex-direction: column; align-items: flex-end; gap: var(--space-xs); }
   .comm-subtitle {
-    font-family: var(--font-body);
-    font-size: var(--text-sm);
-    color: var(--color-muted);
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-size: var(--text-lg);
+    color: var(--color-heading);
+    opacity: 0.85;
     margin: 0;
-    text-align: right;
+    text-align: center;
   }
   .comm-arrow {
     color: var(--color-heading);
