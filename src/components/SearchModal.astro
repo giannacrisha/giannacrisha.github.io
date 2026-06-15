@@ -1,8 +1,8 @@
 ---
 // src/components/SearchModal.astro
 // ⌘K / Ctrl+K search powered by Pagefind.
-// Pagefind index is generated at build time (`astro build && pagefind --site dist`).
-// In dev mode, the search works only if a prior `npm run build` has been run.
+// Pagefind index is generated at build time (`npm run build`).
+// `npm run build` copies the index to public/pagefind/ for local dev.
 ---
 
 <div id="search-modal" class="search-modal" role="dialog" aria-modal="true" aria-label="Search the garden" hidden>
@@ -55,7 +55,7 @@
     background: var(--color-card);
     border: var(--border);
     border-radius: var(--radius-card);
-    box-shadow: 0 16px 48px rgba(0,0,0,0.14);
+    box-shadow: var(--shadow-gold), 0 16px 48px rgba(0, 0, 0, 0.08);
     width: min(560px, calc(100vw - 32px));
     display: flex;
     flex-direction: column;
@@ -93,15 +93,14 @@
     font-family: var(--font-body);
     font-size: var(--text-xs);
     color: var(--color-muted);
-    background: var(--color-accent-light);
+    background: var(--color-pill-bg);
     border: var(--border);
-    border-radius: 4px;
-    padding: 2px 6px;
-    opacity: 0.7;
+    border-radius: var(--radius-pill);
+    padding: 2px 8px;
     flex-shrink: 0;
   }
 
-  /* ── Results ───────────────────────────────────────────────────────── */
+  /* ── Results list ──────────────────────────────────────────────────── */
   .search-results {
     display: flex;
     flex-direction: column;
@@ -111,46 +110,55 @@
   }
   .search-results:empty { display: none; }
 
-  .search-result {
+  /* ── Results (injected via innerHTML — must be :global) ───────────── */
+  .search-results :global(.search-result) {
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: var(--space-xs);
     padding: var(--space-md) var(--space-xl);
     text-decoration: none;
     color: inherit;
-    border-bottom: 0.5px solid var(--color-border);
-    transition: background 0.1s;
+    border-bottom: var(--border);
+    transition: background 0.12s, border-color 0.12s;
     cursor: pointer;
   }
-  .search-result:last-child { border-bottom: none; }
-  .search-result:hover,
-  .search-result[aria-selected="true"] {
+  .search-results :global(.search-result:last-child) { border-bottom: none; }
+  .search-results :global(.search-result:hover),
+  .search-results :global(.search-result[aria-selected="true"]) {
     background: var(--color-accent-light);
   }
-  .result-meta {
+
+  .search-results :global(.search-result-header) {
     display: flex;
     align-items: center;
     gap: var(--space-sm);
+    flex-wrap: wrap;
   }
-  .result-collection {
-    font-family: var(--font-body);
-    font-size: 10px;
-    color: var(--color-muted);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    background: var(--color-accent-light);
-    border-radius: var(--radius-pill);
-    padding: 1px 7px;
-  }
-  .result-title {
+
+  .search-results :global(.search-result-title) {
     font-family: var(--font-serif);
-    font-size: var(--text-base);
+    font-size: var(--text-md);
+    font-weight: 500;
     color: var(--color-fg);
     line-height: var(--leading-tight);
   }
-  .result-excerpt {
+
+  .search-results :global(.search-result-collection) {
     font-family: var(--font-body);
     font-size: var(--text-xs);
+    color: var(--color-pill-text);
+    letter-spacing: 0.06em;
+    text-transform: lowercase;
+    background: var(--color-pill-bg);
+    border: var(--border);
+    border-radius: var(--radius-pill);
+    padding: 2px 8px;
+    flex-shrink: 0;
+  }
+
+  .search-results :global(.search-result-excerpt) {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
     color: var(--color-muted);
     line-height: var(--leading-base);
     display: -webkit-box;
@@ -158,10 +166,13 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-  .result-excerpt :global(mark) {
-    background: transparent;
-    color: var(--color-fg);
+
+  .search-results :global(.search-result-excerpt mark) {
+    background: var(--color-accent-light);
+    color: var(--color-heading);
     font-weight: 600;
+    border-radius: 2px;
+    padding: 0 1px;
   }
 
   /* ── States ────────────────────────────────────────────────────────── */
@@ -180,24 +191,37 @@
 
 <script>
   let pagefind: any = null;
+  let pagefindFailed = false;
+  let pagefindLoading: Promise<void> | null = null;
   let activeIndex = -1;
+  let bound = false;
 
-  const modal   = document.getElementById('search-modal')!;
-  const input   = document.getElementById('search-input') as HTMLInputElement;
-  const results = document.getElementById('search-results')!;
-  const empty   = document.getElementById('search-empty')!;
-  const hint    = document.getElementById('search-hint')!;
-  const backdrop = document.getElementById('search-backdrop')!;
+  function els() {
+    return {
+      modal:    document.getElementById('search-modal') as HTMLElement | null,
+      input:    document.getElementById('search-input') as HTMLInputElement | null,
+      results:  document.getElementById('search-results') as HTMLElement | null,
+      empty:    document.getElementById('search-empty') as HTMLElement | null,
+      hint:     document.getElementById('search-hint') as HTMLElement | null,
+      backdrop: document.getElementById('search-backdrop') as HTMLElement | null,
+    };
+  }
 
   async function loadPagefind() {
-    if (pagefind) return;
-    try {
-      const imp = new Function('p', 'return import(p)');
-      pagefind = await imp('/pagefind/pagefind.js');
-      await pagefind.options({ excerptLength: 12 });
-    } catch {
-      /* pagefind not available in dev without a prior build */
-    }
+    if (pagefind || pagefindFailed) return;
+    if (pagefindLoading) return pagefindLoading;
+
+    pagefindLoading = (async () => {
+      try {
+        const imp = new Function('p', 'return import(p)');
+        pagefind = await imp('/pagefind/pagefind.js');
+        await pagefind.options({ excerptLength: 12 });
+      } catch {
+        pagefindFailed = true;
+      }
+    })();
+
+    return pagefindLoading;
   }
 
   function collectionFromUrl(url: string): string {
@@ -207,10 +231,61 @@
     if (url.includes('/library/'))  return 'library';
     if (url.includes('/now'))       return 'now';
     if (url.includes('/seeds'))     return 'seeds';
+    if (url.includes('/garden'))    return 'garden';
     return '';
   }
 
+  function escapeHtml(text: string): string {
+    return text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function displayTitle(item: any): string {
+    let title = item.meta?.title ?? '';
+    title = title.replace(/\s*[—–-]\s*gianna crisha\s*$/i, '').trim();
+    if (!title) {
+      const parts = item.url.split('/').filter(Boolean);
+      title = parts[parts.length - 1] ?? item.url;
+    }
+    return title;
+  }
+
+  function displayExcerpt(item: any, query: string): string {
+    const desc = item.meta?.description?.trim();
+    if (desc) {
+      const re = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+      return escapeHtml(desc).replace(re, '<mark>$1</mark>');
+    }
+    return item.excerpt ?? '';
+  }
+
+  function resultDepth(url: string): number {
+    try {
+      return new URL(url, location.origin).pathname.split('/').filter(Boolean).length;
+    } catch {
+      return 0;
+    }
+  }
+
+  function rankResults(items: any[]): any[] {
+    const best = new Map<string, { item: any; depth: number }>();
+    for (const item of items) {
+      const title = displayTitle(item).toLowerCase();
+      const depth = resultDepth(item.url);
+      const prev = best.get(title);
+      if (!prev || depth > prev.depth) best.set(title, { item, depth });
+    }
+    return [...best.values()]
+      .sort((a, b) => b.depth - a.depth)
+      .map(({ item }) => item);
+  }
+
   function open() {
+    const { modal, input } = els();
+    if (!modal || !input) return;
     modal.hidden = false;
     input.focus();
     document.body.style.overflow = 'hidden';
@@ -218,24 +293,43 @@
   }
 
   function close() {
+    const { modal, input, results, empty, hint } = els();
+    if (!modal || !input || !results || !empty || !hint) return;
     modal.hidden = true;
     input.value = '';
     results.innerHTML = '';
     empty.hidden = true;
     hint.hidden = false;
+    hint.textContent = 'type to search across all collections';
     activeIndex = -1;
     document.body.style.overflow = '';
   }
 
-  // Expose to Nav.astro button without relying on synthetic KeyboardEvents
+  // Keep legacy bridge for any external callers
   (window as any).__searchOpen  = open;
   (window as any).__searchClose = close;
 
   async function doSearch(q: string) {
-    if (!pagefind || !q.trim()) {
+    const { results, empty, hint } = els();
+    if (!results || !empty || !hint) return;
+
+    if (!q.trim()) {
       results.innerHTML = '';
       empty.hidden = true;
-      hint.hidden = q.trim().length > 0;
+      hint.hidden = false;
+      hint.textContent = 'type to search across all collections';
+      return;
+    }
+
+    await loadPagefind();
+
+    if (!pagefind) {
+      results.innerHTML = '';
+      empty.hidden = true;
+      hint.hidden = false;
+      hint.textContent = pagefindFailed
+        ? 'search index missing — run npm run build'
+        : 'loading search index…';
       return;
     }
 
@@ -243,7 +337,9 @@
     const res = await pagefind.debouncedSearch(q, {}, 200);
     if (!res) return;
 
-    const items = await Promise.all(res.results.slice(0, 8).map((r: any) => r.data()));
+    const items = rankResults(
+      await Promise.all(res.results.slice(0, 12).map((r: any) => r.data()))
+    ).slice(0, 6);
 
     if (!items.length) {
       results.innerHTML = '';
@@ -255,17 +351,21 @@
     activeIndex = -1;
     results.innerHTML = items.map((item: any, i: number) => {
       const col = collectionFromUrl(item.url);
+      const title = escapeHtml(displayTitle(item));
+      const excerpt = displayExcerpt(item, q.trim());
       return `<a href="${item.url}" class="search-result" role="option" data-index="${i}">
-        <div class="result-meta">
-          ${col ? `<span class="result-collection">${col}</span>` : ''}
+        <div class="search-result-header">
+          <span class="search-result-title">${title}</span>
+          ${col ? `<span class="search-result-collection">${col}</span>` : ''}
         </div>
-        <span class="result-title">${item.meta?.title ?? item.url}</span>
-        <span class="result-excerpt">${item.excerpt}</span>
+        ${excerpt ? `<span class="search-result-excerpt">${excerpt}</span>` : ''}
       </a>`;
     }).join('');
   }
 
   function moveActive(dir: number) {
+    const { results } = els();
+    if (!results) return;
     const items = results.querySelectorAll<HTMLElement>('.search-result');
     if (!items.length) return;
     activeIndex = Math.max(0, Math.min(activeIndex + dir, items.length - 1));
@@ -273,32 +373,49 @@
     items[activeIndex]?.scrollIntoView({ block: 'nearest' });
   }
 
-  // ── Event bindings ──────────────────────────────────────────────────
-  backdrop.addEventListener('click', close);
+  function bindEvents() {
+    if (bound) return;
+    const { modal, input, results, backdrop } = els();
+    if (!modal || !input || !results || !backdrop) return;
+    bound = true;
 
-  input.addEventListener('input', () => doSearch(input.value));
-
-  input.addEventListener('keydown', (e: KeyboardEvent) => {
-    if (e.key === 'Escape') { close(); return; }
-    if (e.key === 'ArrowDown') { e.preventDefault(); moveActive(1); return; }
-    if (e.key === 'ArrowUp')   { e.preventDefault(); moveActive(-1); return; }
-    if (e.key === 'Enter') {
-      const items = results.querySelectorAll<HTMLAnchorElement>('.search-result');
-      const target = items[activeIndex] ?? items[0];
-      if (target) { target.click(); close(); }
-    }
-  });
-
-  results.addEventListener('click', (e) => {
-    const link = (e.target as HTMLElement).closest('a');
-    if (link) close();
-  });
-
-  document.addEventListener('keydown', (e: KeyboardEvent) => {
-    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+    // Nav button + any future triggers — delegation survives script order
+    document.addEventListener('click', (e) => {
+      const trigger = (e.target as HTMLElement).closest('#nav-search-btn');
+      if (!trigger) return;
       e.preventDefault();
-      modal.hidden ? open() : close();
-    }
-    if (e.key === 'Escape' && !modal.hidden) close();
-  });
+      open();
+    });
+
+    backdrop.addEventListener('click', close);
+
+    input.addEventListener('input', () => doSearch(input.value));
+
+    input.addEventListener('keydown', (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { close(); return; }
+      if (e.key === 'ArrowDown') { e.preventDefault(); moveActive(1); return; }
+      if (e.key === 'ArrowUp')   { e.preventDefault(); moveActive(-1); return; }
+      if (e.key === 'Enter') {
+        const items = results.querySelectorAll<HTMLAnchorElement>('.search-result');
+        const target = items[activeIndex] ?? items[0];
+        if (target) { target.click(); close(); }
+      }
+    });
+
+    results.addEventListener('click', (e) => {
+      const link = (e.target as HTMLElement).closest('a');
+      if (link) close();
+    });
+
+    document.addEventListener('keydown', (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        modal.hidden ? open() : close();
+      }
+      if (e.key === 'Escape' && !modal.hidden) close();
+    });
+  }
+
+  bindEvents();
+  document.addEventListener('astro:page-load', bindEvents);
 </script>

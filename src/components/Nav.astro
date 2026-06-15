@@ -55,7 +55,7 @@ const sublinks: { href: string; label: string; desc: string }[] = [
     </ul>
 
     <!-- search trigger -->
-    <button class="nav-search" id="nav-search-btn" aria-label="Search (⌘K)">
+    <button type="button" class="nav-search" id="nav-search-btn" aria-label="Search (⌘K)">
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
         <circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.3"/>
         <line x1="9.5" y1="9.5" x2="13" y2="13" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
@@ -379,11 +379,6 @@ const sublinks: { href: string; label: string; desc: string }[] = [
 </style>
 
 <script>
-  // Search button → open SearchModal directly via window bridge
-  document.getElementById('nav-search-btn')?.addEventListener('click', () => {
-    (window as any).__searchOpen?.();
-  });
-
   const btn      = document.getElementById('hamburger');
   const menu     = document.getElementById('nav-mobile-menu');
   const backdrop = document.getElementById('nav-backdrop');

@@ -61,6 +61,7 @@ const ogImageUrl   = ogImage.startsWith('http') ? ogImage : new URL(ogImage, sit
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
+    <meta pagefind-meta="description" content={description} />
     <meta name="keywords" content={site.keywords.join(', ')} />
     <meta name="author" content={site.author} />
 

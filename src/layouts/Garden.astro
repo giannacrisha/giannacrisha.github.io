@@ -18,7 +18,7 @@ const { title, description, ogImage, noFooter = false } = Astro.props;
 <Base title={title} description={description} ogImage={ogImage}>
   <Nav />
   <SearchModal />
-  <main id="main-content" tabindex="-1">
+  <main id="main-content" tabindex="-1" data-pagefind-body>
     <slot />
   </main>
   {!noFooter && <Footer />}
