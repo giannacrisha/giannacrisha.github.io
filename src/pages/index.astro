@@ -61,6 +61,34 @@ const frameRows: FrameItem[][] = [];
 for (let i = 0; i < featuredFrames.length; i += 4) {
   frameRows.push(featuredFrames.slice(i, i + 4));
 }
+
+// ── Community garden: fetch at build time so tiles render instantly ──────────
+import { REPO_OWNER, REPO_NAME, LABEL } from '../config/github';
+type Submission = { pixels: (string | null)[]; hearts?: number };
+let communityTiles: Submission[] = [];
+let communityCount = 0;
+try {
+  const token = import.meta.env.GITHUB_TOKEN;
+  const headers: Record<string, string> = {
+    Accept: 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28',
+  };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const res = await fetch(
+    `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues?labels=${LABEL}&state=open&per_page=100`,
+    { headers }
+  );
+  if (res.ok) {
+    const issues = await res.json() as { body: string; reactions?: { heart: number } }[];
+    const parsed = issues.map(i => {
+      try { const p = JSON.parse(i.body); return p?.pixels ? { pixels: p.pixels, hearts: i.reactions?.heart ?? 0 } : null; }
+      catch { return null; }
+    }).filter(Boolean) as Submission[];
+    parsed.sort((a, b) => (b.hearts ?? 0) - (a.hearts ?? 0));
+    communityTiles = parsed.slice(0, 9);
+    communityCount = parsed.length;
+  }
+} catch { /* silently fall back to empty tiles */ }
 ---
 
 <Garden title={site.name} description={site.description}>
@@ -205,7 +233,7 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
         <div class="comm-title-row">
           <a class="sec-title" href="/community">community</a>
           <span class="sec-phon">/ˈkap.wa/</span>
-          <span class="pill comm-count-pill" id="comm-count" hidden></span>
+          {communityCount > 0 && <span class="pill comm-count-pill">{communityCount} planted</span>}
         </div>
       </header>
       <div class="comm-row-wrap">
@@ -656,48 +684,23 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
   }
 </style>
 
-<script is:inline>
+<script define:vars={{ communityTiles }}>
 (function () {
   var GRID = 16;
   var canvases = document.querySelectorAll('.comm-pixel-canvas');
-  if (!canvases.length) return;
-
-  fetch('https://api.github.com/repos/giannacrisha/giannacrisha.github.io/issues?labels=community-garden&state=open&per_page=100', {
-    headers: { Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' }
-  })
-  .then(function (res) { return res.ok ? res.json() : []; })
-  .then(function (issues) {
-    var submissions = issues.map(function (i) {
-      try { var p = JSON.parse(i.body); return p && p.pixels ? p : null; }
-      catch (e) { return null; }
-    }).filter(Boolean);
-
-    // Show real count in the pill
-    var pill = document.getElementById('comm-count');
-    if (pill && submissions.length > 0) {
-      pill.textContent = submissions.length + ' planted';
-      pill.removeAttribute('hidden');
-    }
-
-    // Sort by hearts desc (same as community page)
-    submissions.sort(function (a, b) { return (b.hearts || 0) - (a.hearts || 0); });
-
-    // Only paint first 9 canvases
-    canvases.forEach(function (canvas, idx) {
-      var s = submissions[idx];
-      if (!s) return;
-      var ctx = canvas.getContext('2d');
-      var cell = canvas.width / GRID;
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      s.pixels.forEach(function (color, i) {
-        if (!color) return;
-        ctx.fillStyle = color;
-        ctx.fillRect((i % GRID) * cell, Math.floor(i / GRID) * cell, cell, cell);
-      });
+  canvases.forEach(function (canvas, idx) {
+    var s = communityTiles[idx];
+    if (!s) return;
+    var ctx = canvas.getContext('2d');
+    var cell = canvas.width / GRID;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    s.pixels.forEach(function (color, i) {
+      if (!color) return;
+      ctx.fillStyle = color;
+      ctx.fillRect((i % GRID) * cell, Math.floor(i / GRID) * cell, cell, cell);
     });
-  })
-  .catch(function () {});
+  });
 })();
 </script>
 
