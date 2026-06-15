@@ -114,7 +114,7 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
             </a>
           </div>
         </div>
-        <div class="about-chip"></div>
+        <img class="about-chip" src="/about-qr.svg" alt="QR code" />
       </div>
       <div class="about-blurb">
         <p class="about-text">
@@ -410,24 +410,15 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
     transition: color 0.15s;
   }
   .about-social:hover { color: #fff; }
-  /* EMV chip */
+  /* QR code */
   .about-chip {
     position: absolute;
-    bottom: 22px;
-    right: 22px;
-    width: 28px;
-    height: 22px;
+    bottom: 18px;
+    right: 18px;
+    width: 52px;
+    height: 52px;
     border-radius: 4px;
-    background: linear-gradient(135deg, #f0d060 0%, #d4a820 45%, #f8e870 80%, #c89010 100%);
-    border: 0.5px solid rgba(255,255,255,0.25);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.4);
-  }
-  .about-chip::after {
-    content: '';
-    position: absolute;
-    inset: 4px 5px;
-    border: 0.5px solid rgba(0,0,0,0.18);
-    border-radius: 1px;
+    opacity: 0.85;
   }
 
   @media (max-width: 768px) {
