@@ -216,7 +216,9 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
           ))}
         </div>
       </div>
-      <p class="comm-subtitle">be part of the community! <a href="/community" class="comm-arrow">draw a pixel-art plant →</a></p>
+      <div class="comm-btn-wrap">
+        <a href="/community" class="btn">join us →</a>
+      </div>
     </section>
 
 
@@ -589,26 +591,11 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
     gap: var(--space-md);
   }
   .comm-count-pill { align-self: center; }
-  .comm-subtitle {
-    font-family: var(--font-body);
-    font-size: var(--text-lg);
-    color: var(--color-muted);
-    line-height: var(--leading-loose);
-    margin: var(--space-xl) 0 0;
-    text-align: center;
+  .comm-btn-wrap {
+    display: flex;
+    justify-content: center;
+    margin-top: var(--space-xl);
   }
-  .comm-arrow {
-    font-family: var(--font-body);
-    font-size: var(--text-sm);
-    font-style: italic;
-    color: var(--color-muted);
-    text-decoration: underline;
-    text-decoration-color: var(--color-accent-border);
-    text-underline-offset: 3px;
-    white-space: nowrap;
-    transition: color 0.15s;
-  }
-  .comm-arrow:hover { color: var(--color-fg); }
   .comm-row-wrap {
     position: relative;
   }
