@@ -257,6 +257,11 @@ const { model = '/heart.glb' } = Astro.props;
           mixer = new THREE.AnimationMixer(root);
           mixer.clipAction(gltf.animations[0]).play();
         }
+        // Start the render loop only once the model is ready — prevents accumulated
+        // spin/rotation before the heart is visible, and ensures a clean first delta.
+        resize();
+        last = performance.now();
+        requestAnimationFrame(loop);
       },
       undefined,
       () => { /* model failed to load — canvas stays empty */ },
@@ -264,6 +269,7 @@ const { model = '/heart.glb' } = Astro.props;
 
     function resize() {
       const w = stage.clientWidth, h = stage.clientHeight;
+      if (!w || !h) return;
       renderer.setSize(w, h, false);
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
@@ -408,8 +414,9 @@ const { model = '/heart.glb' } = Astro.props;
     const start = performance.now();
     let last = start;
     function loop(now: number) {
+      const delta = Math.min((now - last) / 1000, 1 / 30); // cap at 30fps minimum to avoid jumps
+      last = now;
       const t = reduce ? 0 : (now - start) / 1000;
-      const delta = (now - last) / 1000; last = now;
       if (mixer) mixer.update(delta);
       uTime.value = t;
       if (!isDragging) {
@@ -421,7 +428,6 @@ const { model = '/heart.glb' } = Astro.props;
       renderer.render(scene, camera);
       requestAnimationFrame(loop);
     }
-    requestAnimationFrame(loop);
   }
 
   document.querySelectorAll<HTMLElement>('.heart-stage').forEach(initHeart);
