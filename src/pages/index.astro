@@ -205,13 +205,16 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
           <p class="comm-subtitle">be part of the community and draw a pixel-art plant! <a href="/community" class="comm-arrow">→</a></p>
         </div>
       </header>
-      <div class="comm-row">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <a href="/community" class="comm-tile" aria-label="visit the community garden">
-            <canvas class="comm-pixel-canvas" width="96" height="96" data-tile-idx={i}></canvas>
-            <img class="comm-frame" src="/frames/square.png" alt="" aria-hidden="true" />
-          </a>
-        ))}
+      <div class="comm-row-wrap">
+        <div class="comm-row">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <a href="/community" class="comm-tile" aria-label="visit the community garden">
+              <canvas class="comm-pixel-canvas" width="96" height="96" data-tile-idx={i}></canvas>
+              <img class="comm-frame" src="/frames/square.png" alt="" aria-hidden="true" />
+            </a>
+          ))}
+        </div>
+        <a href="/community" class="comm-see-more" aria-hidden="true">see more →</a>
       </div>
     </section>
 
@@ -593,7 +596,42 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
     transition: opacity 0.15s;
   }
   .comm-arrow:hover { opacity: 0.7; }
-  .comm-row { display: flex; gap: clamp(12px, 2vw, 24px); overflow-x: auto; padding: var(--space-md) 2px; scrollbar-width: thin; }
+  .comm-row-wrap {
+    position: relative;
+  }
+  .comm-row-wrap::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 80px;
+    height: 100%;
+    background: linear-gradient(to left, var(--color-bg) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 2;
+    transition: opacity 0.3s;
+  }
+  .comm-row-wrap.is-end::after { opacity: 0; }
+  .comm-row { display: flex; gap: clamp(12px, 2vw, 24px); overflow-x: auto; padding: var(--space-md) 2px; scrollbar-width: none; }
+  .comm-row::-webkit-scrollbar { display: none; }
+  .comm-see-more {
+    display: block;
+    margin-top: var(--space-md);
+    font-family: var(--font-serif);
+    font-size: var(--text-sm);
+    font-style: italic;
+    color: var(--color-heading);
+    text-decoration: none;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    pointer-events: none;
+  }
+  .comm-see-more.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
   .comm-tile {
     flex: 0 0 auto;
     width: clamp(100px, 14vw, 160px);
@@ -698,5 +736,23 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
     card.style.setProperty('--mx', '50%');
     card.style.setProperty('--my', '50%');
   });
+})();
+</script>
+
+<script>
+(function () {
+  var row  = document.querySelector('.comm-row');
+  var wrap = document.querySelector('.comm-row-wrap');
+  var more = document.querySelector('.comm-see-more');
+  if (!row || !wrap || !more) return;
+
+  function check() {
+    var atEnd = row.scrollLeft + row.clientWidth >= row.scrollWidth - 8;
+    wrap.classList.toggle('is-end', atEnd);
+    more.classList.toggle('is-visible', atEnd);
+  }
+
+  row.addEventListener('scroll', check, { passive: true });
+  check();
 })();
 </script>
