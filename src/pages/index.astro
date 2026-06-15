@@ -611,10 +611,12 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
   }
   .comm-row { display: flex; gap: clamp(12px, 2vw, 24px); overflow-x: auto; padding: var(--space-md) 2px; scrollbar-width: none; }
   .comm-row::-webkit-scrollbar { display: none; }
-  /* last 3 tiles blur progressively — affordance that more exists */
-  .comm-tile:nth-child(7) { filter: blur(1.5px); opacity: 0.85; }
-  .comm-tile:nth-child(8) { filter: blur(3px);   opacity: 0.65; }
-  .comm-tile:nth-child(9) { filter: blur(5px);   opacity: 0.45; }
+  /* tiles 5–9 blur progressively — affordance that more exists */
+  .comm-tile:nth-child(5) { filter: blur(0.5px); opacity: 0.95; }
+  .comm-tile:nth-child(6) { filter: blur(1.5px); opacity: 0.85; }
+  .comm-tile:nth-child(7) { filter: blur(2.5px); opacity: 0.70; }
+  .comm-tile:nth-child(8) { filter: blur(4px);   opacity: 0.52; }
+  .comm-tile:nth-child(9) { filter: blur(6px);   opacity: 0.35; }
   .comm-tile {
     flex: 0 0 auto;
     width: clamp(100px, 14vw, 160px);
@@ -664,7 +666,7 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
   var canvases = document.querySelectorAll('.comm-pixel-canvas');
   if (!canvases.length) return;
 
-  fetch('https://api.github.com/repos/giannacrisha/giannacrisha.github.io/issues?labels=community-garden&state=open&per_page=6', {
+  fetch('https://api.github.com/repos/giannacrisha/giannacrisha.github.io/issues?labels=community-garden&state=open&per_page=9', {
     headers: { Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' }
   })
   .then(function (res) { return res.ok ? res.json() : []; })
