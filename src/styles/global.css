@@ -318,6 +318,7 @@ ul, ol {
 /* inline code */
 .prose code {
   font-family: var(--font-mono);
+  font-weight: 700;
   font-size: 0.88em;
   background: var(--color-accent-light);
   color: var(--color-fg);
@@ -328,6 +329,8 @@ ul, ol {
 
 /* code block */
 .prose pre {
+  font-family: var(--font-mono);
+  font-weight: 700;
   background: var(--color-fg);
   color: var(--color-bg);
   border-radius: var(--radius-card);
