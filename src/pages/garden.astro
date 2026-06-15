@@ -94,7 +94,7 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
           <h1 class="garden-title">the garden</h1>
           <span class="garden-phonetic">[gahr-dn] &nbsp;/ ˈɡɑːr.dən /</span>
         </div>
-        <p class="garden-def">
+        <p class="page-def garden-def">
           a space where things grow. <a class="garden-learn-more" href="https://maggieappleton.com/garden-history" target="_blank" rel="noopener" aria-label="learn more about digital gardens (opens in new tab)">learn more →</a>
         </p>
         <div class="garden-links">
@@ -527,12 +527,6 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
     letter-spacing: 0.02em;
   }
   .garden-def {
-    font-family: var(--font-body);
-    font-size: var(--text-lg);
-    color: var(--color-muted);
-    line-height: var(--leading-loose);
-    max-width: 560px;
-    padding-left: var(--space-xl);
     margin-bottom: var(--space-lg);
   }
   .garden-learn-more {
