@@ -200,7 +200,10 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
     <!-- ── Our garden (community) ───────────────────────────────────────── -->
     <section class="community-summary">
       <header class="sec-head sec-head--center">
-        <a class="sec-title" href="/community">community</a>
+        <div class="comm-title-row">
+          <a class="sec-title" href="/community">community</a>
+          <span class="pill comm-count-pill" id="comm-count" hidden></span>
+        </div>
         <p class="comm-subtitle">be part of the community and draw a pixel-art plant! <a href="/community" class="comm-arrow">→</a></p>
       </header>
       <div class="comm-row-wrap">
@@ -579,6 +582,11 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
 
   /* ── Community ────────────────────────────────────────────────────────── */
   .community-summary { padding-block: clamp(40px, 7vw, 96px); }
+  .comm-title-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+  }
   .comm-subtitle {
     font-family: var(--font-serif);
     font-weight: 400;
@@ -665,7 +673,7 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
   var canvases = document.querySelectorAll('.comm-pixel-canvas');
   if (!canvases.length) return;
 
-  fetch('https://api.github.com/repos/giannacrisha/giannacrisha.github.io/issues?labels=community-garden&state=open&per_page=9', {
+  fetch('https://api.github.com/repos/giannacrisha/giannacrisha.github.io/issues?labels=community-garden&state=open&per_page=100', {
     headers: { Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' }
   })
   .then(function (res) { return res.ok ? res.json() : []; })
@@ -675,9 +683,17 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
       catch (e) { return null; }
     }).filter(Boolean);
 
+    // Show real count in the pill
+    var pill = document.getElementById('comm-count');
+    if (pill && submissions.length > 0) {
+      pill.textContent = submissions.length + ' planted';
+      pill.removeAttribute('hidden');
+    }
+
     // Sort by hearts desc (same as community page)
     submissions.sort(function (a, b) { return (b.hearts || 0) - (a.hearts || 0); });
 
+    // Only paint first 9 canvases
     canvases.forEach(function (canvas, idx) {
       var s = submissions[idx];
       if (!s) return;
