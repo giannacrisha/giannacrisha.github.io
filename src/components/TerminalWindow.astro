@@ -1,0 +1,54 @@
+---
+// TerminalWindow.astro — macOS-style terminal chrome.
+// Renders the traffic-light bar + title + slotted body content.
+// The close dot exposes data-tw-close so parents can wire up dismissal.
+interface Props {
+  title?: string;
+  class?: string;
+}
+const { title = '', class: className } = Astro.props;
+---
+
+<div class:list={['tw-window', className]}>
+  <div class="tw-bar">
+    <button class="tw-dot tw-close" data-tw-close aria-label="Close"></button>
+    <span class="tw-dot tw-min"></span>
+    <span class="tw-dot tw-max"></span>
+    {title && <span class="tw-title">{title}</span>}
+  </div>
+  <slot />
+</div>
+
+<style>
+  .tw-window {
+    background: #1c1c1e;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 32px 80px rgba(0, 0, 0, 0.7);
+  }
+  .tw-bar {
+    background: #2c2c2e;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .tw-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    border: none;
+    padding: 0;
+    flex-shrink: 0;
+  }
+  .tw-close { background: var(--color-traffic-red); cursor: pointer; }
+  .tw-min   { background: #ffbd2e; }
+  .tw-max   { background: #28c841; }
+  .tw-title {
+    margin-left: 8px;
+    font-family: var(--font-display);
+    font-size: var(--text-base);
+    color: #666;
+  }
+</style>
