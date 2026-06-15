@@ -329,6 +329,7 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
     position: relative;
     width: 100%;
     aspect-ratio: 1.588 / 1;
+    container-type: inline-size;
   }
   .about-card {
     position: absolute;
@@ -340,11 +341,11 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
       #c49a45 65%,
       #a8762a 100%
     );
-    border-radius: 20px;
-    padding: 28px 24px;
+    border-radius: 5cqw;
+    padding: 7cqw 6cqw;
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 5cqw;
     overflow: hidden;
     box-shadow:
       0 12px 40px rgba(144, 100, 47, 0.38),
@@ -359,7 +360,7 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
     content: '';
     position: absolute;
     inset: 0;
-    border-radius: 20px;
+    border-radius: 5cqw;
     background: radial-gradient(
       circle at var(--mx, 50%) var(--my, 50%),
       rgba(255, 255, 255, 0.22) 0%,
@@ -373,8 +374,8 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
   .about-card:hover::after { opacity: 1; }
   .about-photo-wrap {
     flex-shrink: 0;
-    width: 80px;
-    height: 80px;
+    width: 20cqw;
+    height: 20cqw;
     border-radius: 50%;
     overflow: hidden;
     border: 2px solid rgba(255,255,255,0.35);
@@ -386,32 +387,32 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
     min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 1cqw;
   }
   .about-domain {
     font-family: var(--font-mono);
-    font-size: var(--text-base);
+    font-size: 3.25cqw;
     color: rgba(255,255,255,0.55);
     letter-spacing: 0.04em;
-    margin-bottom: 4px;
+    margin-bottom: 1cqw;
   }
   .about-name {
     font-family: var(--font-serif);
     font-weight: 600;
-    font-size: var(--text-md);
+    font-size: 4.5cqw;
     color: #fff;
     line-height: 1.2;
   }
   .about-role {
     font-family: var(--font-body);
-    font-size: var(--text-base);
+    font-size: 3.25cqw;
     color: rgba(255,255,255,0.72);
     line-height: 1.4;
   }
   .about-socials {
     display: flex;
-    gap: 12px;
-    margin-top: 10px;
+    gap: 3cqw;
+    margin-top: 2.5cqw;
   }
   .about-social {
     color: rgba(255,255,255,0.65);
@@ -419,18 +420,20 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
     align-items: center;
     transition: color 0.15s;
   }
+  .about-social svg { width: 4cqw; height: 4cqw; }
   .about-social:hover { color: #fff; }
   /* QR / linktree chip */
   .about-chip {
     position: absolute;
-    bottom: 18px;
-    right: 18px;
+    bottom: 4.5cqw;
+    right: 4.5cqw;
     display: flex;
     align-items: center;
     justify-content: center;
     color: rgba(255,255,255,0.55);
     transition: color 0.15s;
   }
+  .about-chip svg { width: 10cqw; height: 10cqw; }
   .about-chip:hover { color: #fff; }
 
   @media (max-width: 768px) {
