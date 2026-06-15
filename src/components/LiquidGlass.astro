@@ -2,7 +2,8 @@
 // LiquidGlass.astro — refractive liquid-glass pill
 // Ported from github.com/rdev/liquid-glass-react to vanilla Astro/JS.
 // Generates a radial displacement map client-side and wires up SVG chromatic-
-// aberration filters applied to the backdrop-filter frosted-glass layer.
+// aberration filters. Real backdrop refraction is Chromium-only; Safari/Firefox
+// get frosted blur + edge chrome (see data-lg-refract on <html>).
 interface Props {
   displacement?: number;   // feDisplacementMap scale (e.g. 200)
   blur?: number;           // backdrop-filter blur in px — only used when backdrop={true}
@@ -36,7 +37,7 @@ const scaleB    = (-displacement * (1 - aberration * 0.10)).toFixed(1);
 const grayMap   = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiM4MDgwODAiLz48L3N2Zz4=';
 ---
 
-<div class:list={['lg', className]} data-lg-uid={uid} style={`border-radius: ${cornerRadius}px`}>
+<div class:list={['lg', className]} data-lg-uid={uid} data-lg-radius={cornerRadius} style={`border-radius: ${cornerRadius}px`}>
 
   <!-- filter definition — zero-size so it doesn't affect layout -->
   <svg class="lg__svg" aria-hidden="true">
@@ -144,6 +145,7 @@ const grayMap   = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5
   .lg__back { background: rgba(255, 255, 255, 0.14); }
   /* displacement layer — transparent itself, filter creates the refractive edge */
   .lg__distort { background: transparent; }
+  :global(:root[data-lg-refract="0"]) .lg__distort { display: none; }
   .lg__edge {
     padding: 1.5px;
     -webkit-mask:
@@ -171,27 +173,50 @@ const grayMap   = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5
 </style>
 
 <script>
-  function buildDisplacementMap(w: number, h: number): string {
+  // SVG displacement on live backdrops is Chromium-only. Chrome applies filter:url()
+  // to the backdrop-filter output when both are on the same element; Safari/Firefox
+  // do not — combining into backdrop-filter: blur() url() also fails cross-browser.
+  (function markLiquidRefractSupport() {
+    const ua = navigator.userAgent;
+    const isFirefox = /Firefox\//i.test(ua);
+    const isSafari = /Safari\//i.test(ua) && !/Chrome|Chromium|Edg|OPR|CriOS/i.test(ua);
+    const ok = !isFirefox && !isSafari
+      && typeof CSS !== 'undefined'
+      && CSS.supports('backdrop-filter', 'blur(1px)');
+    document.documentElement.dataset.lgRefract = ok ? '1' : '0';
+  })();
+
+  function roundedRectSDF(px: number, py: number, w: number, h: number, r: number): number {
+    const cx = w / 2, cy = h / 2;
+    const qx = Math.abs(px - cx) - w / 2 + r;
+    const qy = Math.abs(py - cy) - h / 2 + r;
+    return Math.min(Math.max(qx, qy), 0) + Math.hypot(Math.max(qx, 0), Math.max(qy, 0)) - r;
+  }
+
+  function buildDisplacementMap(w: number, h: number, cornerR: number): string {
     const canvas = document.createElement('canvas');
     canvas.width = w; canvas.height = h;
     const ctx = canvas.getContext('2d')!;
     const img = ctx.createImageData(w, h);
     const d = img.data;
-    const cx = w / 2, cy = h / 2;
-    const maxR = Math.sqrt(cx * cx + cy * cy);
+    const r = Math.min(cornerR, w / 2, h / 2);
+    const edgeBand = Math.min(48, Math.min(w, h) * 0.35);
     for (let y = 0; y < h; y++) {
       for (let x = 0; x < w; x++) {
-        const dx = x - cx, dy = y - cy;
-        const r  = Math.sqrt(dx * dx + dy * dy);
-        const n  = Math.min(1, r / maxR);
-        const e  = n * n * n;             // cubic falloff — strong edge, clean center
-        const nx = r > 0 ? dx / r : 0;
-        const ny = r > 0 ? dy / r : 0;
-        const s  = e * 110;
-        const i  = (y * w + x) * 4;
-        d[i]     = Math.round(128 + nx * s);   // R → x displacement
+        const px = x + 0.5, py = y + 0.5;
+        const dist = roundedRectSDF(px, py, w, h, r);
+        const eps = 1;
+        const gx = roundedRectSDF(px + eps, py, w, h, r) - roundedRectSDF(px - eps, py, w, h, r);
+        const gy = roundedRectSDF(px, py + eps, w, h, r) - roundedRectSDF(px, py - eps, w, h, r);
+        const glen = Math.hypot(gx, gy) || 1;
+        const nx = gx / glen, ny = gy / glen;
+        const depth = dist <= 0 ? -dist : 0;
+        const e = dist <= 0 ? Math.pow(Math.max(0, 1 - depth / edgeBand), 3) : 0;
+        const s = e * 110;
+        const i = (y * w + x) * 4;
+        d[i]     = Math.round(128 + nx * s);
         d[i + 1] = 128;
-        d[i + 2] = Math.round(128 + ny * s);   // B → y displacement
+        d[i + 2] = Math.round(128 + ny * s);
         d[i + 3] = 255;
       }
     }
@@ -204,10 +229,11 @@ const grayMap   = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5
     if (!uid) return;
     const feImg = document.getElementById(`${uid}-img`) as SVGFEImageElement | null;
     if (!feImg) return;
+    const cornerR = Number(el.dataset.lgRadius) || 24;
     const refresh = () => {
       const w = el.offsetWidth, h = el.offsetHeight;
       if (w < 4 || h < 4) return;
-      feImg.setAttribute('href', buildDisplacementMap(w, h));
+      feImg.setAttribute('href', buildDisplacementMap(w, h, cornerR));
     };
     refresh();
     new ResizeObserver(refresh).observe(el);

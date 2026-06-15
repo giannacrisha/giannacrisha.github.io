@@ -41,7 +41,12 @@ const { model = '/heart.glb' } = Astro.props;
     filter: drop-shadow(0 0 26px rgba(255, 255, 255, 0.65))
             drop-shadow(0 0 64px rgba(255, 255, 255, 0.40));
   }
-  /* glass layer — backdrop blur + SVG displacement, no text so filter doesn't warp it */
+  /* dark mode: warmer + dimmer so it doesn't blow out against the dark bg */
+  :global(:root[data-theme="dark"]) .heart-canvas {
+    filter: drop-shadow(0 0 20px rgba(216, 175, 120, 0.32))
+            drop-shadow(0 0 52px rgba(216, 175, 120, 0.20));
+  }
+  /* glass layer — frosted backdrop on all browsers; SVG refraction Chromium-only */
   .heart-cursor-glass {
     position: fixed;
     top: 0; left: 0;
@@ -50,8 +55,16 @@ const { model = '/heart.glb' } = Astro.props;
     opacity: 0;
     transition: opacity 0.15s;
     border-radius: 24px;
-    backdrop-filter: blur(2px) saturate(200%); /* change blur and saturation here */
+    overflow: hidden;
+    clip-path: inset(0 round 24px);
+    background: rgba(255, 255, 255, 0.10);
+    backdrop-filter: blur(2px) saturate(200%);
     -webkit-backdrop-filter: blur(2px) saturate(200%);
+    box-shadow:
+      0 0 0 0.75px rgba(255, 255, 255, 0.35) inset,
+      0 4px 16px rgba(0, 0, 0, 0.12);
+  }
+  :global(:root[data-lg-refract="1"]) .heart-cursor-glass {
     filter: url(#heart-pill);
   }
   .heart-cursor-glass.is-visible { opacity: 1; }

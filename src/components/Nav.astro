@@ -2,18 +2,20 @@
 // src/components/Nav.astro
 import ThemeToggle from './ThemeToggle.astro';
 import Icon from './Icon.astro';
+import LogoCanvas from './LogoCanvas.astro';
+import LiquidGlass from './LiquidGlass.astro';
 const current = Astro.url.pathname;
 const gardenActive = current.startsWith('/garden') || ['/lab','/archives','/gallery','/library'].some(p => current.startsWith(p));
-const sublinks: { href: string; label: string; desc: string; icon?: string }[] = [
-  { href: '/lab',      label: 'lab',      desc: 'design and code projects', icon: '/icons/lab-icon.png'     },
-  { href: '/archives', label: 'archives', desc: 'essays, poems, thoughts',  icon: '/icons/archive-icon.png' },
-  { href: '/gallery',  label: 'gallery',  desc: 'artwork and visual work',  icon: '/icons/gallery-icon.png' },
-  { href: '/library',  label: 'library',  desc: 'films, books, shows',      icon: '/icons/lib-icon.png'     },
+const sublinks: { href: string; label: string; desc: string }[] = [
+  { href: '/lab',      label: 'lab',      desc: 'design and code projects' },
+  { href: '/archives', label: 'archives', desc: 'essays, poems, thoughts'  },
+  { href: '/gallery',  label: 'gallery',  desc: 'artwork and visual work'  },
+  { href: '/library',  label: 'library',  desc: 'films, books, shows'      },
 ];
 ---
 <nav class="site-nav">
   <div class="nav-inner">
-    <a href="/" class="nav-logo">gi</a>
+    <a href="/" class="nav-logo" aria-label="home"><LogoCanvas /></a>
 
     <!-- desktop -->
     <ul class="nav-links">
@@ -24,19 +26,20 @@ const sublinks: { href: string; label: string; desc: string; icon?: string }[] =
           <Icon name="chevron-down" size={10} class="caret" />
         </a>
         <div class="garden-dropdown" id="garden-dropdown" role="region" aria-label="Garden sections">
-          <div class="garden-dropdown-inner">
-            {sublinks.map(l => (
-              <a href={l.href} class:list={['dropdown-link', { active: current.startsWith(l.href) }]}>
-                {l.icon
-                  ? <img src={l.icon} alt="" class="dropdown-link-icon" aria-hidden="true" />
-                  : <span class="dropdown-link-dot" aria-hidden="true"></span>
-                }
-                <span class="dropdown-link-text">
-                  <span class="dropdown-link-label">{l.label}</span>
-                  <span class="dropdown-link-desc">{l.desc}</span>
-                </span>
-              </a>
-            ))}
+          <div class="garden-dropdown-glass" aria-hidden="true"></div>
+          <div class="garden-dropdown-panel">
+            <LiquidGlass displacement={100} aberration={3} cornerRadius={24} filterId="garden-dd" backdrop={false}>
+              <div class="garden-dropdown-inner">
+                {sublinks.map(l => (
+                  <a href={l.href} class:list={['dropdown-link', { active: current.startsWith(l.href) }]}>
+                    <span class="dropdown-link-text">
+                      <span class="dropdown-link-label">{l.label}</span>
+                      <span class="dropdown-link-desc">{l.desc}</span>
+                    </span>
+                  </a>
+                ))}
+              </div>
+            </LiquidGlass>
           </div>
         </div>
       </li>
@@ -105,10 +108,10 @@ const sublinks: { href: string; label: string; desc: string; icon?: string }[] =
     justify-content: space-between;
   }
   .nav-logo {
-    font-family: var(--font-display);
-    font-size: 22px;
-    color: var(--color-fg);
+    display: flex;
+    align-items: center;
     text-decoration: none;
+    line-height: 0;
   }
 
   /* desktop links */
@@ -147,23 +150,43 @@ const sublinks: { href: string; label: string; desc: string; icon?: string }[] =
     display: none;
     position: absolute;
     top: 100%;
-    right: 0;
-    min-width: 200px;
-    padding-top: 12px; /* invisible bridge — keeps hover alive */
-    flex-direction: column;
+    left: 0;
+    min-width: 220px;
+    padding-top: 12px;
+  }
+  /* panel wraps LiquidGlass — glass layer is sized to match via JS (same as heart-cursor) */
+  .garden-dropdown-panel {
+    position: relative;
+    display: inline-flex;
+    z-index: 1;
+  }
+  .garden-dropdown-glass {
+    position: absolute;
+    top: 12px;
+    left: 0;
+    pointer-events: none;
+    z-index: 0;
+    border-radius: 24px;
+    overflow: hidden;
+    clip-path: inset(0 round 24px);
+    background: rgba(255, 255, 255, 0.10);
+    backdrop-filter: blur(2px) saturate(200%);
+    -webkit-backdrop-filter: blur(2px) saturate(200%);
+    box-shadow:
+      0 0 0 0.75px rgba(255, 255, 255, 0.35) inset,
+      0 4px 16px rgba(0, 0, 0, 0.12);
+  }
+  :global(:root[data-lg-refract="1"]) .garden-dropdown-glass {
+    filter: url(#garden-dd);
   }
   .garden-dropdown-inner {
-    background: var(--color-card);
-    border: 0.5px solid var(--color-border);
-    border-radius: var(--radius-card);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.07);
-    padding: var(--space-sm) 0;
+    padding: var(--space-sm);
     display: flex;
     flex-direction: column;
   }
   .nav-item--garden:hover .garden-dropdown,
   .nav-item--garden:focus-within .garden-dropdown {
-    display: flex;
+    display: block;
   }
   .nav-item--garden:hover .caret {
     transform: rotate(180deg);
@@ -171,64 +194,37 @@ const sublinks: { href: string; label: string; desc: string; icon?: string }[] =
   .dropdown-link {
     padding: var(--space-sm) var(--space-lg);
     display: flex;
-    flex-direction: row;
     align-items: center;
-    gap: var(--space-md);
     text-decoration: none;
+    border-radius: 8px;
     transition: background 0.12s;
   }
-  .dropdown-link-icon {
-    width: 28px;
-    height: 28px;
-    object-fit: contain;
-    flex-shrink: 0;
-    opacity: 0.7;
-    transition: opacity 0.12s;
-    image-rendering: pixelated;
-  }
-  .dropdown-link:hover .dropdown-link-icon,
-  .dropdown-link.active .dropdown-link-icon {
-    opacity: 1;
-  }
-  .dropdown-link-dot {
-    width: 28px;
-    height: 28px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .dropdown-link-dot::after {
-    content: '';
-    display: block;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--color-accent-border);
-    transition: background 0.12s;
-  }
-  .dropdown-link:hover .dropdown-link-dot::after,
-  .dropdown-link.active .dropdown-link-dot::after {
-    background: var(--color-accent);
+  .dropdown-link:hover  { background: var(--color-accent-light); }
+  .dropdown-link:hover .dropdown-link-label {
+    text-shadow: 0 0 0.6px var(--color-fg), 0 0 0.6px var(--color-fg);
   }
   .dropdown-link-text {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 3px;
   }
-  .dropdown-link:hover  { background: var(--color-accent-light); }
-  .dropdown-link.active .dropdown-link-label { color: var(--color-fg); font-weight: 600; }
   .dropdown-link-label {
-    font-family: var(--font-body);
-    font-size: var(--text-xs);
+    font-family: var(--font-serif);
+    font-size: var(--text-sm);
     color: var(--color-fg);
-    letter-spacing: 0.05em;
+    letter-spacing: 0.01em;
+    text-shadow: none;
+    transition: text-shadow 0.2s ease;
+  }
+  .dropdown-link.active .dropdown-link-label {
+    color: var(--color-heading);
+    text-shadow: 0 0 0.6px var(--color-heading), 0 0 0.6px var(--color-heading);
   }
   .dropdown-link-desc {
     font-family: var(--font-body);
-    font-size: 10px;
+    font-size: 11px;
     color: var(--color-muted);
-    letter-spacing: 0.03em;
+    letter-spacing: 0.02em;
   }
 
   /* search */
@@ -306,7 +302,7 @@ const sublinks: { href: string; label: string; desc: string; icon?: string }[] =
     border: none;
     color: var(--color-fg);
     cursor: pointer;
-    padding: 8px;          /* larger hit target — min 44px touch area */
+    padding: 8px;
     margin: -8px -8px var(--space-lg) 0;
     min-width: 44px;
     min-height: 44px;
@@ -317,9 +313,7 @@ const sublinks: { href: string; label: string; desc: string; icon?: string }[] =
     transition: background 0.15s;
   }
   .mobile-close:hover,
-  .mobile-close:focus-visible {
-    background: var(--color-border);
-  }
+  .mobile-close:focus-visible { background: var(--color-border); }
   .mobile-close:focus-visible {
     outline: 2px solid var(--color-accent);
     outline-offset: 2px;
@@ -328,29 +322,21 @@ const sublinks: { href: string; label: string; desc: string; icon?: string }[] =
     padding: var(--space-md) 0;
     font-family: var(--font-body);
     font-size: var(--text-md);
-    /* color-fg gives 7:1+ contrast on color-bg in both modes */
     color: var(--color-fg);
     text-decoration: none;
     border-bottom: 1px solid var(--color-border);
-    min-height: 44px;      /* ADA minimum touch target */
+    min-height: 44px;
     display: flex;
     align-items: center;
     transition: color 0.15s;
   }
   .mobile-link:last-of-type { border-bottom: none; }
-
-  /* theme toggle at bottom of nav drawer */
   .mobile-theme-wrap {
     margin-top: auto;
     padding-top: var(--space-xl);
     display: flex;
     align-items: center;
     justify-content: space-between;
-  }
-  .mobile-theme-label {
-    font-family: var(--font-body);
-    font-size: var(--text-sm);
-    color: var(--color-muted);
   }
   .mobile-link:hover,
   .mobile-link:focus-visible { color: var(--color-accent); }
@@ -362,7 +348,6 @@ const sublinks: { href: string; label: string; desc: string; icon?: string }[] =
   .mobile-link--sub {
     padding-left: var(--space-lg);
     font-size: var(--text-sm);
-    /* color-muted meets 4.5:1 on color-bg in light; boosted for dark */
     color: var(--color-muted);
   }
   :root[data-theme="dark"] .mobile-link--sub {
@@ -387,9 +372,7 @@ const sublinks: { href: string; label: string; desc: string; icon?: string }[] =
   const backdrop = document.getElementById('nav-backdrop');
   const closeBtn = document.getElementById('nav-close');
 
-  // Focusable elements selector
   const FOCUSABLE = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
-
   function getFocusable(): HTMLElement[] {
     return Array.from(menu?.querySelectorAll<HTMLElement>(FOCUSABLE) ?? []);
   }
@@ -400,17 +383,14 @@ const sublinks: { href: string; label: string; desc: string; icon?: string }[] =
     btn?.setAttribute('aria-expanded', 'true');
     menu?.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
-    // Move focus into the drawer (close button)
     setTimeout(() => closeBtn?.focus(), 50);
   }
-
   function closeMenu() {
     menu?.classList.remove('open');
     backdrop?.classList.remove('open');
     btn?.setAttribute('aria-expanded', 'false');
     menu?.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
-    // Return focus to the hamburger button
     btn?.focus();
   }
 
@@ -418,7 +398,6 @@ const sublinks: { href: string; label: string; desc: string; icon?: string }[] =
   closeBtn?.addEventListener('click', closeMenu);
   backdrop?.addEventListener('click', closeMenu);
 
-  // Focus trap inside drawer
   menu?.addEventListener('keydown', (e: KeyboardEvent) => {
     if (e.key === 'Escape') { closeMenu(); return; }
     if (e.key !== 'Tab') return;
@@ -436,6 +415,15 @@ const sublinks: { href: string; label: string; desc: string; icon?: string }[] =
   // Garden dropdown aria-expanded on hover/focus
   const gardenItem    = document.querySelector('.nav-item--garden');
   const gardenTrigger = document.getElementById('garden-nav-trigger');
+  const gardenPanel   = document.querySelector<HTMLElement>('.garden-dropdown-panel');
+  const gardenGlass   = document.querySelector<HTMLElement>('.garden-dropdown-glass');
+  const syncGardenGlass = () => {
+    if (!gardenPanel || !gardenGlass) return;
+    gardenGlass.style.width  = gardenPanel.offsetWidth  + 'px';
+    gardenGlass.style.height = gardenPanel.offsetHeight + 'px';
+  };
+  syncGardenGlass();
+  if (gardenPanel) new ResizeObserver(syncGardenGlass).observe(gardenPanel);
   if (gardenItem && gardenTrigger) {
     const setExpanded = (v: boolean) => gardenTrigger.setAttribute('aria-expanded', String(v));
     gardenItem.addEventListener('mouseenter', () => setExpanded(true));
