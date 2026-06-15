@@ -94,14 +94,6 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
 
     <!-- ── About intro ──────────────────────────────────────────────────── -->
     <section class="about-intro">
-      <div class="ai-blurb">
-        <p class="ai-text">
-          Filipino by origin. Designer, technologist, and anthropologist by practice.
-          I build at the edges of disciplines — making things that sit at the
-          intersection of culture, technology, and care.
-        </p>
-        <a href="/about" class="ai-link"><em>get to know me</em> →</a>
-      </div>
       <div class="ai-card">
         <div class="ai-photo-wrap">
           <img class="ai-photo" src="/images/portrait.png" alt="Gianna Crisha Saludo" />
@@ -123,6 +115,14 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
           </div>
         </div>
         <div class="ai-chip"></div>
+      </div>
+      <div class="ai-blurb">
+        <p class="ai-text">
+          Filipino by origin. Designer, technologist, and anthropologist by practice.
+          I build at the edges of disciplines — making things that sit at the
+          intersection of culture, technology, and care.
+        </p>
+        <a href="/about" class="ai-link"><em>get to know me</em> →</a>
       </div>
     </section>
 
@@ -314,14 +314,14 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
   .ai-blurb { display: flex; flex-direction: column; gap: var(--space-xl); }
   .ai-text {
     font-family: var(--font-serif);
-    font-size: var(--text-lg);
+    font-size: var(--text-md);
     line-height: var(--leading-loose);
     color: var(--color-fg);
     max-width: 38ch;
   }
   .ai-link {
     font-family: var(--font-serif);
-    font-size: var(--text-md);
+    font-size: var(--text-sm);
     color: var(--color-heading);
     text-decoration: none;
     width: fit-content;
@@ -332,7 +332,7 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
   .ai-link:hover { color: var(--color-fg); border-color: var(--color-fg); }
   .ai-link em { font-style: italic; }
 
-  /* right: access card */
+  /* left: access card */
   .ai-card {
     position: relative;
     background: linear-gradient(
@@ -352,24 +352,27 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
       0 12px 40px rgba(144, 100, 47, 0.38),
       0 2px 8px rgba(0, 0, 0, 0.18),
       0 0 0 1px rgba(255, 215, 80, 0.2) inset;
+    transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+    will-change: transform;
+    cursor: default;
   }
-  /* gloss streak */
-  .ai-card::before {
+  /* cursor-tracking gloss */
+  .ai-card::after {
     content: '';
     position: absolute;
-    top: -40%;
-    left: -8%;
-    width: 55%;
-    height: 190%;
-    background: linear-gradient(
-      108deg,
-      rgba(255,255,255,0) 0%,
-      rgba(255,255,255,0.07) 50%,
-      rgba(255,255,255,0) 100%
+    inset: 0;
+    border-radius: 20px;
+    background: radial-gradient(
+      circle at var(--mx, 50%) var(--my, 50%),
+      rgba(255, 255, 255, 0.22) 0%,
+      rgba(255, 255, 255, 0.06) 38%,
+      rgba(255, 255, 255, 0) 65%
     );
     pointer-events: none;
-    transform: rotate(-4deg);
+    opacity: 0;
+    transition: opacity 0.25s;
   }
+  .ai-card:hover::after { opacity: 1; }
   .ai-photo-wrap {
     flex-shrink: 0;
     width: 80px;
@@ -624,5 +627,32 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
     });
   })
   .catch(function () {});
+})();
+</script>
+
+<script>
+(function () {
+  var card = document.querySelector('.ai-card');
+  if (!card) return;
+  var MAX = 16;
+
+  card.addEventListener('mousemove', function (e) {
+    var r = card.getBoundingClientRect();
+    var x = (e.clientX - r.left) / r.width;
+    var y = (e.clientY - r.top)  / r.height;
+    var rotY =  (x - 0.5) * MAX * 2;
+    var rotX = -(y - 0.5) * MAX * 2;
+    card.style.transition = 'transform 0.08s ease-out, box-shadow 0.08s ease-out';
+    card.style.transform = 'perspective(700px) rotateX(' + rotX + 'deg) rotateY(' + rotY + 'deg) scale3d(1.025,1.025,1.025)';
+    card.style.setProperty('--mx', (x * 100) + '%');
+    card.style.setProperty('--my', (y * 100) + '%');
+  });
+
+  card.addEventListener('mouseleave', function () {
+    card.style.transition = 'transform 0.6s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.6s cubic-bezier(0.23, 1, 0.32, 1)';
+    card.style.transform = 'perspective(700px) rotateX(0deg) rotateY(0deg) scale3d(1,1,1)';
+    card.style.setProperty('--mx', '50%');
+    card.style.setProperty('--my', '50%');
+  });
 })();
 </script>
