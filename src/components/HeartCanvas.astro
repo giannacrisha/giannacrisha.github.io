@@ -4,11 +4,9 @@
 // contraction beat (vertex wall-flex + directional squeeze + systolic twist).
 // The model is meshopt-compressed, so the loader needs the meshopt decoder.
 import LiquidGlass from './LiquidGlass.astro';
+import TerminalWindow from './TerminalWindow.astro';
 const { model = '/heart.glb' } = Astro.props;
 ---
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <div class="heart-stage" data-heart-model={model}>
   <canvas class="heart-canvas" aria-hidden="true"></canvas>
 </div>
@@ -19,15 +17,9 @@ const { model = '/heart.glb' } = Astro.props;
   </LiquidGlass>
 </div>
 <div class="heart-terminal" role="dialog" aria-modal="true" aria-hidden="true">
-  <div class="ht-window">
-    <div class="ht-bar">
-      <span class="ht-dot ht-r"></span>
-      <span class="ht-dot ht-y"></span>
-      <span class="ht-dot ht-g"></span>
-      <span class="ht-title">why-a-heart.sh</span>
-    </div>
+  <TerminalWindow title="why-a-heart.sh" class="ht-window">
     <pre class="ht-body"></pre>
-  </div>
+  </TerminalWindow>
 </div>
 
 <style>
@@ -71,8 +63,8 @@ const { model = '/heart.glb' } = Astro.props;
   }
   .heart-cursor-label.is-visible { opacity: 1; }
   .heart-cursor-text {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 9px;
+    font-family: var(--font-display);
+    font-size: var(--text-base);
     line-height: 1;
     color: #fff;
     white-space: nowrap;
@@ -94,34 +86,11 @@ const { model = '/heart.glb' } = Astro.props;
     transition: opacity 0.2s ease;
   }
   .heart-terminal.is-open { opacity: 1; pointer-events: auto; }
-  .ht-window {
-    background: #1c1c1e;
-    border-radius: 12px;
-    overflow: hidden;
-    width: min(520px, 90vw);
-    box-shadow: 0 32px 80px rgba(0, 0, 0, 0.7);
-  }
-  .ht-bar {
-    background: #2c2c2e;
-    padding: 12px 16px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .ht-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
-  .ht-r { background: #ff5f57; cursor: pointer; }
-  .ht-y { background: #ffbd2e; }
-  .ht-g { background: #28c841; }
-  .ht-title {
-    margin-left: 8px;
-    font-family: 'Press Start 2P', monospace;
-    font-size: 8px;
-    color: #666;
-  }
+  .ht-window { width: min(520px, 90vw); }
   .ht-body {
     padding: 24px 28px;
-    font-family: 'Press Start 2P', monospace;
-    font-size: 9px;
+    font-family: var(--font-display);
+    font-size: var(--text-base);
     line-height: 2.2;
     color: #d4d4d4;
     margin: 0;
@@ -135,7 +104,7 @@ const { model = '/heart.glb' } = Astro.props;
   @keyframes ht-blink { 50% { opacity: 0; } }
   @media (max-width: 768px) {
     .heart-stage { width: clamp(220px, 64vw, 320px); }
-    .ht-body { font-size: 7px; padding: 20px; }
+    .ht-body { padding: 20px; }
   }
 </style>
 
@@ -409,7 +378,7 @@ const { model = '/heart.glb' } = Astro.props;
       terminal.addEventListener('click', (e) => {
         if (e.target === terminal) { terminal.classList.remove('is-open'); terminal.setAttribute('aria-hidden', 'true'); }
       });
-      terminal.querySelector<HTMLElement>('.ht-r')?.addEventListener('click', () => {
+      terminal.querySelector<HTMLElement>('[data-tw-close]')?.addEventListener('click', () => {
         terminal.classList.remove('is-open'); terminal.setAttribute('aria-hidden', 'true');
       });
       document.addEventListener('keydown', (e) => {
