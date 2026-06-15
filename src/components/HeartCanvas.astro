@@ -29,6 +29,10 @@ const { model = '/heart.glb' } = Astro.props;
     position: relative;
     z-index: 3;
     cursor: none;
+    transition: transform 0.3s ease;
+  }
+  .heart-stage:hover {
+    transform: scale(1.06);
   }
   .heart-canvas {
     width: 100%;

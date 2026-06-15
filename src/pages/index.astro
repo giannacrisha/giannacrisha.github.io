@@ -3,7 +3,6 @@
 // Sections: hero → art wall → the garden → our garden (community) → now → footer.
 import Garden from '../layouts/Garden.astro';
 import HeartCanvas from '../components/HeartCanvas.astro';
-import Card from '../components/Card.astro';
 import GrowthPill from '../components/GrowthPill.astro';
 import Icon from '../components/Icon.astro';
 import { getCollection } from 'astro:content';
@@ -101,7 +100,7 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
             <img class="about-photo" src="/images/portrait.png" alt="Gianna Crisha Saludo" />
           </div>
           <div class="about-card-body">
-            <div class="about-domain">giannacrisha.github.io</div>
+            <div class="about-domain">giannacrisha.com</div>
             <div class="about-name">Gianna Crisha Saludo</div>
             <div class="about-role">designer · developer · anthropologist</div>
           </div>
@@ -336,14 +335,18 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
     container-type: inline-size;
   }
   .about-card {
+    /* glow color — change just this hex (the hover gloss) */
+    --glow-color: #ffe3ba;
+
     position: absolute;
     inset: 0;
     background: linear-gradient(
-      135deg,
-      #6b3e12 0%,
-      var(--color-heading) 35%,
-      #c49a45 65%,
-      #a8762a 100%
+      145deg,
+      #3E2710 0%,
+      #82592B 25%,
+      var(--color-heading) 30%,
+      #CA9F57 60%,
+      #82592B 100%
     );
     border-radius: 5cqw;
     padding: 6cqw;
@@ -367,9 +370,9 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
     border-radius: 5cqw;
     background: radial-gradient(
       circle at var(--mx, 50%) var(--my, 50%),
-      rgba(255, 255, 255, 0.22) 0%,
-      rgba(255, 255, 255, 0.06) 38%,
-      rgba(255, 255, 255, 0) 65%
+      rgb(from var(--glow-color) r g b / 0.22) 0%,
+      rgb(from var(--glow-color) r g b / 0.06) 38%,
+      rgb(from var(--glow-color) r g b / 0) 65%
     );
     pointer-events: none;
     opacity: 0;
@@ -453,6 +456,7 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
   @media (max-width: 768px) {
     .about-intro { grid-template-columns: 1fr; }
     .about-text { max-width: none; }
+    .about-card-sizer { max-width: 360px; margin-inline: auto; }
   }
 
   /* ── Bento garden grid ───────────────────────────────────────────────── */
@@ -665,6 +669,30 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
     z-index: 1;
   }
 
+  /* ── Typing cursor ───────────────────────────────────────────────────── */
+  .title-cursor {
+    display: inline-block;
+    font-style: normal;
+    color: var(--color-heading);
+    animation: blink-cursor 0.75s step-start infinite;
+    margin-left: 2px;
+  }
+  @keyframes blink-cursor { 50% { opacity: 0; } }
+
+  /* ── About section entrance animation ────────────────────────────────── */
+  .about-card-sizer.will-animate,
+  .about-blurb.will-animate {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.65s ease, transform 0.65s ease;
+  }
+  .about-card-sizer.is-visible,
+  .about-blurb.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .about-blurb.will-animate { transition-delay: 0.28s; }
+
   /* ── Responsive ───────────────────────────────────────────────────────── */
   @media (max-width: 820px) {
     .hero { flex-direction: column; text-align: center; }
@@ -723,6 +751,104 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
     });
   })
   .catch(function () {});
+})();
+</script>
+
+<script>
+// ── Typing animation for hero title ──────────────────────────────────────
+(function () {
+  var h1 = document.querySelector('.hero-title');
+  if (!h1 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  var segs = [
+    { t: 'Gi designs creative ', em: false },
+    { t: 'systems', em: true },
+    { t: ', ', em: false },
+    { t: 'products', em: true },
+    { t: ', & ', em: false },
+    { t: 'experiences', em: true },
+    { t: '.', em: false },
+  ];
+
+  var chars = [];
+  segs.forEach(function (seg) {
+    seg.t.split('').forEach(function (ch) { chars.push({ ch: ch, em: seg.em }); });
+  });
+
+  h1.textContent = '';
+  var cursor = document.createElement('span');
+  cursor.className = 'title-cursor';
+  cursor.textContent = '|';
+  h1.appendChild(cursor);
+
+  var i = 0;
+  var currentEm = null;
+  var inEm = false;
+
+  function typeNext() {
+    if (i >= chars.length) {
+      setTimeout(function () { cursor.remove(); }, 900);
+      return;
+    }
+    var item = chars[i++];
+    if (item.em !== inEm) {
+      inEm = item.em;
+      if (inEm) {
+        currentEm = document.createElement('em');
+        h1.insertBefore(currentEm, cursor);
+      } else {
+        currentEm = null;
+      }
+    }
+    if (inEm && currentEm) {
+      currentEm.textContent += item.ch;
+    } else {
+      h1.insertBefore(document.createTextNode(item.ch), cursor);
+    }
+    setTimeout(typeNext, 38 + Math.random() * 28);
+  }
+
+  setTimeout(typeNext, 350);
+})();
+
+// ── About section entrance animation ─────────────────────────────────────
+(function () {
+  var sizer = document.querySelector('.about-card-sizer');
+  var blurb = document.querySelector('.about-blurb');
+  var section = document.querySelector('.about-intro');
+  if (!sizer || !blurb || !section) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  sizer.classList.add('will-animate');
+  blurb.classList.add('will-animate');
+
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) {
+        sizer.classList.add('is-visible');
+        blurb.classList.add('is-visible');
+        io.disconnect();
+      }
+    });
+  }, { threshold: 0.12 });
+  io.observe(section);
+})();
+
+// ── Community row scrolls with page scroll ────────────────────────────────
+(function () {
+  var section = document.querySelector('.community-summary');
+  var row = document.querySelector('.comm-row');
+  if (!section || !row) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  window.addEventListener('scroll', function () {
+    var rect = section.getBoundingClientRect();
+    var vh = window.innerHeight;
+    var progress = 1 - (rect.bottom / (vh + rect.height));
+    if (progress < 0 || progress > 1) return;
+    var maxScroll = row.scrollWidth - row.clientWidth;
+    row.scrollLeft = progress * maxScroll;
+  }, { passive: true });
 })();
 </script>
 
