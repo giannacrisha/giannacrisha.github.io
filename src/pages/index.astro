@@ -3,7 +3,6 @@
 // Sections: hero → art wall → the garden → our garden (community) → now → footer.
 import Garden from '../layouts/Garden.astro';
 import HeartCanvas from '../components/HeartCanvas.astro';
-import GrowthPill from '../components/GrowthPill.astro';
 import Icon from '../components/Icon.astro';
 import TerminalWindow from '../components/TerminalWindow.astro';
 import { getCollection } from 'astro:content';
@@ -24,7 +23,7 @@ const galleryRecent = recent(gallery,  e => (e.data.date_published ?? e.data.dat
 const archiveRecent = recent(archives, e => (e.data.date_published ?? e.data.date_written).getTime());
 const libraryRecent = recent(library,  e => e.data.date_added.getTime(), 6);
 
-const phonetic = '[gahr-dn]  / ˈɡɑːr.dən /';
+const gardenPhonetic = '/ ˈɡɑːr.dən /';
 
 function bookColor(s: string) {
   const p = ['#c9b99a','#b5c4b1','#b5a8c0','#c4b1b1','#a8bec4','#c4bdb5','#b1c4b5','#c4b5a8'];
@@ -136,7 +135,7 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
     <section class="garden-summary">
       <header class="sec-head">
         <a class="sec-title" href="/garden">the garden</a>
-        <span class="sec-phon">{phonetic}</span>
+        <span class="sec-phon garden-phonetic">{gardenPhonetic}</span>
       </header>
 
       <div class="bento-grid">
@@ -151,8 +150,6 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
                   ? <img class="bento-lab-thumb" src={entry.data.cover_image} alt={entry.data.title} loading="lazy" />
                   : <div class="bento-lab-thumb bento-lab-thumb--empty" />
                 }
-                <span class="bento-lab-name">{entry.data.title}</span>
-                <GrowthPill stage={entry.data.growth_stage} />
               </div>
             ))}
           </div>
@@ -211,7 +208,6 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
         <div class="comm-title-row">
           <a class="sec-title" href="/community">community</a>
           <button class="sec-phon kapwa-trigger" id="kapwa-trigger">/ˈkap.wa/</button>
-          <span class="pill comm-count-pill" id="comm-count" hidden></span>
         </div>
       </header>
       <div class="comm-row-wrap">
@@ -276,6 +272,14 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
     opacity: 0.85;
   }
   .sec-phon--italic { font-style: italic; }
+  .garden-summary .garden-phonetic {
+    font-family: var(--font-body);
+    font-size: var(--text-md);
+    color: var(--color-muted);
+    letter-spacing: 0.02em;
+    opacity: 1;
+    font-weight: 400;
+  }
   .kapwa-trigger {
     background: none;
     border: none;
@@ -559,24 +563,20 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 6px;
     min-width: 0;
+    min-height: 0;
   }
   .bento-lab-thumb {
     width: 100%;
-    height: 110px;
-    object-fit: cover;
+    height: auto;
+    max-height: 100%;
+    object-fit: contain;
     border-radius: 8px;
     display: block;
   }
-  .bento-lab-thumb--empty { background: var(--color-accent-light); }
-  .bento-lab-name {
-    font-family: var(--font-serif);
-    font-size: var(--text-sm);
-    color: var(--color-fg);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  .bento-lab-thumb--empty {
+    aspect-ratio: 4 / 3;
+    background: var(--color-accent-light);
   }
 
   /* Gallery tile */
@@ -663,7 +663,6 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
     align-items: center;
     gap: var(--space-md);
   }
-  .comm-count-pill { align-self: center; }
   .comm-btn-wrap {
     display: flex;
     justify-content: center;
@@ -785,13 +784,6 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
       try { var p = JSON.parse(i.body); return p && p.pixels ? p : null; }
       catch (e) { return null; }
     }).filter(Boolean);
-
-    // Show real count in the pill
-    var pill = document.getElementById('comm-count');
-    if (pill && submissions.length > 0) {
-      pill.textContent = submissions.length + ' planted';
-      pill.removeAttribute('hidden');
-    }
 
     // Sort by hearts desc (same as community page)
     submissions.sort(function (a, b) { return (b.hearts || 0) - (a.hearts || 0); });
