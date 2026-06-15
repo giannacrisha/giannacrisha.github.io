@@ -26,16 +26,7 @@ const { model = '/heart.glb' } = Astro.props;
       <span class="ht-dot ht-g"></span>
       <span class="ht-title">why-a-heart.sh</span>
     </div>
-    <pre class="ht-body"><span class="ht-c">giannacrisha@Giannas-MacBook-Air why-a-heart.sh</span>
-
-because everything worth
-creating starts with one :)
-
-it brings hope that deep down
-we all have one that beats
-inside of all of us.
-
-<span class="ht-p">~</span> <span class="ht-blink">▋</span></pre>
+    <pre class="ht-body"></pre>
   </div>
 </div>
 
@@ -135,9 +126,11 @@ inside of all of us.
     color: #d4d4d4;
     margin: 0;
     white-space: pre-wrap;
+    text-align: left;
   }
-  .ht-p { color: #90642f; }
-  .ht-c { color: #fff; }
+  .ht-user { color: #d4d4d4; }
+  .ht-dir  { color: #89b4fa; }
+  .ht-pct  { color: #cdd6f4; }
   .ht-blink { display: inline-block; animation: ht-blink 1s step-start infinite; }
   @keyframes ht-blink { 50% { opacity: 0; } }
   @media (max-width: 768px) {
@@ -355,10 +348,62 @@ inside of all of us.
       if (dist < 6 && terminal) {
         terminal.classList.add('is-open');
         terminal.removeAttribute('aria-hidden');
+        playTerminal();
       }
     };
     stage.addEventListener('pointerup', endDrag);
     stage.addEventListener('pointercancel', endDrag);
+
+    // terminal typing animation
+    const PROMPT_HTML =
+      `<span class="ht-user">giannacrisha@Giannas-MacBook-Air</span> ` +
+      `<span class="ht-dir">giannacrisha.github.io</span> ` +
+      `<span class="ht-pct">%</span> `;
+    const CMD = 'cat why-a-heart.sh';
+    const FILE_CONTENT =
+      'because everything worth\n' +
+      'creating starts with one :)\n' +
+      '\n' +
+      'it brings hope that deep down\n' +
+      'we all have one that beats\n' +
+      'inside of all of us.\n';
+
+    let typeTimer: number | null = null;
+
+    function playTerminal() {
+      if (!terminal) return;
+      const body = terminal.querySelector<HTMLElement>('.ht-body');
+      if (!body) return;
+      if (typeTimer !== null) { clearTimeout(typeTimer); typeTimer = null; }
+
+      body.innerHTML =
+        `<span>${PROMPT_HTML}<span class="ht-cmd"></span><span class="ht-blink">▋</span></span>`;
+
+      const cmdEl  = body.querySelector<HTMLElement>('.ht-cmd')!;
+      const cursor = body.querySelector<HTMLElement>('.ht-blink')!;
+      let i = 0;
+
+      function typeNext() {
+        if (i < CMD.length) {
+          cmdEl.textContent += CMD[i++];
+          typeTimer = setTimeout(typeNext, 65 + Math.random() * 45) as unknown as number;
+        } else {
+          typeTimer = setTimeout(() => {
+            cursor.remove();
+            // file content dumps all at once (cat behaviour)
+            const out = document.createElement('span');
+            out.textContent = '\n' + FILE_CONTENT + '\n';
+            body.appendChild(out);
+            // second prompt + cursor
+            const p2 = document.createElement('span');
+            p2.innerHTML = `${PROMPT_HTML}<span class="ht-blink">▋</span>`;
+            body.appendChild(p2);
+          }, 250) as unknown as number;
+        }
+      }
+
+      typeTimer = setTimeout(typeNext, 450) as unknown as number;
+    }
 
     if (terminal) {
       terminal.addEventListener('click', (e) => {
