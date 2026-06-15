@@ -3,15 +3,16 @@
 // Sections: hero → art wall → the garden → our garden (community) → now → footer.
 import Garden from '../layouts/Garden.astro';
 import HeartCanvas from '../components/HeartCanvas.astro';
+import Card from '../components/Card.astro';
+import GrowthPill from '../components/GrowthPill.astro';
 import { getCollection } from 'astro:content';
 import { site } from '../config/design';
 
-const [lab, archives, gallery, library, now] = await Promise.all([
+const [lab, archives, gallery, library] = await Promise.all([
   getCollection('lab'),
   getCollection('archives'),
   getCollection('gallery'),
   getCollection('library'),
-  getCollection('now'),
 ]);
 
 const recent = <T,>(arr: T[], key: (e: T) => number, n = 4) =>
@@ -22,13 +23,13 @@ const galleryRecent = recent(gallery,  e => (e.data.date_published ?? e.data.dat
 const archiveRecent = recent(archives, e => (e.data.date_published ?? e.data.date_written).getTime());
 const libraryRecent = recent(library,  e => e.data.date_added.getTime(), 6);
 
-const nowSorted = [...now].sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
-const latestNow = nowSorted[0];
-const NowContent = latestNow ? (await latestNow.render()).Content : null;
-const fmtLong = (d: Date) => d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-const fmtShort = (d: Date) => d.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: '2-digit' });
-
 const phonetic = '[gahr-dn]  / ˈɡɑːr.dən /';
+
+function bookColor(s: string) {
+  const p = ['#c9b99a','#b5c4b1','#b5a8c0','#c4b1b1','#a8bec4','#c4bdb5','#b1c4b5','#c4b5a8'];
+  let h = 0; for (const c of s) h = c.charCodeAt(0)+((h<<5)-h);
+  return p[Math.abs(h)%p.length];
+}
 
 type FrameShape = 'rect' | 'circle' | 'square' | 'oval';
 type FrameItem  = { shape: FrameShape; href: string; image: string; title: string };
@@ -97,78 +98,106 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
         <span class="sec-phon">{phonetic}</span>
       </header>
 
-      <div class="g-grid">
-        <article class="g-card">
-          <a class="g-card-label" href="/lab">lab</a>
-          <ul class="g-card-list">
-            {labRecent.map(e => <li><a href={`/lab/${e.slug}`}>{e.data.title}</a></li>)}
-          </ul>
-        </article>
+      <div class="garden-shelves">
 
-        <article class="g-card">
-          <a class="g-card-label" href="/gallery">gallery</a>
-          <div class="g-thumbs">
-            {galleryRecent.map(e => (
-              <a href={`/gallery/${e.slug}`} class="g-thumb" title={e.data.title}>
-                {e.data.image
-                  ? <img src={e.data.image} alt={e.data.title} loading="lazy" />
-                  : <span class="g-thumb-fallback">{e.data.title}</span>}
-              </a>
+        <!-- Lab -->
+        <div class="shelf-section">
+          <h2 class="shelf-label"><a href="/lab" class="shelf-label-link">lab</a></h2>
+          <div class="shelf-row shelf-row--lab">
+            {labRecent.map(entry => (
+              <div class:list={['shelf-item', { 'shelf-item--lab-img': !!entry.data.cover_image }]}>
+                <Card title={entry.data.title} slug={entry.slug} collection="lab" stage={entry.data.growth_stage} date_published={entry.data.date_published ?? entry.data.date_built} date_built={entry.data.date_built} cover_image={entry.data.cover_image} description={entry.data.description} body={entry.body} />
+              </div>
             ))}
           </div>
-        </article>
-
-        <article class="g-card">
-          <a class="g-card-label" href="/archives">archives</a>
-          <ul class="g-card-list">
-            {archiveRecent.map(e => <li><a href={`/archives/${e.slug}`}>{e.data.title}</a></li>)}
-          </ul>
-        </article>
-      </div>
-
-      <a class="g-card-label g-card-label--wide" href="/library">library</a>
-      <div class="g-card g-card--wide">
-        <div class="lib-row">
-          {libraryRecent.map(b => (
-            <a href={`/library/${b.slug}`} class="lib-item" title={`${b.data.title} — ${b.data.creator}`}>
-              {b.data.cover_image
-                ? <img src={b.data.cover_image} alt={b.data.title} loading="lazy" />
-                : <span class="lib-spine">{b.data.title}</span>}
-            </a>
-          ))}
         </div>
+
+        <!-- Gallery -->
+        <div class="shelf-section">
+          <h2 class="shelf-label"><a href="/gallery" class="shelf-label-link">gallery</a></h2>
+          <div class="shelf-row shelf-row--gallery">
+            {galleryRecent.map(entry => {
+              const d = entry.data;
+              return (
+                <div class="shelf-item">
+                  <a href={`/gallery/${entry.slug}`} class="frame-card">
+                    <div class="frame-img-wrap">
+                      {d.image
+                        ? <img class="frame-img" src={d.image} alt={d.title} loading="lazy" />
+                        : <div class="frame-empty">no image</div>
+                      }
+                      <div class="frame-overlay">
+                        <div class="frame-stage"><GrowthPill stage={d.growth_stage} forceColor="rgba(255,255,255,0.9)" /></div>
+                        <div class="frame-bottom">
+                          <div class="frame-title-row">
+                            <span class="frame-title">{d.title}</span>
+                            <span class="frame-year">{d.date_made.getFullYear()}</span>
+                          </div>
+                          {d.caption && <p class="frame-caption">{d.caption}</p>}
+                        </div>
+                      </div>
+                    </div>
+                  </a>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <!-- Archives -->
+        <div class="shelf-section">
+          <h2 class="shelf-label"><a href="/archives" class="shelf-label-link">archives</a></h2>
+          <div class="shelf-row">
+            {archiveRecent.map(entry => (
+              <div class="shelf-item">
+                <Card title={entry.data.title} slug={entry.slug} collection="archives" type={entry.data.type} stage={entry.data.growth_stage} date_published={entry.data.date_published ?? entry.data.date_written} date_written={entry.data.date_written} body={entry.body} />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <!-- Library -->
+        <div class="shelf-section">
+          <h2 class="shelf-label"><a href="/library" class="shelf-label-link">library</a></h2>
+          <div class="shelf-row shelf-row--library">
+            {libraryRecent.map(entry => {
+              const d = entry.data;
+              return (
+                <div class="shelf-item">
+                  <a href={`/library/${entry.slug}`} class="book-card" style={`--book-color:${bookColor(d.title)}`}>
+                    {d.cover_image
+                      ? <img class="book-cover" src={d.cover_image} alt={d.title} loading="lazy" />
+                      : <div class="book-spine"></div>
+                    }
+                    <p class="book-title">{d.title}</p>
+                    <p class="book-author">{d.creator}</p>
+                  </a>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
       </div>
     </section>
 
     <!-- ── Our garden (community) ───────────────────────────────────────── -->
     <section class="community-summary">
       <header class="sec-head sec-head--end">
-        <span class="sec-phon">{phonetic}</span>
-        <a class="sec-title" href="/community">our garden</a>
+        <div class="comm-title-block">
+          <a class="sec-title" href="/community">community</a>
+          <p class="comm-subtitle">be part of the community and draw a pixel-art plant! <a href="/community" class="comm-arrow">→</a></p>
+        </div>
       </header>
       <div class="comm-row">
-        {Array.from({ length: 6 }).map(() => (
-          <a href="/community" class="comm-tile" aria-label="visit the community garden"></a>
+        {Array.from({ length: 6 }).map((_, i) => (
+          <a href="/community" class="comm-tile" aria-label="visit the community garden">
+            <canvas class="comm-pixel-canvas" width="96" height="96" data-tile-idx={i}></canvas>
+          </a>
         ))}
       </div>
     </section>
 
-    <!-- ── Now ──────────────────────────────────────────────────────────── -->
-    <section class="now-summary">
-      <header class="sec-head sec-head--center">
-        <a class="sec-title" href="/now">now</a>
-        <span class="sec-phon sec-phon--italic">
-          last updated: {latestNow ? fmtShort(latestNow.data.date) : 'mm/dd/yy'}
-        </span>
-      </header>
-      <article class="now-card">
-        {latestNow && <p class="now-date">{fmtLong(latestNow.data.date)}</p>}
-        <div class="now-body">
-          {NowContent ? <NowContent /> : <p>nothing here yet.</p>}
-        </div>
-        <a class="now-more" href="/now">more now →</a>
-      </article>
-    </section>
 
   </div>
 </Garden>
@@ -234,159 +263,145 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
     justify-content: center;
   }
 
-  /* ── Art wall ─────────────────────────────────────────────────────────── */
-  .featurewall {
-    background-image: url('/home/wall-texture.png');
-    background-size: 240px 240px;
-    background-position: top left;
-    border-radius: var(--radius-lg);
-    padding: clamp(16px, 3vw, 32px);
-    display: flex;
-    flex-direction: column;
-    gap: clamp(8px, 1.5vw, 16px);
-    overflow: hidden;
-  }
-  .featurewall-row {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: clamp(8px, 1.5vw, 16px);
-  }
-  .frame-slot {
-    position: relative;
-    display: block;
-    height: clamp(120px, 18vw, 216px);
-    flex-shrink: 0;
-    text-decoration: none;
-  }
-  .frame-slot--rect   { aspect-ratio: 900 / 492; }
-  .frame-slot--circle { aspect-ratio: 900 / 894; }
-  .frame-slot--square { aspect-ratio: 900 / 891; }
-  .frame-slot--oval   { aspect-ratio: 667 / 900; height: clamp(150px, 24vw, 291px); }
-
-  .frame-project-img {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  .frame-overlay {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    pointer-events: none;
-    z-index: 1;
-    filter: drop-shadow(0 6px 14px rgba(120, 90, 20, 0.22));
-  }
+  /* ── Art wall (hidden until fixed) ───────────────────────────────────── */
+  .featurewall { display: none; }
 
   /* ── The garden summary ───────────────────────────────────────────────── */
   .garden-summary { padding-block: clamp(56px, 9vw, 128px); }
-  .g-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--space-xl);
-    margin-bottom: var(--space-xl);
+  .garden-shelves {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xxl);
   }
-  .g-card-label {
-    display: block;
-    font-family: var(--font-serif);
-    font-weight: 700;
-    font-size: var(--text-xl);
-    color: var(--color-heading);
-    text-decoration: none;
-    margin-bottom: var(--space-md);
-    transition: opacity 0.15s;
+
+  /* shelf sections — identical to garden.astro */
+  .shelf-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
   }
-  .g-card-label:hover { opacity: 0.72; }
-  .g-card-label--wide { margin-top: var(--space-sm); }
-  .g-card {
-    background: var(--color-card);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-gold);
-    padding: var(--space-xl);
-    min-height: 196px;
-  }
-  .g-card--wide { min-height: 188px; display: flex; align-items: center; }
-  .g-card-list { list-style: none; display: flex; flex-direction: column; gap: var(--space-sm); }
-  .g-card-list a {
+  .shelf-label {
     font-family: var(--font-body);
-    font-size: var(--text-sm);
-    color: var(--color-fg);
+    font-size: var(--text-xs);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+  .shelf-label-link {
+    color: inherit;
     text-decoration: none;
-    line-height: 1.4;
-    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    transition: color 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
   }
-  .g-card-list a:hover { color: var(--color-heading); text-decoration: underline; }
+  .shelf-label-link::after { content: '→'; font-size: 1em; transition: transform 0.15s; }
+  .shelf-label-link:hover::after { transform: translateX(3px); }
+  .shelf-row {
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    overflow-y: visible;
+    scrollbar-width: none;
+    padding-bottom: var(--space-lg);
+    padding-top: var(--space-xs);
+  }
+  .shelf-row::-webkit-scrollbar { display: none; }
+  .shelf-item {
+    flex-shrink: 0;
+    width: 200px;
+    max-width: 200px;
+    overflow: visible;
+    margin-right: var(--space-lg);
+  }
+  .shelf-row--gallery .shelf-item,
+  .shelf-row--library .shelf-item { width: auto; max-width: 2000px; }
+  .shelf-item--lab-img { width: 260px; }
+  /* frame card (gallery) */
+  .frame-card { display: block; text-decoration: none; color: inherit; }
+  .frame-img-wrap {
+    position: relative;
+    display: inline-block;
+    border-radius: 12px;
+    overflow: hidden;
+    max-height: 240px;
+  }
+  .frame-img { display: block; max-height: 240px; width: auto; transition: transform 0.25s; }
+  .frame-card:hover .frame-img { transform: scale(1.03); }
+  .frame-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: var(--space-sm) var(--space-md);
+    background: linear-gradient(to bottom, rgba(0,0,0,0.18) 0%, transparent 35%, transparent 55%, rgba(0,0,0,0.55) 100%);
+    border-radius: 12px;
+  }
+  .frame-stage { align-self: flex-end; background: rgba(0,0,0,0.3); padding: 2px 8px; border-radius: 20px; }
+  .frame-bottom { display: flex; flex-direction: column; gap: 4px; }
+  .frame-title-row { display: flex; align-items: baseline; gap: var(--space-sm); }
+  .frame-title { font-family: var(--font-serif); font-size: var(--text-md); font-weight: 700; color: #fff; line-height: var(--leading-tight); }
+  .frame-year { font-family: var(--font-body); font-size: var(--text-xs); color: rgba(255,255,255,0.75); white-space: nowrap; }
+  .frame-caption { font-family: var(--font-body); font-size: var(--text-xs); color: rgba(255,255,255,0.8); margin: 0; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .frame-empty { display: flex; align-items: center; justify-content: center; width: 180px; height: 220px; font-family: var(--font-body); font-size: var(--text-xs); color: var(--color-muted); background: var(--color-card); border-radius: 12px; }
 
-  .g-thumbs { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-sm); }
-  .g-thumb {
-    aspect-ratio: 1 / 1;
-    border-radius: var(--radius-card);
-    overflow: hidden;
-    background: var(--color-accent-light);
-    display: flex; align-items: center; justify-content: center;
+  /* book card (library) */
+  .book-card { display: flex; flex-direction: column; gap: var(--space-sm); text-decoration: none; width: 200px; transition: transform 0.2s; position: relative; }
+  .book-card:hover { transform: translateY(-4px); }
+  .book-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 200px; height: 300px;
+    border-radius: 3px 6px 6px 3px;
+    pointer-events: none;
+    background:
+      linear-gradient(to right, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.1) 0.5%, rgba(255,255,255,0.15) 3%, rgba(0,0,0,0.1) 5.5%, rgba(0,0,0,0.15) 6%, rgba(0,0,0,0.15) 6.5%, rgba(0,0,0,0.1) 7.5%, rgba(255,255,255,0.06) 20%, rgba(0,0,0,0) 80%, rgba(0,0,0,0.1) 100%, transparent 22%),
+      linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, transparent 5%),
+      linear-gradient(to top, rgba(0,0,0,0.1) 0%, transparent 5%);
   }
-  .g-thumb img { width: 100%; height: 100%; object-fit: cover; }
-  .g-thumb-fallback { font-family: var(--font-body); font-size: 10px; color: var(--color-muted); padding: 4px; text-align: center; }
-
-  .lib-row { display: flex; gap: var(--space-lg); overflow-x: auto; width: 100%; padding-bottom: 4px; scrollbar-width: thin; }
-  .lib-item {
-    flex: 0 0 auto;
-    width: 96px; height: 140px;
-    border-radius: var(--radius-card);
-    overflow: hidden;
-    background: var(--color-accent-light);
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 2px 8px rgba(120, 90, 20, 0.15);
-  }
-  .lib-item img { width: 100%; height: 100%; object-fit: cover; }
-  .lib-spine { font-family: var(--font-serif); font-size: 11px; color: var(--color-muted); padding: 6px; text-align: center; }
+  .book-cover { width: 200px; height: 300px; object-fit: cover; border-radius: 3px 6px 6px 3px; display: block; }
+  .book-spine { width: 200px; height: 300px; background: var(--book-color, #c9b99a); border-radius: 12px; }
+  .book-title { font-family: var(--font-serif); font-size: var(--text-md); font-weight: 700; color: var(--color-fg); line-height: var(--leading-tight); margin: 0; }
+  .book-author { font-family: var(--font-body); font-size: var(--text-sm); color: var(--color-muted); margin: 0; }
 
   /* ── Community ────────────────────────────────────────────────────────── */
   .community-summary { padding-block: clamp(40px, 7vw, 96px); }
-  .comm-row { display: flex; gap: clamp(16px, 3vw, 48px); overflow-x: auto; padding: var(--space-md) 2px; scrollbar-width: thin; }
+  .comm-title-block { display: flex; flex-direction: column; align-items: flex-end; gap: var(--space-xs); }
+  .comm-subtitle {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+    margin: 0;
+    text-align: right;
+  }
+  .comm-arrow {
+    color: var(--color-heading);
+    text-decoration: none;
+    transition: opacity 0.15s;
+  }
+  .comm-arrow:hover { opacity: 0.7; }
+  .comm-row { display: flex; gap: clamp(12px, 2vw, 24px); overflow-x: auto; padding: var(--space-md) 2px; scrollbar-width: thin; }
   .comm-tile {
     flex: 0 0 auto;
-    width: clamp(120px, 16vw, 196px);
+    width: clamp(100px, 14vw, 160px);
     aspect-ratio: 1 / 1;
     background: var(--color-card);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-gold);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
     transition: transform 0.18s ease, box-shadow 0.18s ease;
   }
   .comm-tile:hover { transform: translateY(-4px); box-shadow: 0 10px 24px rgba(144, 100, 47, 0.28); }
-
-  /* ── Now ──────────────────────────────────────────────────────────────── */
-  .now-summary { padding-block: clamp(40px, 7vw, 96px) clamp(64px, 10vw, 128px); }
-  .now-card {
-    background: var(--color-card);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-gold);
-    padding: clamp(28px, 5vw, 64px);
-    font-family: var(--font-serif);
-    font-style: italic;
-    color: var(--color-heading);
-  }
-  .now-date { font-weight: 700; font-size: var(--text-lg); margin-bottom: var(--space-lg); }
-  .now-body { font-size: var(--text-md); line-height: 1.7; }
-  .now-body :global(p) { margin-bottom: var(--space-md); }
-  .now-body :global(p:last-child) { margin-bottom: 0; }
-  .now-more {
-    display: inline-block;
-    margin-top: var(--space-lg);
-    font-family: var(--font-body);
-    font-style: normal;
-    font-size: var(--text-sm);
-    color: var(--color-heading);
-    text-decoration: underline;
-    text-underline-offset: 3px;
+  .comm-pixel-canvas {
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated;
+    display: block;
   }
 
   /* ── Responsive ───────────────────────────────────────────────────────── */
@@ -396,3 +411,40 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
     .g-grid { grid-template-columns: 1fr; }
   }
 </style>
+
+<script is:inline>
+(function () {
+  var GRID = 16;
+  var canvases = document.querySelectorAll('.comm-pixel-canvas');
+  if (!canvases.length) return;
+
+  fetch('https://api.github.com/repos/giannacrisha/giannacrisha.github.io/issues?labels=community-garden&state=open&per_page=6', {
+    headers: { Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' }
+  })
+  .then(function (res) { return res.ok ? res.json() : []; })
+  .then(function (issues) {
+    var submissions = issues.map(function (i) {
+      try { var p = JSON.parse(i.body); return p && p.pixels ? p : null; }
+      catch (e) { return null; }
+    }).filter(Boolean);
+
+    // Sort by hearts desc (same as community page)
+    submissions.sort(function (a, b) { return (b.hearts || 0) - (a.hearts || 0); });
+
+    canvases.forEach(function (canvas, idx) {
+      var s = submissions[idx];
+      if (!s) return;
+      var ctx = canvas.getContext('2d');
+      var cell = canvas.width / GRID;
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      s.pixels.forEach(function (color, i) {
+        if (!color) return;
+        ctx.fillStyle = color;
+        ctx.fillRect((i % GRID) * cell, Math.floor(i / GRID) * cell, cell, cell);
+      });
+    });
+  })
+  .catch(function () {});
+})();
+</script>

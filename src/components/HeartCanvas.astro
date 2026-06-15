@@ -3,11 +3,40 @@
 // Loads a heart .glb and applies a gold PBR material + a procedural muscle-
 // contraction beat (vertex wall-flex + directional squeeze + systolic twist).
 // The model is meshopt-compressed, so the loader needs the meshopt decoder.
+import LiquidGlass from './LiquidGlass.astro';
 const { model = '/heart.glb' } = Astro.props;
 ---
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <div class="heart-stage" data-heart-model={model}>
   <canvas class="heart-canvas" aria-hidden="true"></canvas>
+</div>
+<div class="heart-cursor-glass" aria-hidden="true"></div>
+<div class="heart-cursor-label" aria-hidden="true">
+  <LiquidGlass displacement={100} aberration={3} cornerRadius={24} filterId="heart-pill" backdrop={false}>
+    <span class="heart-cursor-text">why a heart?</span>
+  </LiquidGlass>
+</div>
+<div class="heart-terminal" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="ht-window">
+    <div class="ht-bar">
+      <span class="ht-dot ht-r"></span>
+      <span class="ht-dot ht-y"></span>
+      <span class="ht-dot ht-g"></span>
+      <span class="ht-title">why-a-heart.sh</span>
+    </div>
+    <pre class="ht-body"><span class="ht-c">giannacrisha@Giannas-MacBook-Air why-a-heart.sh</span>
+
+because everything worth
+creating starts with one :)
+
+it brings hope that deep down
+we all have one that beats
+inside of all of us.
+
+<span class="ht-p">~</span> <span class="ht-blink">▋</span></pre>
+  </div>
 </div>
 
 <style>
@@ -16,18 +45,104 @@ const { model = '/heart.glb' } = Astro.props;
     aspect-ratio: 1 / 1;
     position: relative;
     z-index: 3;
-    cursor: pointer;
+    cursor: none;
   }
   .heart-canvas {
     width: 100%;
     height: 100%;
     display: block;
-    /* white glow (no offset → reads as light, not a shadow) */
     filter: drop-shadow(0 0 26px rgba(255, 255, 255, 0.65))
             drop-shadow(0 0 64px rgba(255, 255, 255, 0.40));
   }
+  /* glass layer — backdrop blur + SVG displacement, no text so filter doesn't warp it */
+  .heart-cursor-glass {
+    position: fixed;
+    top: 0; left: 0;
+    pointer-events: none;
+    z-index: 9998;
+    opacity: 0;
+    transition: opacity 0.15s;
+    border-radius: 24px;
+    backdrop-filter: blur(2px) saturate(200%); /* change blur and saturation here */
+    -webkit-backdrop-filter: blur(2px) saturate(200%);
+    filter: url(#heart-pill);
+  }
+  .heart-cursor-glass.is-visible { opacity: 1; }
+  /* label layer — LiquidGlass chrome + text, sits above glass, no filter applied */
+  .heart-cursor-label {
+    position: fixed;
+    top: 0; left: 0;
+    display: inline-flex;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .heart-cursor-label.is-visible { opacity: 1; }
+  .heart-cursor-text {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px;
+    line-height: 1;
+    color: #fff;
+    white-space: nowrap;
+    padding: 7px 14px;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.55), 0 0 2px rgba(0, 0, 0, 0.3);
+  }
+  /* terminal modal */
+  .heart-terminal {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+  .heart-terminal.is-open { opacity: 1; pointer-events: auto; }
+  .ht-window {
+    background: #1c1c1e;
+    border-radius: 12px;
+    overflow: hidden;
+    width: min(520px, 90vw);
+    box-shadow: 0 32px 80px rgba(0, 0, 0, 0.7);
+  }
+  .ht-bar {
+    background: #2c2c2e;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .ht-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+  .ht-r { background: #ff5f57; cursor: pointer; }
+  .ht-y { background: #ffbd2e; }
+  .ht-g { background: #28c841; }
+  .ht-title {
+    margin-left: 8px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px;
+    color: #666;
+  }
+  .ht-body {
+    padding: 24px 28px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px;
+    line-height: 2.2;
+    color: #d4d4d4;
+    margin: 0;
+    white-space: pre-wrap;
+  }
+  .ht-p { color: #90642f; }
+  .ht-c { color: #fff; }
+  .ht-blink { display: inline-block; animation: ht-blink 1s step-start infinite; }
+  @keyframes ht-blink { 50% { opacity: 0; } }
   @media (max-width: 768px) {
     .heart-stage { width: clamp(220px, 64vw, 320px); }
+    .ht-body { font-size: 7px; padding: 20px; }
   }
 </style>
 
@@ -176,10 +291,88 @@ const { model = '/heart.glb' } = Astro.props;
     new ResizeObserver(resize).observe(stage);
     resize();
 
-    // hover → gently rotate (turntable); eases back to rest on leave
-    let spin = 0, targetSpin = 0;
-    stage.addEventListener('pointerenter', () => { targetSpin = 0.9; });
-    stage.addEventListener('pointerleave', () => { targetSpin = 0; });
+    // auto-rotate + hover tilt + cursor-label + drag + click → terminal
+    const cursorLabel = document.querySelector<HTMLElement>('.heart-cursor-label');
+    const cursorGlass = document.querySelector<HTMLElement>('.heart-cursor-glass');
+    const terminal    = document.querySelector<HTMLElement>('.heart-terminal');
+
+    // keep glass sized to match label (glass has no intrinsic size)
+    const syncGlassSize = () => {
+      if (!cursorGlass || !cursorLabel) return;
+      cursorGlass.style.width  = cursorLabel.offsetWidth  + 'px';
+      cursorGlass.style.height = cursorLabel.offsetHeight + 'px';
+    };
+    syncGlassSize();
+    if (cursorLabel) new ResizeObserver(syncGlassSize).observe(cursorLabel);
+
+    const idleSpin = 0.3;
+    let spin = 0, targetSpin = idleSpin;
+    let tiltX = 0, targetTiltX = 0;
+    let isDragging = false;
+    let dragPX = 0, dragPY = 0, dragStartX = 0, dragStartY = 0;
+
+    stage.addEventListener('pointerenter', () => {
+      cursorLabel?.classList.add('is-visible');
+      cursorGlass?.classList.add('is-visible');
+      if (!isDragging) targetTiltX = 0.18;
+    });
+    stage.addEventListener('pointerleave', () => {
+      cursorLabel?.classList.remove('is-visible');
+      cursorGlass?.classList.remove('is-visible');
+      if (!isDragging) targetTiltX = 0;
+    });
+    stage.addEventListener('pointermove', (e: Event) => {
+      const pe = e as PointerEvent;
+      if (cursorLabel) {
+        const x = pe.clientX + 14;
+        const y = pe.clientY - cursorLabel.offsetHeight / 2;
+        cursorLabel.style.left = x + 'px';
+        cursorLabel.style.top  = y + 'px';
+        if (cursorGlass) { cursorGlass.style.left = x + 'px'; cursorGlass.style.top = y + 'px'; }
+      }
+      if (isDragging) {
+        pivot.rotation.y += (pe.clientX - dragPX) * 0.008;
+        pivot.rotation.x += (pe.clientY - dragPY) * 0.008;
+        dragPX = pe.clientX; dragPY = pe.clientY;
+      }
+    });
+    stage.addEventListener('pointerdown', (e: Event) => {
+      const pe = e as PointerEvent;
+      (stage as HTMLElement).setPointerCapture(pe.pointerId);
+      isDragging = true;
+      dragPX = dragStartX = pe.clientX;
+      dragPY = dragStartY = pe.clientY;
+      targetSpin = 0;
+    });
+    const endDrag = (e: Event) => {
+      if (!isDragging) return;
+      const pe = e as PointerEvent;
+      const dist = Math.hypot(pe.clientX - dragStartX, pe.clientY - dragStartY);
+      isDragging = false;
+      tiltX = pivot.rotation.x;
+      targetTiltX = 0;
+      targetSpin = idleSpin;
+      if (dist < 6 && terminal) {
+        terminal.classList.add('is-open');
+        terminal.removeAttribute('aria-hidden');
+      }
+    };
+    stage.addEventListener('pointerup', endDrag);
+    stage.addEventListener('pointercancel', endDrag);
+
+    if (terminal) {
+      terminal.addEventListener('click', (e) => {
+        if (e.target === terminal) { terminal.classList.remove('is-open'); terminal.setAttribute('aria-hidden', 'true'); }
+      });
+      terminal.querySelector<HTMLElement>('.ht-r')?.addEventListener('click', () => {
+        terminal.classList.remove('is-open'); terminal.setAttribute('aria-hidden', 'true');
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && terminal.classList.contains('is-open')) {
+          terminal.classList.remove('is-open'); terminal.setAttribute('aria-hidden', 'true');
+        }
+      });
+    }
 
     const start = performance.now();
     let last = start;
@@ -187,10 +380,13 @@ const { model = '/heart.glb' } = Astro.props;
       const t = reduce ? 0 : (now - start) / 1000;
       const delta = (now - last) / 1000; last = now;
       if (mixer) mixer.update(delta);
-      uTime.value = t;     // drives the cardiac cycle in the gold shader
-      // ease spin speed in/out and rotate the heart in place (around the pivot)
-      spin += (targetSpin - spin) * 0.05;
-      pivot.rotation.y += spin * delta;
+      uTime.value = t;
+      if (!isDragging) {
+        spin += (targetSpin - spin) * 0.06;
+        pivot.rotation.y += spin * delta;
+        tiltX += (targetTiltX - tiltX) * 0.06;
+        pivot.rotation.x = tiltX;
+      }
       renderer.render(scene, camera);
       requestAnimationFrame(loop);
     }
