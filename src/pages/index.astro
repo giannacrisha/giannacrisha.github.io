@@ -94,33 +94,33 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
 
     <!-- ── About intro ──────────────────────────────────────────────────── -->
     <section class="about-intro">
-      <div class="ai-card">
-        <div class="ai-photo-wrap">
-          <img class="ai-photo" src="/images/portrait.png" alt="Gianna Crisha Saludo" />
+      <div class="about-card">
+        <div class="about-photo-wrap">
+          <img class="about-photo" src="/images/portrait.png" alt="Gianna Crisha Saludo" />
         </div>
-        <div class="ai-card-body">
-          <div class="ai-domain">giannacrisha.github.io</div>
-          <div class="ai-name">Gianna Crisha Saludo</div>
-          <div class="ai-role"> designer · developer · anthropologist</div>
-          <div class="ai-socials">
-            <a href="https://bsky.app/profile/giannacrisha.com" class="ai-social" aria-label="Bluesky" target="_blank" rel="noopener">
+        <div class="about-card-body">
+          <div class="about-domain">giannacrisha.github.io</div>
+          <div class="about-name">Gianna Crisha Saludo</div>
+          <div class="about-role"> designer · developer · anthropologist</div>
+          <div class="about-socials">
+            <a href="https://bsky.app/profile/giannacrisha.com" class="about-social" aria-label="Bluesky" target="_blank" rel="noopener">
               <Icon name="bluesky" size={16} />
             </a>
-            <a href="https://linkedin.com/in/giannacrisha" class="ai-social" aria-label="LinkedIn" target="_blank" rel="noopener">
+            <a href="https://linkedin.com/in/giannacrisha" class="about-social" aria-label="LinkedIn" target="_blank" rel="noopener">
               <Icon name="linkedin" size={16} />
             </a>
-            <a href="https://github.com/giannacrisha" class="ai-social" aria-label="GitHub" target="_blank" rel="noopener">
+            <a href="https://github.com/giannacrisha" class="about-social" aria-label="GitHub" target="_blank" rel="noopener">
               <Icon name="github" size={16} />
             </a>
           </div>
         </div>
-        <div class="ai-chip"></div>
+        <div class="about-chip"></div>
       </div>
-      <div class="ai-blurb">
-        <p class="ai-text">
+      <div class="about-blurb">
+        <p class="about-text">
           hey, im gi! im based in Boston studying whatever i find interesting (everything) in a liberal arts uni. i was raised in the Manila, grew up in Abu Dhabi, and moved to Butuan.
         </p>
-        <a href="/about" class="ai-link"><em>get to know me</em> →</a>
+        <a href="/about" class="about-link"><em>get to know me</em> →</a>
       </div>
     </section>
 
@@ -295,15 +295,15 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
   }
 
   /* left: blurb */
-  .ai-blurb { display: flex; flex-direction: column; gap: var(--space-xl); }
-  .ai-text {
+  .about-blurb { display: flex; flex-direction: column; gap: var(--space-xl); }
+  .about-text {
     font-family: var(--font-serif);
     font-size: var(--text-md);
     line-height: var(--leading-loose);
     color: var(--color-fg);
     max-width: 38ch;
   }
-  .ai-link {
+  .about-link {
     font-family: var(--font-serif);
     font-size: var(--text-sm);
     color: var(--color-heading);
@@ -313,11 +313,11 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
     padding-bottom: 2px;
     transition: color 0.15s, border-color 0.15s;
   }
-  .ai-link:hover { color: var(--color-fg); border-color: var(--color-fg); }
-  .ai-link em { font-style: italic; }
+  .about-link:hover { color: var(--color-fg); border-color: var(--color-fg); }
+  .about-link em { font-style: italic; }
 
   /* left: access card */
-  .ai-card {
+  .about-card {
     position: relative;
     background: linear-gradient(
       135deg,
@@ -341,7 +341,7 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
     cursor: default;
   }
   /* cursor-tracking gloss */
-  .ai-card::after {
+  .about-card::after {
     content: '';
     position: absolute;
     inset: 0;
@@ -356,8 +356,8 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
     opacity: 0;
     transition: opacity 0.25s;
   }
-  .ai-card:hover::after { opacity: 1; }
-  .ai-photo-wrap {
+  .about-card:hover::after { opacity: 1; }
+  .about-photo-wrap {
     flex-shrink: 0;
     width: 80px;
     height: 80px;
@@ -366,48 +366,48 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
     border: 2px solid rgba(255,255,255,0.35);
     box-shadow: 0 2px 8px rgba(0,0,0,0.3);
   }
-  .ai-photo { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .ai-card-body {
+  .about-photo { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .about-card-body {
     flex: 1;
     min-width: 0;
     display: flex;
     flex-direction: column;
     gap: 4px;
   }
-  .ai-domain {
+  .about-domain {
     font-family: var(--font-mono);
     font-size: var(--text-base);
     color: rgba(255,255,255,0.55);
     letter-spacing: 0.04em;
     margin-bottom: 4px;
   }
-  .ai-name {
+  .about-name {
     font-family: var(--font-serif);
     font-weight: 600;
     font-size: var(--text-md);
     color: #fff;
     line-height: 1.2;
   }
-  .ai-role {
+  .about-role {
     font-family: var(--font-body);
     font-size: var(--text-base);
     color: rgba(255,255,255,0.72);
     line-height: 1.4;
   }
-  .ai-socials {
+  .about-socials {
     display: flex;
     gap: 12px;
     margin-top: 10px;
   }
-  .ai-social {
+  .about-social {
     color: rgba(255,255,255,0.65);
     display: flex;
     align-items: center;
     transition: color 0.15s;
   }
-  .ai-social:hover { color: #fff; }
+  .about-social:hover { color: #fff; }
   /* EMV chip */
-  .ai-chip {
+  .about-chip {
     position: absolute;
     bottom: 22px;
     right: 22px;
@@ -418,7 +418,7 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
     border: 0.5px solid rgba(255,255,255,0.25);
     box-shadow: 0 1px 3px rgba(0,0,0,0.4);
   }
-  .ai-chip::after {
+  .about-chip::after {
     content: '';
     position: absolute;
     inset: 4px 5px;
@@ -428,7 +428,7 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
 
   @media (max-width: 768px) {
     .about-intro { grid-template-columns: 1fr; }
-    .ai-text { max-width: none; }
+    .about-text { max-width: none; }
   }
 
   /* ── Bento garden grid ───────────────────────────────────────────────── */
@@ -697,7 +697,7 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
 
 <script>
 (function () {
-  var card = document.querySelector('.ai-card');
+  var card = document.querySelector('.about-card');
   if (!card) return;
   var MAX = 16;
 
