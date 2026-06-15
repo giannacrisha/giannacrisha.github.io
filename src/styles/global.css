@@ -317,7 +317,7 @@ ul, ol {
 
 /* inline code */
 .prose code {
-  font-family: 'Courier New', Courier, monospace;
+  font-family: var(--font-mono);
   font-size: 0.88em;
   background: var(--color-accent-light);
   color: var(--color-fg);
