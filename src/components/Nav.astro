@@ -196,12 +196,16 @@ const sublinks: { href: string; label: string; desc: string }[] = [
     display: flex;
     align-items: center;
     text-decoration: none;
-    border-radius: 8px;
+    border-radius: 16px;
     transition: background 0.12s;
   }
-  .dropdown-link:hover  { background: var(--color-accent-light); }
+  .dropdown-link:hover  { background: rgba(255, 255, 255, 0.5); }
   .dropdown-link:hover .dropdown-link-label {
-    text-shadow: 0 0 0.6px var(--color-fg), 0 0 0.6px var(--color-fg);
+    text-shadow:
+      0 1px 4px rgba(0, 0, 0, 0.35),
+      0 0 2px rgba(255, 255, 255, 0.45),
+      0 0 0.6px var(--color-fg),
+      0 0 0.6px var(--color-fg);
   }
   .dropdown-link-text {
     display: flex;
@@ -213,18 +217,27 @@ const sublinks: { href: string; label: string; desc: string }[] = [
     font-size: var(--text-sm);
     color: var(--color-fg);
     letter-spacing: 0.01em;
-    text-shadow: none;
+    text-shadow:
+      0 1px 4px rgba(0, 0, 0, 0.35),
+      0 0 2px rgba(255, 255, 255, 0.45);
     transition: text-shadow 0.2s ease;
   }
   .dropdown-link.active .dropdown-link-label {
     color: var(--color-heading);
-    text-shadow: 0 0 0.6px var(--color-heading), 0 0 0.6px var(--color-heading);
+    text-shadow:
+      0 1px 4px rgba(0, 0, 0, 0.35),
+      0 0 2px rgba(255, 255, 255, 0.45),
+      0 0 0.6px var(--color-heading),
+      0 0 0.6px var(--color-heading);
   }
   .dropdown-link-desc {
     font-family: var(--font-body);
     font-size: 11px;
     color: var(--color-muted);
     letter-spacing: 0.02em;
+    text-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.3),
+      0 0 1px rgba(255, 255, 255, 0.4);
   }
 
   /* search */
