@@ -119,14 +119,14 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
             </a>
           </div>
           <a href="https://linktr.ee/giannacrisha" class="about-chip" aria-label="Linktree" target="_blank" rel="noopener">
-            <Icon name="linktree" size={40} />
+            <img src="/about-qr-clean.svg" class="about-chip-img" alt="" />
           </a>
         </div>
       </div>
       </div>
       <div class="about-blurb">
         <p class="about-text">
-          hey, im gi! im based in Boston studying whatever i find interesting (everything) in a liberal arts uni. i was raised in the Manila, grew up in Abu Dhabi, and moved to Butuan.
+          hey, im gi! i was raised in metro manila, grew up in abu dhabi, then moved to butuan. currently, im a wien international scholar at a libertal arts uni in boston!
         </p>
         <a href="/about" class="about-link"><em>get to know me</em> →</a>
       </div>
@@ -439,11 +439,15 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: rgba(255,255,255,0.55);
-    transition: color 0.15s;
   }
-  .about-chip svg { width: 12cqw; height: 12cqw; }
-  .about-chip:hover { color: #fff; }
+  .about-chip-img {
+    width: 12cqw;
+    height: 12cqw;
+    opacity: 0.7;
+    transition: opacity 0.15s;
+    border-radius: 2px;
+  }
+  .about-chip:hover .about-chip-img { opacity: 1; }
 
   @media (max-width: 768px) {
     .about-intro { grid-template-columns: 1fr; }
