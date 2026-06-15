@@ -18,6 +18,7 @@ export const colors = {
 
 export const fonts = {
   display: "'Jacquard 12', monospace",
+  mono:    "'Iosevka', monospace",
   serif:   "'Lora', serif",
   body:    "'Atkinson Hyperlegible Next', sans-serif",
   googleFontsUrl: "https://fonts.googleapis.com/css2?family=Jacquard+12&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600;1,700&family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,700;1,400&display=swap",
