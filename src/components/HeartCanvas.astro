@@ -379,11 +379,11 @@ const { model = '/heart.glb' } = Astro.props;
             // file content dumps all at once (cat behaviour)
             const out = document.createElement('span');
             out.textContent = '\n' + FILE_CONTENT + '\n';
-            body.appendChild(out);
+            body!.appendChild(out);
             // second prompt + cursor
             const p2 = document.createElement('span');
             p2.innerHTML = `${PROMPT_HTML}<span class="ht-blink">▋</span>`;
-            body.appendChild(p2);
+            body!.appendChild(p2);
           }, 250) as unknown as number;
         }
       }

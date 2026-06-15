@@ -81,7 +81,7 @@ const ogImageUrl   = ogImage.startsWith('http') ? ogImage : new URL(ogImage, sit
     <meta name="twitter:image" content={ogImageUrl} />
 
     <!-- JSON-LD structured data for AI assistants + search -->
-    <script type="application/ld+json" set:html={jsonLd} />
+    <script is:inline type="application/ld+json" set:html={jsonLd} />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

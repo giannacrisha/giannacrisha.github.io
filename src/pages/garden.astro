@@ -68,9 +68,6 @@ const allTopics = [...new Set([
 
 // Growth stage weather — counts across all collections (excluding library, which has no stage)
 const allStaged = [...lab, ...archives, ...gallery] as { data: { growth_stage?: string } }[];
-const dustCount  = allStaged.filter(e => e.data.growth_stage === 'dust').length;
-const sparkCount = allStaged.filter(e => e.data.growth_stage === 'spark').length;
-const starCount  = allStaged.filter(e => e.data.growth_stage === 'star').length;
 
 // Book spine color from title hash
 function bookColor(s: string) {
@@ -79,7 +76,6 @@ function bookColor(s: string) {
   return p[Math.abs(h)%p.length];
 }
 
-const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
 ---
 
 <Garden title={site.name} description={site.description}>

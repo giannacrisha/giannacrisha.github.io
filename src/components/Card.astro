@@ -62,7 +62,6 @@ const hasImage = !!cover_image;
 // Library cards show cover as a corner thumbnail, not full-width
 const showFullImage = hasImage && !isGallery && !isLibrary;
 const showCoverThumb = hasImage && isLibrary;
-const useLabHorizontal = false; // reserved for future 3D model feature
 ---
 <article class:list={['card', { 'card--gallery': isGallery && hasImage, 'card--lab': isLab && hasImage }]}
          style={isGallery && hasImage ? `background-image: url(${cover_image}); background-size: cover; background-position: center;` : ''}>

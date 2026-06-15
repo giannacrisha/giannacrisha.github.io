@@ -831,7 +831,7 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
     { t: '.', em: false },
   ];
 
-  var chars = [];
+  var chars: Array<{ch: string, em: boolean}> = [];
   segs.forEach(function (seg) {
     seg.t.split('').forEach(function (ch) { chars.push({ ch: ch, em: seg.em }); });
   });
@@ -843,7 +843,7 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
   h1.appendChild(cursor);
 
   var i = 0;
-  var currentEm = null;
+  var currentEm: HTMLElement | null = null;
   var inEm = false;
 
   function typeNext() {
@@ -856,7 +856,7 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
       inEm = item.em;
       if (inEm) {
         currentEm = document.createElement('em');
-        h1.insertBefore(currentEm, cursor);
+        h1!.insertBefore(currentEm, cursor);
       } else {
         currentEm = null;
       }
@@ -864,7 +864,7 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
     if (inEm && currentEm) {
       currentEm.textContent += item.ch;
     } else {
-      h1.insertBefore(document.createTextNode(item.ch), cursor);
+      h1!.insertBefore(document.createTextNode(item.ch), cursor);
     }
     setTimeout(typeNext, 38 + Math.random() * 28);
   }
@@ -886,8 +886,8 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
   var io = new IntersectionObserver(function (entries) {
     entries.forEach(function (entry) {
       if (entry.isIntersecting) {
-        sizer.classList.add('is-visible');
-        blurb.classList.add('is-visible');
+        (sizer as Element).classList.add('is-visible');
+        (blurb as Element).classList.add('is-visible');
         io.disconnect();
       }
     });
@@ -911,14 +911,14 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
     entries.forEach(function (entry) {
       if (!entry.isIntersecting) return;
       io.disconnect();
-      row.classList.add('reveal-run');  // play staggered animation
+      (row as Element).classList.add('reveal-run');  // play staggered animation
     });
   }, { threshold: 0.25 });
   io.observe(row);
 
   // once the last (most-delayed) tile finishes, hand control back to base CSS
   last.addEventListener('animationend', function () {
-    row.classList.remove('reveal-armed', 'reveal-run');
+    (row as Element).classList.remove('reveal-armed', 'reveal-run');
   });
 })();
 
@@ -961,82 +961,83 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
     '\nIt means recognizing the\n' +
     '"self in the other."\n';
 
-  var typeTimer = null;
+  var typeTimer: number | null = null;
 
   function playTerminal() {
-    var body = terminal.querySelector('.kt-body');
+    var body = terminal!.querySelector('.kt-body');
     if (!body) return;
     if (typeTimer !== null) { clearTimeout(typeTimer); typeTimer = null; }
 
     body.innerHTML =
       '<span>' + PROMPT_HTML + '<span class="kt-cmd"></span><span class="kt-blink">▋</span></span>';
 
-    var cmdEl  = body.querySelector('.kt-cmd');
-    var cursor = body.querySelector('.kt-blink');
+    var cmdEl  = body.querySelector<HTMLElement>('.kt-cmd')!;
+    var cursor = body.querySelector<HTMLElement>('.kt-blink')!;
     var i = 0;
 
     function typeNext() {
       if (i < CMD.length) {
         cmdEl.textContent += CMD[i++];
-        typeTimer = setTimeout(typeNext, 65 + Math.random() * 45);
+        typeTimer = setTimeout(typeNext, 65 + Math.random() * 45) as unknown as number;
       } else {
         typeTimer = setTimeout(function () {
           cursor.remove();
           var out = document.createElement('span');
           out.textContent = '\n' + FILE_CONTENT + '\n';
-          body.appendChild(out);
+          body!.appendChild(out);
           var p2 = document.createElement('span');
           p2.innerHTML = PROMPT_HTML + '<span class="kt-blink">▋</span>';
-          body.appendChild(p2);
-        }, 250);
+          body!.appendChild(p2);
+        }, 250) as unknown as number;
       }
     }
-    typeTimer = setTimeout(typeNext, 450);
+    typeTimer = setTimeout(typeNext, 450) as unknown as number;
   }
 
   function open() {
-    terminal.classList.add('is-open');
-    terminal.removeAttribute('aria-hidden');
+    terminal!.classList.add('is-open');
+    terminal!.removeAttribute('aria-hidden');
     playTerminal();
   }
   function close() {
-    terminal.classList.remove('is-open');
-    terminal.setAttribute('aria-hidden', 'true');
+    terminal!.classList.remove('is-open');
+    terminal!.setAttribute('aria-hidden', 'true');
     if (typeTimer !== null) { clearTimeout(typeTimer); typeTimer = null; }
   }
 
   trigger.addEventListener('click', open);
-  terminal.addEventListener('click', function (e) { if (e.target === terminal) close(); });
-  terminal.querySelector('[data-tw-close]')?.addEventListener('click', close);
+  terminal!.addEventListener('click', function (e) { if (e.target === terminal) close(); });
+  terminal!.querySelector('[data-tw-close]')?.addEventListener('click', close);
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && terminal.classList.contains('is-open')) close();
+    if (e.key === 'Escape' && terminal!.classList.contains('is-open')) close();
   });
 })();
 </script>
 
 <script>
 (function () {
-  var card = document.querySelector('.about-card');
+  var card = document.querySelector<HTMLElement>('.about-card');
   if (!card) return;
   var MAX = 16;
 
   card.addEventListener('mousemove', function (e) {
-    var r = card.getBoundingClientRect();
-    var x = (e.clientX - r.left) / r.width;
-    var y = (e.clientY - r.top)  / r.height;
+    var me = e as MouseEvent;
+    var r = card!.getBoundingClientRect();
+    var x = (me.clientX - r.left) / r.width;
+    var y = (me.clientY - r.top)  / r.height;
     var rotY =  (x - 0.5) * MAX * 2;
     var rotX = -(y - 0.5) * MAX * 2;
-    card.style.transition = 'transform 0.08s ease-out, box-shadow 0.08s ease-out';
-    card.style.transform = 'perspective(700px) rotateX(' + rotX + 'deg) rotateY(' + rotY + 'deg) scale3d(1.025,1.025,1.025)';
-    card.style.setProperty('--mx', (x * 100) + '%');
-    card.style.setProperty('--my', (y * 100) + '%');
+    card!.style.transition = 'transform 0.08s ease-out, box-shadow 0.08s ease-out';
+    card!.style.transform = 'perspective(700px) rotateX(' + rotX + 'deg) rotateY(' + rotY + 'deg) scale3d(1.025,1.025,1.025)';
+    card!.style.setProperty('--mx', (x * 100) + '%');
+    card!.style.setProperty('--my', (y * 100) + '%');
   });
 
   card.addEventListener('mouseleave', function () {
-    card.style.transition = 'transform 0.6s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.6s cubic-bezier(0.23, 1, 0.32, 1)';
-    card.style.transform = 'perspective(700px) rotateX(0deg) rotateY(0deg) scale3d(1,1,1)';
-    card.style.setProperty('--mx', '50%');
-    card.style.setProperty('--my', '50%');
+    card!.style.transition = 'transform 0.6s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.6s cubic-bezier(0.23, 1, 0.32, 1)';
+    card!.style.transform = 'perspective(700px) rotateX(0deg) rotateY(0deg) scale3d(1,1,1)';
+    card!.style.setProperty('--mx', '50%');
+    card!.style.setProperty('--my', '50%');
   });
 })();
 </script>
