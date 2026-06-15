@@ -204,7 +204,7 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
           <a class="sec-title" href="/community">community</a>
           <span class="pill comm-count-pill" id="comm-count" hidden></span>
         </div>
-        <p class="comm-subtitle">be part of the community and draw a pixel-art plant! <a href="/community" class="comm-arrow">→</a></p>
+        <p class="comm-subtitle">be part of the community! <a href="/community" class="comm-arrow">draw a pixel-art plant →</a></p>
       </header>
       <div class="comm-row-wrap">
         <div class="comm-row">
@@ -597,11 +597,17 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
     text-align: center;
   }
   .comm-arrow {
-    color: var(--color-heading);
-    text-decoration: none;
-    transition: opacity 0.15s;
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    font-style: italic;
+    color: var(--color-muted);
+    text-decoration: underline;
+    text-decoration-color: var(--color-accent-border);
+    text-underline-offset: 3px;
+    white-space: nowrap;
+    transition: color 0.15s;
   }
-  .comm-arrow:hover { opacity: 0.7; }
+  .comm-arrow:hover { color: var(--color-fg); }
   .comm-row-wrap {
     position: relative;
   }
