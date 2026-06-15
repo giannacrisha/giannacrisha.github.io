@@ -114,7 +114,9 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
             </a>
           </div>
         </div>
-        <img class="about-chip" src="/about-qr.svg" alt="QR code" />
+        <a href="https://linktr.ee/giannacrisha" class="about-chip" aria-label="Linktree" target="_blank" rel="noopener">
+          <Icon name="linktree" size={40} />
+        </a>
       </div>
       <div class="about-blurb">
         <p class="about-text">
@@ -332,6 +334,7 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
     );
     border-radius: 20px;
     padding: 28px 24px;
+    aspect-ratio: 1.618 / 1;
     display: flex;
     align-items: center;
     gap: 20px;
@@ -410,16 +413,17 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
     transition: color 0.15s;
   }
   .about-social:hover { color: #fff; }
-  /* QR code */
+  /* linktree QR icon */
   .about-chip {
     position: absolute;
-    bottom: 18px;
-    right: 18px;
-    width: 52px;
-    height: 52px;
-    border-radius: 4px;
-    opacity: 0.85;
+    bottom: 16px;
+    right: 16px;
+    color: rgba(255,255,255,0.55);
+    display: flex;
+    align-items: center;
+    transition: color 0.15s;
   }
+  .about-chip:hover { color: #fff; }
 
   @media (max-width: 768px) {
     .about-intro { grid-template-columns: 1fr; }
