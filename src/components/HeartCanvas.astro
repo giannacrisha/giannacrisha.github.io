@@ -64,11 +64,11 @@ const { model = '/heart.glb' } = Astro.props;
   .heart-cursor-label.is-visible { opacity: 1; }
   .heart-cursor-text {
     font-family: var(--font-display);
-    font-size: var(--text-base);
-    line-height: 1;
+    font-size: var(--text-md);
+    line-height: 1.5;
     color: #fff;
     white-space: nowrap;
-    padding: 7px 14px;
+    padding: 32px 16px;
     text-shadow: 0 1px 6px rgba(0, 0, 0, 0.55), 0 0 2px rgba(0, 0, 0, 0.3);
   }
   /* terminal modal */
@@ -89,7 +89,8 @@ const { model = '/heart.glb' } = Astro.props;
   .ht-window { width: min(520px, 90vw); }
   .ht-body {
     padding: 24px 28px;
-    font-family: var(--font-display);
+    font-family: var(--font-mono);
+    font-weight: 700;
     font-size: var(--text-base);
     line-height: 2.2;
     color: #d4d4d4;
@@ -330,9 +331,8 @@ const { model = '/heart.glb' } = Astro.props;
       `<span class="ht-pct">%</span> `;
     const CMD = 'cat why-a-heart.sh';
     const FILE_CONTENT =
-      'because everything worth\n' +
+      '\nbecause everything worth\n' +
       'creating starts with one :)\n' +
-      '\n' +
       'it brings hope that deep down\n' +
       'we all have one that beats\n' +
       'inside of all of us.\n';
