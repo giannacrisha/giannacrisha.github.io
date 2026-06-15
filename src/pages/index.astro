@@ -5,6 +5,7 @@ import Garden from '../layouts/Garden.astro';
 import HeartCanvas from '../components/HeartCanvas.astro';
 import GrowthPill from '../components/GrowthPill.astro';
 import Icon from '../components/Icon.astro';
+import TerminalWindow from '../components/TerminalWindow.astro';
 import { getCollection } from 'astro:content';
 import { site } from '../config/design';
 
@@ -125,7 +126,7 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
       </div>
       <div class="about-blurb">
         <p class="about-text">
-          hey, im gi! i was raised in metro manila, grew up in abu dhabi, then moved to butuan. currently, im a wien international scholar at a liberal arts uni in boston!
+          hey, im gi! i was raised in metro manila, grew up in abu dhabi, then moved to butuan. now, im based in boston and currently a wien international scholar at brandeis university!
         </p>
         <a href="/about" class="about-link"><em>get to know me</em> →</a>
       </div>
@@ -209,14 +210,14 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
       <header class="sec-head sec-head--center">
         <div class="comm-title-row">
           <a class="sec-title" href="/community">community</a>
-          <span class="sec-phon">/ˈkap.wa/</span>
+          <button class="sec-phon kapwa-trigger" id="kapwa-trigger">/ˈkap.wa/</button>
           <span class="pill comm-count-pill" id="comm-count" hidden></span>
         </div>
       </header>
       <div class="comm-row-wrap">
         <div class="comm-row">
           {Array.from({ length: 9 }).map((_, i) => (
-            <a href="/community" class="comm-tile" aria-label="visit the community garden">
+            <a href="/community" class="comm-tile" style={`--i:${i}`} aria-label="visit the community garden">
               <canvas class="comm-pixel-canvas" width="96" height="96" data-tile-idx={i}></canvas>
               <img class="comm-frame" src="/frames/square.png" alt="" aria-hidden="true" />
             </a>
@@ -227,6 +228,13 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
         <a href="/community" class="btn">join us →</a>
       </div>
     </section>
+
+    <!-- kapwa terminal modal -->
+    <div class="kapwa-terminal" id="kapwa-terminal" role="dialog" aria-modal="true" aria-hidden="true">
+      <TerminalWindow title="kapwa.sh" class="kt-window">
+        <pre class="kt-body"></pre>
+      </TerminalWindow>
+    </div>
 
 
   </div>
@@ -268,6 +276,48 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
     opacity: 0.85;
   }
   .sec-phon--italic { font-style: italic; }
+  .kapwa-trigger {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 3px;
+    transition: text-decoration-color 0.15s, opacity 0.15s;
+  }
+  .kapwa-trigger:hover {
+    opacity: 1;
+    text-decoration-color: var(--color-heading);
+  }
+  .kapwa-terminal {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+  .kapwa-terminal.is-open { opacity: 1; pointer-events: auto; }
+  .kt-window { width: min(520px, 90vw); }
+  .kt-body {
+    padding: 24px 28px;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: var(--text-base);
+    line-height: 2.2;
+    color: #d4d4d4;
+    margin: 0;
+    white-space: pre-wrap;
+    text-align: left;
+  }
+  .kt-blink { display: inline-block; animation: kt-blink 1s step-start infinite; }
+  @keyframes kt-blink { 50% { opacity: 0; } }
 
   /* ── Hero ─────────────────────────────────────────────────────────────── */
   .hero {
@@ -340,14 +390,7 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
 
     position: absolute;
     inset: 0;
-    background: linear-gradient(
-      145deg,
-      #3E2710 0%,
-      #82592B 25%,
-      var(--color-heading) 30%,
-      #CA9F57 60%,
-      #82592B 100%
-    );
+    background: var(--card-grad);
     border-radius: 5cqw;
     padding: 6cqw;
     display: flex;
@@ -485,7 +528,13 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
     flex-direction: column;
     gap: var(--space-md);
     padding: var(--space-lg);
-    transition: border-color 0.15s;
+    transition: border-color 0.15s, opacity 0.5s ease, transform 0.5s ease;
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  .bento-tile.visible {
+    opacity: 1;
+    transform: translateY(0);
   }
   .bento-tile:hover { border-color: var(--color-heading); }
 
@@ -636,13 +685,15 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
   }
   .comm-row { display: flex; gap: clamp(12px, 2vw, 24px); overflow-x: auto; padding: var(--space-md) 2px; scrollbar-width: none; }
   .comm-row::-webkit-scrollbar { display: none; }
-  /* tiles 5–9 blur progressively — affordance that more exists */
-  .comm-tile:nth-child(5) { filter: blur(0.5px); opacity: 0.95; }
-  .comm-tile:nth-child(6) { filter: blur(1.5px); opacity: 0.85; }
-  .comm-tile:nth-child(7) { filter: blur(2.5px); opacity: 0.70; }
-  .comm-tile:nth-child(8) { filter: blur(4px);   opacity: 0.52; }
-  .comm-tile:nth-child(9) { filter: blur(6px);   opacity: 0.35; }
+  /* tiles 5–9 blur progressively — affordance that more exists.
+     --tile-o = each tile's resting opacity (reused as the reveal end-state) */
+  .comm-tile:nth-child(5) { filter: blur(0.5px); opacity: 0.95; --tile-o: 0.95; }
+  .comm-tile:nth-child(6) { filter: blur(1.5px); opacity: 0.85; --tile-o: 0.85; }
+  .comm-tile:nth-child(7) { filter: blur(2.5px); opacity: 0.70; --tile-o: 0.70; }
+  .comm-tile:nth-child(8) { filter: blur(4px);   opacity: 0.52; --tile-o: 0.52; }
+  .comm-tile:nth-child(9) { filter: blur(6px);   opacity: 0.35; --tile-o: 0.35; }
   .comm-tile {
+    --tile-o: 1;
     flex: 0 0 auto;
     width: clamp(100px, 14vw, 160px);
     aspect-ratio: 1 / 1;
@@ -651,6 +702,16 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
     transition: transform 0.18s ease;
   }
   .comm-tile:hover { transform: translateY(-4px); }
+  /* staggered fade + rise — frames appear one by one when scrolled into view */
+  .comm-row.reveal-armed .comm-tile { opacity: 0; }
+  .comm-row.reveal-run .comm-tile {
+    animation: comm-rise 0.6s cubic-bezier(0.23, 1, 0.32, 1) both;
+    animation-delay: calc(var(--i) * 75ms);
+  }
+  @keyframes comm-rise {
+    from { opacity: 0; transform: translateY(26px); }
+    to   { opacity: var(--tile-o); transform: translateY(0); }
+  }
   .comm-pixel-canvas {
     position: absolute;
     inset: 23%;
@@ -834,21 +895,122 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
   io.observe(section);
 })();
 
-// ── Community row scrolls with page scroll ────────────────────────────────
+// ── Community frames reveal one by one on scroll into view (once) ─────────
 (function () {
-  var section = document.querySelector('.community-summary');
   var row = document.querySelector('.comm-row');
-  if (!section || !row) return;
+  if (!row) return;
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-  window.addEventListener('scroll', function () {
-    var rect = section.getBoundingClientRect();
-    var vh = window.innerHeight;
-    var progress = 1 - (rect.bottom / (vh + rect.height));
-    if (progress < 0 || progress > 1) return;
-    var maxScroll = row.scrollWidth - row.clientWidth;
-    row.scrollLeft = progress * maxScroll;
-  }, { passive: true });
+  var tiles = row.querySelectorAll('.comm-tile');
+  if (!tiles.length) return;
+  var last = tiles[tiles.length - 1];
+
+  row.classList.add('reveal-armed');   // hide until in view
+
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (!entry.isIntersecting) return;
+      io.disconnect();
+      row.classList.add('reveal-run');  // play staggered animation
+    });
+  }, { threshold: 0.25 });
+  io.observe(row);
+
+  // once the last (most-delayed) tile finishes, hand control back to base CSS
+  last.addEventListener('animationend', function () {
+    row.classList.remove('reveal-armed', 'reveal-run');
+  });
+})();
+
+// ── Garden bento grid: fade-in on scroll into view ───────────────────────
+(function () {
+  var tiles = document.querySelectorAll('.bento-tile');
+  if (!tiles.length) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    tiles.forEach(function (t) { t.classList.add('visible'); });
+    return;
+  }
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry, i) {
+      if (entry.isIntersecting) {
+        setTimeout(function () { entry.target.classList.add('visible'); }, i * 80);
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.08 });
+  tiles.forEach(function (t) { io.observe(t); });
+})();
+
+// ── Kapwa terminal ────────────────────────────────────────────────────────
+(function () {
+  var trigger  = document.getElementById('kapwa-trigger');
+  var terminal = document.getElementById('kapwa-terminal');
+  if (!trigger || !terminal) return;
+
+  var PROMPT_HTML =
+    '<span style="color:#89b4fa">giannacrisha@Giannas-MacBook-Air</span> ' +
+    '<span style="color:#89b4fa">giannacrisha.github.io</span> ' +
+    '<span style="color:#cdd6f4">%</span> ';
+  var CMD = 'cat kapwa.sh';
+  var FILE_CONTENT =
+    '\nKapwa is a Filipino social psychology\n' +
+    'concept that translates to "shared\n' +
+    'identity" or "togetherness."\n' +
+    '\nWell-being, joy, and struggles are\n' +
+    'inherently tied to those around you.\n' +
+    '\nIt means recognizing the\n' +
+    '"self in the other."\n';
+
+  var typeTimer = null;
+
+  function playTerminal() {
+    var body = terminal.querySelector('.kt-body');
+    if (!body) return;
+    if (typeTimer !== null) { clearTimeout(typeTimer); typeTimer = null; }
+
+    body.innerHTML =
+      '<span>' + PROMPT_HTML + '<span class="kt-cmd"></span><span class="kt-blink">▋</span></span>';
+
+    var cmdEl  = body.querySelector('.kt-cmd');
+    var cursor = body.querySelector('.kt-blink');
+    var i = 0;
+
+    function typeNext() {
+      if (i < CMD.length) {
+        cmdEl.textContent += CMD[i++];
+        typeTimer = setTimeout(typeNext, 65 + Math.random() * 45);
+      } else {
+        typeTimer = setTimeout(function () {
+          cursor.remove();
+          var out = document.createElement('span');
+          out.textContent = '\n' + FILE_CONTENT + '\n';
+          body.appendChild(out);
+          var p2 = document.createElement('span');
+          p2.innerHTML = PROMPT_HTML + '<span class="kt-blink">▋</span>';
+          body.appendChild(p2);
+        }, 250);
+      }
+    }
+    typeTimer = setTimeout(typeNext, 450);
+  }
+
+  function open() {
+    terminal.classList.add('is-open');
+    terminal.removeAttribute('aria-hidden');
+    playTerminal();
+  }
+  function close() {
+    terminal.classList.remove('is-open');
+    terminal.setAttribute('aria-hidden', 'true');
+    if (typeTimer !== null) { clearTimeout(typeTimer); typeTimer = null; }
+  }
+
+  trigger.addEventListener('click', open);
+  terminal.addEventListener('click', function (e) { if (e.target === terminal) close(); });
+  terminal.querySelector('[data-tw-close]')?.addEventListener('click', close);
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && terminal.classList.contains('is-open')) close();
+  });
 })();
 </script>
 

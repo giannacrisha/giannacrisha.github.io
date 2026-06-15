@@ -193,7 +193,7 @@
     if (pagefind) return;
     try {
       const imp = new Function('p', 'return import(p)');
-      pagefind = await imp('/_pagefind/pagefind.js');
+      pagefind = await imp('/pagefind/pagefind.js');
       await pagefind.options({ excerptLength: 12 });
     } catch {
       /* pagefind not available in dev without a prior build */

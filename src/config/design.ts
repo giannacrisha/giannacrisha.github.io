@@ -100,8 +100,17 @@ export const mediaTypes = {
   other: { id: 'other', label: 'other' },
 } as const;
 
+export const liquidGlass = {
+  displacement: 100,
+  aberration:   3,
+  cornerRadius: 24,
+  blur:         20,
+  saturation:   200,
+  tint:         'rgba(0, 0, 0, 0.13)',
+} as const;
+
 export const site = {
-  name:        "gi's digital garden",
+  name:        "gianna crisha",
   tagline:     "designer, writer, creative technologist. growing in public.",
   description: "Gianna Crisha Saludo is a Filipino creative technologist, designer, and anthropologist based in the US. This is her digital garden: a living collection of essays, poems, art, lab projects, and half-formed thoughts on creativity, technology, culture, and what it means to make things. She writes about design, the internet, Filipino identity, and the blurry edges between disciplines. If you're looking for portfolio inspiration, digital garden examples, or the work of a creative who refuses to pick just one thing, you're in the right place.",
   url:         'https://giannacrisha.github.io',

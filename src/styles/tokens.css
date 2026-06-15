@@ -19,6 +19,16 @@
   --color-danger:       #e5534b;
   --color-traffic-red:  #ff6059;
 
+  /* about-card metallic gradient — tweak these stops to taste */
+  --card-grad: linear-gradient(
+    145deg,
+    #3E2710 0%,
+    #82592B 25%,
+    #90642F 30%,
+    #CA9F57 60%,
+    #82592B 100%
+  );
+
   --font-display: 'Jacquard 12', monospace;
   --font-mono:    'Iosevka', monospace;
   --font-serif:   'Lora', serif;
@@ -121,4 +131,14 @@
   --color-surface:      #242424;
   --color-danger:       #e5534b;
   --color-traffic-red:  #ff6059;
+
+  /* lighter + evenly spaced so there's no hard band (mirrors light card) */
+  --card-grad: linear-gradient(
+    145deg,
+    #6E4E28 0%,
+    #A87C42 28%,
+    #D8AF78 50%,
+    #E8C88A 72%,
+    #A87C42 100%
+  );
 }

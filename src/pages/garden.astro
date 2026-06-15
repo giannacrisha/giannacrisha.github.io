@@ -92,7 +92,7 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
       <header class="garden-header">
         <div class="garden-title-row">
           <h1 class="garden-title">the garden</h1>
-          <span class="garden-phonetic">[gahr-dn] &nbsp;/ ˈɡɑːr.dən /</span>
+          <span class="garden-phonetic">/ ˈɡɑːr.dən /</span>
         </div>
         <p class="page-def garden-def">
           a space where things grow. <a class="garden-learn-more" href="https://maggieappleton.com/garden-history" target="_blank" rel="noopener" aria-label="learn more about digital gardens (opens in new tab)">learn more →</a>
@@ -509,13 +509,11 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
     margin-bottom: var(--space-md);
   }
   .garden-title {
-    font-family: var(--font-display);
-    font-size: var(--text-hero);
-    color: var(--color-fg);
-    line-height: var(--leading-tight);
-  }
-  :global(:root[data-theme="dark"]) .garden-title {
-    color: var(--color-fg);
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: var(--text-section);
+    color: var(--color-heading);
+    line-height: 1.1;
   }
   :global(:root[data-theme="dark"]) .garden-def {
     color: var(--color-fg); /* cream */
@@ -836,9 +834,10 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
 
   /* story modal prose — :global() because content is JS-injected */
   :global(.story-title) {
-    font-family: var(--font-display);
+    font-family: var(--font-serif);
+    font-weight: 600;
     font-size: var(--text-xxl);
-    color: var(--color-fg);
+    color: var(--color-heading);
     margin: 0 0 var(--space-lg);
     line-height: 1.15;
   }
@@ -1413,7 +1412,6 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US',{month:'short',day:'numeri
   }
 
   @media (max-width: 600px) {
-    .garden-title { font-size: clamp(48px, 12vw, 80px); }
     .shelf-item { width: 160px; }
     .frame-img { max-height: 220px; }
     .chip-label { display: none; }
