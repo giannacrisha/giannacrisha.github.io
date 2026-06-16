@@ -245,7 +245,7 @@
 
   function displayTitle(item: any): string {
     let title = item.meta?.title ?? '';
-    title = title.replace(/\s*[—–-]\s*gianna crisha\s*$/i, '').trim();
+    title = title.replace(/\s*(\||[—–-])\s*gianna crisha\s*$/i, '').trim();
     if (!title) {
       const parts = item.url.split('/').filter(Boolean);
       title = parts[parts.length - 1] ?? item.url;
