@@ -1,0 +1,676 @@
+---
+---
+
+<div class="iw-outer" id="iw-outer">
+  <div class="iw-container" id="iw-container"></div>
+  <div class="iw-legend">
+    <span class="iw-leg-label">most salient</span>
+    <span class="iw-leg iw-leg--O"></span>
+    <span class="iw-leg iw-leg--B"></span>
+    <span class="iw-leg iw-leg--A"></span>
+    <span class="iw-leg iw-leg--F"></span>
+    <span class="iw-leg iw-leg--G"></span>
+    <span class="iw-leg iw-leg--K"></span>
+    <span class="iw-leg iw-leg--M"></span>
+    <span class="iw-leg-label">least</span>
+  </div>
+  <button class="iw-reset" id="iw-reset" aria-label="reset node positions">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M2.5 8a5.5 5.5 0 1 0 1.2-3.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      <polyline points="2.5,2.5 2.5,5.5 5.5,5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    reset nodes
+  </button>
+  <button class="iw-recenter" id="iw-recenter" aria-label="recenter view">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="8" cy="8" r="2.5" fill="currentColor"/>
+      <path d="M8 1v2.5M8 12.5V15M1 8h2.5M12.5 8H15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+    recenter
+  </button>
+  <p class="iw-hint">drag to orbit · scroll to zoom · drag nodes to reposition</p>
+</div>
+
+<style>
+  .iw-outer {
+    position: relative;
+    width: 100%;
+    height: 75vh;
+    min-height: 520px;
+    max-height: 780px;
+    border-radius: var(--radius-card);
+    border: var(--border);
+    overflow: hidden;
+    background: radial-gradient(ellipse at 50% 45%, #0d1828 0%, #060a10 70%);
+  }
+
+  .iw-container {
+    position: absolute;
+    inset: 0;
+    cursor: grab;
+  }
+  .iw-container:active { cursor: grabbing; }
+  .iw-container canvas { display: block; }
+
+  /* legend — spectral scale */
+  .iw-legend {
+    position: absolute;
+    top: var(--space-md);
+    left: var(--space-md);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    z-index: 10;
+    pointer-events: none;
+  }
+  .iw-leg-label {
+    font-family: var(--font-body);
+    font-size: 10px;
+    color: rgba(255,255,255,0.35);
+  }
+  .iw-leg {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    box-shadow: 0 0 6px 2px currentColor;
+    opacity: 0.85;
+  }
+  .iw-leg--O { background: #5577FF; color: #5577FF; }
+  .iw-leg--B { background: #99BBFF; color: #99BBFF; }
+  .iw-leg--A { background: #EEEEFF; color: #EEEEFF; }
+  .iw-leg--F { background: #EEFFAA; color: #EEFFAA; }
+  .iw-leg--G { background: #FFE040; color: #FFE040; }
+  .iw-leg--K { background: #FF8030; color: #FF8030; }
+  .iw-leg--M { background: #FF2810; color: #FF2810; }
+
+  /* reset + recenter buttons — shared style */
+  .iw-reset,
+  .iw-recenter {
+    position: absolute;
+    bottom: var(--space-xl);
+  }
+  .iw-reset   { left:  var(--space-xl); }
+  .iw-recenter { right: var(--space-xl); }
+
+  .iw-reset,
+  .iw-recenter {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-body);
+    font-size: 11px;
+    color: rgba(255,255,255,0.45);
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: var(--radius-pill);
+    padding: 6px 12px;
+    cursor: pointer;
+    z-index: 10;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+  }
+  .iw-reset:hover,
+  .iw-recenter:hover {
+    color: rgba(255,255,255,0.85);
+    border-color: rgba(255,255,255,0.35);
+    background: rgba(255,255,255,0.10);
+  }
+
+  /* hint */
+  .iw-hint {
+    position: absolute;
+    bottom: var(--space-md);
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-body);
+    font-size: 11px;
+    color: rgba(255,255,255,0.30);
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 10;
+  }
+</style>
+
+<script>
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
+
+const NODES = [
+  // center — fixed
+  { id: 'center', label: 'IDENTITY\nWEB', x: 0, y: 0, z: 0, group: 'center', fixed: true,
+    desc: 'All of these pieces are me — overlapping, contradicting, co-evolving.' },
+
+  // category hubs — fixed anchors, larger glow
+  { id: 'identity-hub',    label: 'Identity',    x: -2.0, y:  0.0, z:  0.0, group: 'hub', fixed: true, hub: true },
+  { id: 'interests-hub',   label: 'Interests',   x:  2.0, y:  0.0, z:  0.0, group: 'hub', fixed: true, hub: true },
+  { id: 'foundations-hub', label: 'Foundations', x:  0.0, y: -2.5, z:  0.0, group: 'hub', fixed: true, hub: true },
+
+  // identity cluster — left hemisphere
+  // spectral: 0=O(blue) most salient → 6=M(red) least salient
+  { id: 'woman',          label: 'Woman',               x: -3.8, y:  1.2, z:  0.5, group: 'identity',    spectral: 0,
+    desc: 'Being a woman shapes how I move through every room — and every interface — I design.' },
+  { id: 'queer',          label: 'Queer',               x: -4.2, y: -1.2, z: -1.0, group: 'identity',    spectral: 3,
+    desc: 'Queerness taught me to question defaults — in systems, in design, in what counts as "normal."' },
+  { id: 'filipino',       label: 'Filipino',            x: -5.8, y:  0.2, z:  0.8, group: 'identity',    spectral: 0,
+    desc: 'I carry bayanihan, migration, and my family\'s internet cafe in Antipolo with me everywhere.' },
+  { id: 'neurodivergent', label: 'Neurodivergent',      x: -3.4, y:  3.0, z: -1.2, group: 'identity',    spectral: 1,
+    desc: 'My brain makes unusual connections and notices patterns others skip — a feature, not a bug.' },
+  { id: 'firstgen',       label: 'First-gen',           x: -5.2, y:  2.4, z: -0.3, group: 'identity',    spectral: 0,
+    desc: 'Being first in my family to attend college shaped my understanding of access and aspiration.' },
+  { id: 'vision',         label: 'Vision issues',       x: -5.8, y: -1.2, z: -0.8, group: 'identity',    spectral: 3,
+    desc: 'Living with visual impairment makes accessibility personal — I design for it because I live it.' },
+  { id: 'spiritual',      label: 'Spiritually eclectic', x: -4.5, y: -2.8, z:  0.5, group: 'identity',   spectral: 2,
+    desc: 'I borrow from many traditions — ritual, wonder, and the sacred are part of my creative practice.' },
+
+  // interests cluster — right hemisphere
+  { id: 'designer',       label: 'Designer',            x:  3.6, y:  2.4, z: -0.5, group: 'interests-parent', spectral: 1,
+    desc: 'Design is my primary language for translating values into form.' },
+  { id: 'developer',      label: 'Developer',           x:  3.8, y:  0.0, z:  1.2, group: 'interests-parent', spectral: 1,
+    desc: 'I build to think — code is how I stress-test ideas in the real world.' },
+  { id: 'anthropologist', label: 'Anthropologist',      x:  3.6, y: -2.4, z: -0.3, group: 'interests-parent', spectral: 1,
+    desc: 'Anthropology is my lens — I study how culture and technology shape each other.' },
+
+  { id: 'storytelling',     label: 'Storytelling',       x:  6.8, y:  0.0, z:  0.5, group: 'interests-sub', spectral: 2,
+    desc: 'All three disciplines converge on narrative — shaping how meaning is made and shared.' },
+  { id: 'problemsolving',  label: 'Problem Solving',    x:  6.2, y:  2.6, z: -0.4, group: 'interests-sub', spectral: 3,
+    desc: 'Design and code are both tools for decomposing complexity into something workable.' },
+  { id: 'designresearch',  label: 'Design Research',   x:  6.0, y: -1.2, z: -1.0, group: 'interests-sub', spectral: 4,
+    desc: 'Ethnographic sensibility applied to design — centering people and their lived contexts.' },
+  { id: 'digitalcultures', label: 'Digital Cultures',  x:  5.4, y: -3.6, z:  1.0, group: 'interests-sub', spectral: 4,
+    desc: 'How technology and society shape each other — the terrain where code meets culture.' },
+
+  // foundations cluster — bottom hemisphere
+  { id: 'parliamentarian', label: 'Parliamentarian',    x:  1.6, y: -4.6, z:  1.5, group: 'foundations',  spectral: 3,
+    desc: 'Debate trained my mind — argumentation, structure, and the discipline of listening.' },
+  { id: 'communityorg',   label: 'Community Organizer', x: -1.6, y: -5.0, z: -0.8, group: 'foundations',  spectral: 2,
+    desc: 'Organizing is politics made practical — building power with people, not over them.' },
+  { id: 'artistactivist', label: 'Artist Activist',     x:  0.3, y: -6.2, z:  0.5, group: 'foundations',  spectral: 2,
+    desc: 'Art is not decorative — it is the sharpest tool I have for causes I care about.' },
+  { id: 'scientist',      label: 'Scientist',           x:  2.8, y: -5.4, z: -1.2, group: 'foundations',  spectral: 3,
+    desc: 'My research background keeps me rigorous — evidence, method, and curiosity are constants.' },
+];
+
+const EDGES = [
+  // center → hubs (thick spoke edges)
+  { from: 'center', to: 'identity-hub',    type: 'hub' },
+  { from: 'center', to: 'interests-hub',   type: 'hub' },
+  { from: 'center', to: 'foundations-hub', type: 'hub' },
+  // identity hub → members
+  { from: 'identity-hub', to: 'woman',          type: 'identity' },
+  { from: 'identity-hub', to: 'queer',          type: 'identity' },
+  { from: 'identity-hub', to: 'filipino',       type: 'identity' },
+  { from: 'identity-hub', to: 'neurodivergent', type: 'identity' },
+  { from: 'identity-hub', to: 'firstgen',       type: 'identity' },
+  { from: 'identity-hub', to: 'vision',         type: 'identity' },
+  { from: 'identity-hub', to: 'spiritual',      type: 'identity' },
+  // interests hub → parent nodes
+  { from: 'interests-hub', to: 'designer',       type: 'interests' },
+  { from: 'interests-hub', to: 'developer',      type: 'interests' },
+  { from: 'interests-hub', to: 'anthropologist', type: 'interests' },
+  // interests parent → subs
+  { from: 'designer',      to: 'storytelling',    type: 'interests' },
+  { from: 'developer',     to: 'storytelling',    type: 'interests' },
+  { from: 'anthropologist',to: 'storytelling',    type: 'interests' },
+  { from: 'designer',      to: 'problemsolving',  type: 'interests' },
+  { from: 'developer',     to: 'problemsolving',  type: 'interests' },
+  { from: 'designer',      to: 'designresearch',  type: 'interests' },
+  { from: 'anthropologist',to: 'designresearch',  type: 'interests' },
+  { from: 'developer',     to: 'digitalcultures', type: 'interests' },
+  { from: 'anthropologist',to: 'digitalcultures', type: 'interests' },
+  // foundations hub → members
+  { from: 'foundations-hub', to: 'parliamentarian', type: 'foundations' },
+  { from: 'foundations-hub', to: 'communityorg',    type: 'foundations' },
+  { from: 'foundations-hub', to: 'artistactivist',  type: 'foundations' },
+  { from: 'foundations-hub', to: 'scientist',       type: 'foundations' },
+  // intersectionality (cross-group)
+  { from: 'woman',          to: 'communityorg',    type: 'intersect' },
+  { from: 'queer',          to: 'artistactivist',  type: 'intersect' },
+  { from: 'filipino',       to: 'anthropologist',  type: 'intersect' },
+  { from: 'neurodivergent', to: 'developer',       type: 'intersect' },
+  { from: 'firstgen',       to: 'parliamentarian', type: 'intersect' },
+  { from: 'spiritual',      to: 'artistactivist',  type: 'intersect' },
+  { from: 'vision',         to: 'designresearch',  type: 'intersect' },
+  { from: 'scientist',      to: 'developer',       type: 'intersect' },
+];
+
+// Stellar spectral classification: O (blue, most salient) → M (orange-red, least salient)
+const SPECTRAL = [
+  { inner: '#AABBFF', corona: '#5577EE', outer: '#2244CC', halo: '#101880' }, // 0 O — blue
+  { inner: '#CCDDFF', corona: '#99AAEE', outer: '#6677CC', halo: '#334499' }, // 1 B — blue-white
+  { inner: '#FFFFFF', corona: '#DDEEFF', outer: '#AABBEE', halo: '#7788CC' }, // 2 A — white
+  { inner: '#FFFFCC', corona: '#EEEEA0', outer: '#CCCC66', halo: '#AAAA33' }, // 3 F — yellow-white
+  { inner: '#FFE878', corona: '#F5A020', outer: '#C06000', halo: '#804000' }, // 4 G — yellow
+  { inner: '#FFB060', corona: '#E07020', outer: '#B04000', halo: '#702000' }, // 5 K — orange
+  { inner: '#FF7040', corona: '#D03010', outer: '#900010', halo: '#500008' }, // 6 M — orange-red
+];
+
+const EDGE_COLORS = {
+  hub:         { hex: 0xaabbdd, opacity: 0.45 },
+  identity:    { hex: 0x8899cc, opacity: 0.22 },
+  interests:   { hex: 0x8899cc, opacity: 0.22 },
+  foundations: { hex: 0x8899cc, opacity: 0.22 },
+  intersect:   { hex: 0x8899bb, opacity: 0.28 },
+};
+
+// ── star point texture ────────────────────────────────────────────────────
+function makeStarTexture() {
+  const S = 32, c = document.createElement('canvas');
+  c.width = c.height = S;
+  const ctx = c.getContext('2d');
+  const g = ctx.createRadialGradient(S/2, S/2, 0, S/2, S/2, S/2);
+  g.addColorStop(0.0, 'rgba(255,255,255,1.0)');
+  g.addColorStop(0.3, 'rgba(200,215,255,0.7)');
+  g.addColorStop(1.0, 'rgba(0,0,0,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, S, S);
+  return new THREE.CanvasTexture(c);
+}
+
+// ── star glow + text (two sprites) ───────────────────────────────────────
+function makeGlowSprite(node) {
+  const isHub = node.hub === true;
+  const s     = isHub
+    ? { inner: '#FFFFFF', corona: '#DDEEFF', outer: '#99BBEE', halo: '#4466AA' }
+    : SPECTRAL[node.spectral ?? 4];
+  const isSub = node.group === 'interests-sub';
+  const SCALE = 2;
+  const CH    = isHub ? 420 : (isSub ? 260 : 320);
+  const halo  = 90;
+  const fontSize = isHub ? 26 : (isSub ? 19 : 22);
+  const fontStr  = `700 ${fontSize}px 'Atkinson Hyperlegible Next', system-ui, sans-serif`;
+  const worldH   = isHub ? 2.6 : (isSub ? 1.5 : 1.9);
+
+  const probe = document.createElement('canvas').getContext('2d');
+  probe.font  = fontStr;
+  const textW = probe.measureText(node.label).width;
+  const CW    = Math.max(CH, Math.ceil(textW + halo * 2));
+  const worldW = worldH * (CW / CH);
+
+  // ── glow orb (additive blend) ─────────────────────────────────────────
+  const gc = document.createElement('canvas');
+  gc.width = CW * SCALE; gc.height = CH * SCALE;
+  const gctx = gc.getContext('2d');
+  gctx.scale(SCALE, SCALE);
+  const cx = CW / 2, cy = CH / 2, asp = CW / CH;
+  gctx.save();
+  gctx.scale(asp, 1);
+  const grad = gctx.createRadialGradient(cx/asp, cy, 0, cx/asp, cy, CH * 0.48);
+  grad.addColorStop(0.00, '#ffffff');
+  grad.addColorStop(0.10, '#ffffff');
+  grad.addColorStop(0.22, s.inner + 'EE');
+  grad.addColorStop(0.40, s.corona + 'AA');
+  grad.addColorStop(0.62, s.outer + '55');
+  grad.addColorStop(0.82, s.halo + '18');
+  grad.addColorStop(1.00, 'rgba(0,0,0,0)');
+  gctx.fillStyle = grad;
+  gctx.fillRect(0, 0, CW/asp, CH);
+  gctx.restore();
+  const glowSprite = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: new THREE.CanvasTexture(gc), transparent: true, depthWrite: false,
+    blending: THREE.AdditiveBlending,
+  }));
+  glowSprite.scale.set(worldW, worldH, 1);
+  glowSprite.renderOrder = 1;
+
+  // ── text label (normal blend, dark text readable on bright core) ───────
+  const padX = 44;
+  const tCW  = Math.ceil(textW + padX * 2), tCH = 90;
+  const tc   = document.createElement('canvas');
+  tc.width = tCW * SCALE; tc.height = tCH * SCALE;
+  const tctx = tc.getContext('2d');
+  tctx.scale(SCALE, SCALE);
+  tctx.font = fontStr;
+  tctx.textAlign = 'center'; tctx.textBaseline = 'middle';
+  tctx.fillStyle = '#000000';
+  tctx.fillText(node.label, tCW / 2, tCH / 2);
+  const tWorldH = worldH * (tCH / CH);
+  const tWorldW = tWorldH * (tCW / tCH);
+  const textSprite = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: new THREE.CanvasTexture(tc), transparent: true, depthWrite: false, depthTest: false,
+  }));
+  textSprite.scale.set(tWorldW, tWorldH, 1);
+  textSprite.renderOrder = 2;
+
+  return { glowSprite, textSprite };
+}
+
+// ── main init ─────────────────────────────────────────────────────────────
+function init() {
+  const container = document.getElementById('iw-container');
+
+  const W = container.clientWidth;
+  const H = container.clientHeight;
+
+  // renderer — transparent so CSS background shows through
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setSize(W, H);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.1;
+  container.appendChild(renderer.domElement);
+
+  // scene & camera
+  const scene  = new THREE.Scene();
+  scene.fog    = new THREE.FogExp2(0x060a10, 0.030); // deep space fade
+
+  const camera = new THREE.PerspectiveCamera(52, W / H, 0.1, 60);
+  camera.position.set(0, 0, 14);
+
+  // controls
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping  = true;
+  controls.dampingFactor  = 0.06;
+  controls.minDistance    = 5;
+  controls.maxDistance    = 22;
+  controls.enablePan      = false;
+  controls.autoRotate     = true;
+  controls.autoRotateSpeed = 0.35;
+
+  // stop autorotate on user interaction, resume after 3s
+  let autoRotateTimer = null;
+  renderer.domElement.addEventListener('pointerdown', () => {
+    controls.autoRotate = false;
+    clearTimeout(autoRotateTimer);
+  });
+  renderer.domElement.addEventListener('pointerup', () => {
+    autoRotateTimer = setTimeout(() => { controls.autoRotate = true; }, 3000);
+  });
+
+  // ── starfield ─────────────────────────────────────────────────────────────
+  const starTex    = makeStarTexture();
+  const starGroups = [];
+  const SR         = 38;
+
+  // static background — 1000 tiny stars
+  (() => {
+    const N = 1000, pos = new Float32Array(N * 3);
+    for (let i = 0; i < N; i++) {
+      const th = Math.random() * Math.PI * 2;
+      const ph = Math.acos(2 * Math.random() - 1);
+      const r  = SR * (0.55 + Math.random() * 0.45);
+      pos[i*3]   = r * Math.sin(ph) * Math.cos(th);
+      pos[i*3+1] = r * Math.sin(ph) * Math.sin(th);
+      pos[i*3+2] = r * Math.cos(ph);
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    scene.add(new THREE.Points(geo, new THREE.PointsMaterial({
+      map: starTex, size: 0.09, transparent: true, opacity: 0.30,
+      sizeAttenuation: true, fog: false, depthWrite: false,
+      blending: THREE.AdditiveBlending,
+    })));
+  })();
+
+  // twinkling stars — 8 groups of 40, each with independent phase
+  for (let g = 0; g < 8; g++) {
+    const N = 40, pos = new Float32Array(N * 3);
+    for (let i = 0; i < N; i++) {
+      const th = Math.random() * Math.PI * 2;
+      const ph = Math.acos(2 * Math.random() - 1);
+      const r  = SR * (0.50 + Math.random() * 0.50);
+      pos[i*3]   = r * Math.sin(ph) * Math.cos(th);
+      pos[i*3+1] = r * Math.sin(ph) * Math.sin(th);
+      pos[i*3+2] = r * Math.cos(ph);
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    const mat = new THREE.PointsMaterial({
+      map: starTex, size: 0.16, transparent: true, opacity: 0.7,
+      sizeAttenuation: true, fog: false, depthWrite: false,
+      blending: THREE.AdditiveBlending,
+    });
+    scene.add(new THREE.Points(geo, mat));
+    starGroups.push({ mat, phase: (g / 8) * Math.PI * 2, speed: 0.5 + Math.random() * 1.5 });
+  }
+
+  // ── nodes as glow orb sprites ─────────────────────────────────────────────
+  const spriteMap = {};
+  const sprites   = [];
+
+  NODES.forEach(node => {
+    node.originPos  = new THREE.Vector3(node.x, node.y, node.z);
+    node.basePos    = new THREE.Vector3(node.x, node.y, node.z);
+    node.floatPhase = new THREE.Vector3(
+      Math.random() * Math.PI * 2,
+      Math.random() * Math.PI * 2,
+      Math.random() * Math.PI * 2,
+    );
+    node.floatSpeed = 0.28 + Math.random() * 0.24;
+    node.floatAmp   = node.fixed ? 0 : (0.08 + Math.random() * 0.10);
+
+    if (node.id === 'center') {
+      spriteMap['center'] = { position: new THREE.Vector3(0, 0, 0), userData: { node } };
+      return;
+    }
+
+    const { glowSprite, textSprite } = makeGlowSprite(node);
+
+    glowSprite.position.copy(node.basePos);
+    textSprite.position.copy(node.basePos);
+    glowSprite.userData.node = node;
+    textSprite.userData.node = node;
+    node._textSprite = textSprite;
+    scene.add(glowSprite);
+    scene.add(textSprite);
+    spriteMap[node.id] = glowSprite;
+    sprites.push(glowSprite);
+  });
+
+  // ── edges ─────────────────────────────────────────────────────────────────
+  const edgeData = [];
+
+  EDGES.forEach(edge => {
+    const { hex, opacity } = EDGE_COLORS[edge.type] || EDGE_COLORS.identity;
+    const mat = new THREE.LineBasicMaterial({ color: hex, transparent: true, opacity, fog: true });
+    const geo = new THREE.BufferGeometry().setFromPoints([
+      spriteMap[edge.from].position.clone(),
+      spriteMap[edge.to].position.clone(),
+    ]);
+    const line = new THREE.Line(geo, mat);
+    line.renderOrder = -1;
+    scene.add(line);
+    edgeData.push({ line, fromId: edge.from, toId: edge.to });
+  });
+
+  function updateEdges() {
+    edgeData.forEach(({ line, fromId, toId }) => {
+      const from = spriteMap[fromId].position;
+      const to   = spriteMap[toId].position;
+      const pos  = line.geometry.attributes.position;
+      pos.setXYZ(0, from.x, from.y, from.z);
+      pos.setXYZ(1, to.x, to.y, to.z);
+      pos.needsUpdate = true;
+    });
+  }
+
+
+  // ── heart GLB at center ───────────────────────────────────────────────────
+  const heartMeshes = [];
+  const heartPivot  = new THREE.Group();
+  scene.add(heartPivot);
+
+  // warm key light so the gold reads as metal
+  const keyLight = new THREE.DirectionalLight(0xfff4d6, 2.2);
+  keyLight.position.set(2, 3, 4);
+  scene.add(keyLight);
+
+  // IBL environment for reflections
+  const pmrem      = new THREE.PMREMGenerator(renderer);
+  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+  pmrem.dispose();
+
+  const goldColor = () => {
+    const css = getComputedStyle(document.documentElement).getPropertyValue('--color-heading').trim();
+    return new THREE.Color(css || '#90642f');
+  };
+  const gold = new THREE.MeshStandardMaterial({
+    color: goldColor(), metalness: 1.0, roughness: 0.26, envMapIntensity: 1.25, fog: false,
+  });
+  new MutationObserver(() => gold.color.set(goldColor())).observe(
+    document.documentElement, { attributes: true, attributeFilter: ['data-theme'] },
+  );
+
+  const centerNode = NODES.find(n => n.id === 'center');
+  const gltfLoader = new GLTFLoader();
+  gltfLoader.setMeshoptDecoder(MeshoptDecoder);
+  gltfLoader.load('/heart.glb', (gltf) => {
+    const root = gltf.scene;
+    root.traverse(o => {
+      if (o.isMesh) {
+        o.material = gold;
+        o.userData.node = centerNode;
+        heartMeshes.push(o);
+      }
+    });
+    // center and scale to ~1.8 world units
+    const box    = new THREE.Box3().setFromObject(root);
+    const size   = box.getSize(new THREE.Vector3());
+    const center = box.getCenter(new THREE.Vector3());
+    const scale  = 1.8 / Math.max(size.x, size.y, size.z);
+    root.scale.setScalar(scale);
+    root.position.copy(center.multiplyScalar(-scale));
+    heartPivot.add(root);
+  });
+
+  // ── raycasting & interaction ──────────────────────────────────────────────
+  const raycaster = new THREE.Raycaster();
+  const mouse     = new THREE.Vector2();
+  const dragPlane = new THREE.Plane();
+  const dragPoint = new THREE.Vector3();
+  let isDragging  = false;
+  let dragSprite  = null;
+  let mouseDown   = { x: 0, y: 0 };
+
+  function ndcFromEvent(e) {
+    const r = container.getBoundingClientRect();
+    return {
+      x:  ((e.clientX - r.left) / r.width)  * 2 - 1,
+      y: -((e.clientY - r.top)  / r.height) * 2 + 1,
+    };
+  }
+
+  function hitSprite(e) {
+    const ndc = ndcFromEvent(e);
+    mouse.set(ndc.x, ndc.y);
+    raycaster.setFromCamera(mouse, camera);
+    if (heartMeshes.length) {
+      const hh = raycaster.intersectObjects(heartMeshes);
+      if (hh.length) return hh[0].object;
+    }
+    const hits = raycaster.intersectObjects(sprites);
+    return hits.length > 0 ? hits[0].object : null;
+  }
+
+  container.addEventListener('pointerdown', e => {
+    mouseDown = { x: e.clientX, y: e.clientY };
+    const hit = hitSprite(e);
+    if (!hit) return;
+    const node = hit.userData.node;
+    dragSprite = hit;
+    if (!node.fixed) {
+      controls.enabled = false;
+      isDragging = true;
+      const normal = new THREE.Vector3();
+      camera.getWorldDirection(normal);
+      dragPlane.setFromNormalAndCoplanarPoint(normal, hit.position);
+    }
+  });
+
+  container.addEventListener('pointermove', e => {
+    if (!isDragging || !dragSprite) return;
+    const ndc = ndcFromEvent(e);
+    mouse.set(ndc.x, ndc.y);
+    raycaster.setFromCamera(mouse, camera);
+    if (raycaster.ray.intersectPlane(dragPlane, dragPoint)) {
+      dragSprite.position.copy(dragPoint);
+      dragSprite.userData.node.basePos = dragPoint.clone();
+      const ts = dragSprite.userData.node._textSprite;
+      if (ts) ts.position.copy(dragPoint);
+    }
+  });
+
+  container.addEventListener('pointerup', () => {
+    if (isDragging) {
+      isDragging = false;
+      controls.enabled = true;
+    }
+    dragSprite = null;
+  });
+
+  // recenter
+  const INIT_CAM_POS = new THREE.Vector3(0, 0, 14);
+  document.getElementById('iw-recenter').addEventListener('click', () => {
+    camera.position.copy(INIT_CAM_POS);
+    controls.target.set(0, 0, 0);
+    controls.update();
+  });
+
+  // reset node positions — smooth lerp back to origin
+  const RESET_DURATION = 0.8;
+  let resetStartTime = -1;
+  const resetFrom = new Map();
+
+  document.getElementById('iw-reset').addEventListener('click', () => {
+    sprites.forEach(glowSprite => {
+      const node = glowSprite.userData.node;
+      resetFrom.set(node.id, glowSprite.position.clone());
+    });
+    resetStartTime = -1; // will be set on first frame with actual t
+  });
+
+  // ── animation loop ────────────────────────────────────────────────────────
+  const clock = new THREE.Clock();
+
+  renderer.setAnimationLoop(() => {
+    const t = clock.getElapsedTime();
+
+    // advance reset animation
+    if (resetStartTime !== null) {
+      if (resetStartTime < 0) resetStartTime = t;
+      const progress = Math.min(1, (t - resetStartTime) / RESET_DURATION);
+      const ease = 1 - Math.pow(1 - progress, 3); // cubic ease-out
+      sprites.forEach(glowSprite => {
+        const node = glowSprite.userData.node;
+        const from = resetFrom.get(node.id);
+        if (from) node.basePos.lerpVectors(from, node.originPos, ease);
+      });
+      if (progress >= 1) resetStartTime = null;
+    }
+
+    sprites.forEach(glowSprite => {
+      const node = glowSprite.userData.node;
+      if (!isDragging || glowSprite !== dragSprite) {
+        const p = node.floatPhase, a = node.floatAmp, s = node.floatSpeed;
+        const nx = node.basePos.x + Math.sin(t * s       + p.x) * a * 0.4;
+        const ny = node.basePos.y + Math.sin(t * s * 0.7 + p.y) * a;
+        const nz = node.basePos.z + Math.sin(t * s * 0.5 + p.z) * a * 0.3;
+        glowSprite.position.set(nx, ny, nz);
+        if (node._textSprite) node._textSprite.position.set(nx, ny, nz);
+      }
+    });
+
+    starGroups.forEach(({ mat, phase, speed }) => {
+      mat.opacity = 0.25 + 0.65 * (0.5 + 0.5 * Math.sin(t * speed + phase));
+    });
+
+    heartPivot.rotation.y = t * 0.4;
+    updateEdges();
+    controls.update();
+    renderer.render(scene, camera);
+  });
+
+  // ── resize ────────────────────────────────────────────────────────────────
+  const ro = new ResizeObserver(() => {
+    const w = container.clientWidth, h = container.clientHeight;
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w, h);
+  });
+  ro.observe(container);
+}
+
+// wait for fonts so canvas text renders correctly
+document.fonts.ready.then(init);
+</script>

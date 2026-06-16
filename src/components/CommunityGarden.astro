@@ -140,12 +140,11 @@ const HEART_FILLED = `<svg viewBox="0 0 24 24" width="20" height="20" fill="curr
     <!-- Header -->
     <div class="cg-header page-header">
       <div class="cg-title-row page-title-row">
-        <h1 class="section-header cg-title">our garden</h1>
+        <h1 class="section-header cg-title">community</h1>
         {submissions.length > 0 && (
           <span class="pill">{submissions.length} planted</span>
         )}
       </div>
-      <p class="page-def">draw a tiny pixel-art plant or creature and leave it here for everyone to find.</p>
       <hr class="cg-divider" />
     </div>
 
@@ -304,6 +303,9 @@ const HEART_FILLED = `<svg viewBox="0 0 24 24" width="20" height="20" fill="curr
     gap: var(--space-lg);
     flex-wrap: wrap;
     margin-bottom: var(--space-md);
+  }
+  .cg-title-row :global(.pill) {
+    align-self: center;
   }
   .cg-title { margin: 0; }
   .cg-divider {

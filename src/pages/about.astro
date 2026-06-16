@@ -1,6 +1,7 @@
 ---
 import Garden from '../layouts/Garden.astro';
 import Icon from '../components/Icon.astro';
+import IdentityWeb from '../components/IdentityWeb.astro';
 ---
 <Garden title="about">
   <div class="page-wrapper">
@@ -45,111 +46,20 @@ import Icon from '../components/Icon.astro';
         </div>
       </section>
 
-      <!-- now -->
+      <!-- identity web -->
       <section class="about-section">
-        <h2 class="section-heading">now</h2>
-        <ul class="now-list">
-          <li>design & innovation lab student worker at brandeis</li>
-          <li>campus leader for lovable, building community around ai-native tools</li>
-          <li>board fellow at the weston art & innovation center</li>
-          <li>leading deishacks 2027</li>
-          <li>going into legislators' offices pitching the MA data privacy act with repro equity now</li>
-        </ul>
+        <h2 class="section-heading">who am i?</h2>
+        <IdentityWeb />
       </section>
 
-      <!-- work -->
+      <!-- linkedin -->
       <section class="about-section">
-        <h2 class="section-heading">work</h2>
-        <div class="work-list">
-
-          <div class="work-item">
-            <div class="work-meta">
-              <span class="work-year">2026 &ndash; now</span>
-            </div>
-            <div class="work-detail">
-              <p class="work-title">design & innovation lab student worker</p>
-              <p class="work-place">brandeis university</p>
-            </div>
-          </div>
-
-          <div class="work-item">
-            <div class="work-meta">
-              <span class="work-year">2026 &ndash; now</span>
-            </div>
-            <div class="work-detail">
-              <p class="work-title">campus leader</p>
-              <p class="work-place">lovable</p>
-              <p class="work-desc">organized events with ~100 participants & building community around ai-native tools as part of the first cohort of a selective campus program</p>
-            </div>
-          </div>
-
-          <div class="work-item">
-            <div class="work-meta">
-              <span class="work-year">2025 &ndash; now</span>
-            </div>
-            <div class="work-detail">
-              <p class="work-title">board fellow</p>
-              <p class="work-place">weston art & innovation center</p>
-              <p class="work-desc">visualized a dataset of 7k records to inform fundraising strategies, optimizing CRM systems, and formulated design system</p>
-            </div>
-          </div>
-
-          <div class="work-item">
-            <div class="work-meta">
-              <span class="work-year">2025 &ndash; now</span>
-            </div>
-            <div class="work-detail">
-              <p class="work-title">student fundraiser</p>
-              <p class="work-place">brandeis institutional advancement</p>
-              <p class="work-desc">raised $40K+ in donations through outreach and aura</p>
-            </div>
-          </div>
-
-          <div class="work-item">
-            <div class="work-meta">
-              <span class="work-year">2025 &ndash; now</span>
-            </div>
-            <div class="work-detail">
-              <p class="work-title">admissions fellow</p>
-              <p class="work-place">brandeis admissions office</p>
-              <p class="work-desc">led 80+ tours for 1,000+ prospective students & designed materials used across the office</p>
-            </div>
-          </div>
-
-          <div class="work-item">
-            <div class="work-meta">
-              <span class="work-year">2024 &ndash; now</span>
-            </div>
-            <div class="work-detail">
-              <p class="work-title">marketing & startup champion</p>
-              <p class="work-place">brandeis innovation center</p>
-              <p class="work-desc">reached 2,000+ students through digital & traditional marketing, supported 20+ startups, designed materials for the Spark Program</p>
-            </div>
-          </div>
-
-          <div class="work-item">
-            <div class="work-meta">
-              <span class="work-year">2024</span>
-            </div>
-            <div class="work-detail">
-              <p class="work-title">lead designer</p>
-              <p class="work-place">earth moon magick</p>
-              <p class="work-desc">led design for 3 product lines that raised $18,143 with 249 backers, all now sold on amazon</p>
-            </div>
-          </div>
-
-          <div class="work-item">
-            <div class="work-meta">
-              <span class="work-year">2022 &ndash; 2023</span>
-            </div>
-            <div class="work-detail">
-              <p class="work-title">research intern, sadler-edepli lab</p>
-              <p class="work-place">new york university abu dhabi</p>
-              <p class="work-desc">confirmed lab findings on UHRF1 gene overexpression and hypomethylation in cancer genomes; quantitative analysis on 50+ zebrafish livers using ImageJ</p>
-            </div>
-          </div>
-
-        </div>
+        <h2 class="section-heading">what i've done</h2>
+        <a href="https://linkedin.com/in/giannacrisha" target="_blank" rel="noopener noreferrer" class="linkedin-cta">
+          <Icon name="linkedin" size={22} />
+          <span>see my full experience on linkedin</span>
+          <Icon name="chevron-right" size={16} />
+        </a>
       </section>
 
 
@@ -226,77 +136,23 @@ import Icon from '../components/Icon.astro';
   }
 
   /* now list */
-  .now-list {
-    display: flex;
-    flex-direction: column;
+  /* linkedin cta */
+  .linkedin-cta {
+    display: inline-flex;
+    align-items: center;
     gap: var(--space-md);
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-  .now-list li {
     font-family: var(--font-body);
     font-size: var(--text-md);
-    color: var(--color-fg);
-    line-height: var(--leading-loose);
-    display: flex;
-    align-items: baseline;
-    gap: var(--space-md);
+    color: var(--color-heading);
+    text-decoration: none;
+    border: 1px solid var(--color-accent-border);
+    border-radius: var(--radius-pill);
+    padding: var(--space-md) var(--space-xl);
+    transition: background 0.18s, border-color 0.18s, color 0.18s;
   }
-  .now-list li::before {
-    content: '';
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: var(--color-accent);
-    flex-shrink: 0;
-    position: relative;
-    top: -2px;
-  }
-
-  /* work */
-  .work-list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-xxl);
-  }
-  .work-item {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--space-xs);
-    align-items: start;
-  }
-
-  @media (min-width: 600px) {
-    .work-item {
-      grid-template-columns: 120px 1fr;
-      gap: var(--space-xl);
-    }
-  }
-  .work-year {
-    font-family: var(--font-body);
-    font-size: var(--text-sm);
-    color: var(--color-muted);
-    padding-top: 3px;
-  }
-  .work-title {
-    font-family: var(--font-body);
-    font-size: var(--text-md);
-    color: var(--color-fg);
-    line-height: var(--leading-tight);
-  }
-  .work-place {
-    font-family: var(--font-body);
-    font-size: var(--text-sm);
-    color: var(--color-muted);
-    margin-top: var(--space-xs);
-  }
-  .work-desc {
-    font-family: var(--font-body);
-    font-size: var(--text-sm);
-    color: var(--color-fg);
-    line-height: var(--leading-loose);
-    margin-top: var(--space-sm);
+  .linkedin-cta:hover {
+    background: var(--color-accent-light);
+    border-color: var(--color-heading);
   }
 
   /* migration map */
@@ -394,31 +250,31 @@ const stops = [
     name: 'antipolo',
     sub: 'philippines · 2004 – 2014',
     lat: 14.5888, lng: 121.1228, zoom: 13,
-    text: 'i was born in quezon city and raised in purok maligaya 2 in antipolo city. my family owned a small internet cafe, one of the firsts in the area. This is where i fell in love with computers. our house had two spaces: the back was our living space, and the front was the cafe, where i spent my after-school hours playing games and exploring the web. at six, i troubleshot my first computer problem to save my family repair costs, becoming a little technician before i knew the word for it.',
+    text: 'i was born in quezon city and raised in antipolo city. my family owned a small internet cafe, one of the firsts in the area. This is where i fell in love with computers. our house had two spaces: the back was our living space and the front was the internet cafe, where i spent my after-school hours playing games and exploring the web. at six, i troubleshot my first computer problem and became the family technician.',
   },
   {
     name: 'abu dhabi',
     sub: 'uae · 2014 – 2017',
     lat: 24.4539, lng: 54.3773, zoom: 11,
-    text: 'we moved to abu dhabi after my fourth grade. i did my research internship at NYU Abu Dhabi here years later. full circle.',
+    text: 'we moved to abu dhabi after 4th grade. i wrote a story about it! my brother and i went to Philippine Emirates Private School.',
   },
   {
     name: 'butuan',
     sub: 'philippines · 2017 – 2021',
     lat: 8.9475, lng: 125.5406, zoom: 12,
-    text: 'my family moved back to the philippines after my sixth grade. butuan is a quieter city, known as the city of golden tara.',
+    text: 'my family moved back to the Philippines after 6th grade. i didnt know any Cebuano, but thankfully, i managed to pick it up in my first two months.',
   },
   {
     name: 'cagayan de oro',
     sub: 'philippines · 2021 – 2024',
     lat: 8.4542, lng: 124.6319, zoom: 12,
-    text: 'i moved to cagayan de oro for senior high school after getting a scholarship for junior high school valedictorians. i went to xavier university ateneo de cagayan, debated, made things, figured out who i was. grandfinalist at PDA world congress 2021. this city gave me a lot.',
+    text: 'i got a scholarship at Xavier University - Ateneo de Cagayan and moved to cagayan de oro for senior high school. this city and its people molded me in so many ways! ill write about it soon.',
   },
   {
     name: 'boston',
     sub: 'usa · 2024 – present ✦',
     lat: 42.3601, lng: -71.0589, zoom: 12,
-    text: "after getting the wien international scholarship at brandeis university that covers my full cost of attendance, i packed up everything and moved to boston. co-founding clubs, leading hackathons, going into legislators' offices, building things every day. still figuring it all out, but happily.",
+    text: "after getting the wien international scholarship at brandeis university, i moved to boston!",
   },
 ];
 
