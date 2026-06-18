@@ -2,49 +2,61 @@
 import Garden from '../layouts/Garden.astro';
 import Icon from '../components/Icon.astro';
 import IdentityWeb from '../components/IdentityWeb.astro';
+import PortraitCanvas from '../components/PortraitCanvas.astro';
+import LiquidGlass from '../components/LiquidGlass.astro';
 ---
 <Garden title="about">
+  <!-- hero + marquee: constrained to page-wrapper -->
   <div class="page-wrapper">
-    <div class="about">
+    <div class="about about--pre">
 
-      <!-- hero intro (full viewport) -->
+      <!-- hero intro (sticky scroll) -->
       <section class="about-hero-section" id="about-top">
-        <img src="/images/portrait.png" alt="Gianna Crisha Saludo" class="portrait" />
-        <h1 class="about-name">gianna crisha</h1>
-        <p class="about-role">design, tech & society ·</p>
-        <p class="about-bio">
-          my design is very human. at brandeis, i'm designing my major in design, tech, and society.
-          whether that's building interfaces or advocating for tech policy, i'm always thinking about
-          how the things we make shape the people who use them.
-        </p>
+        <div class="hero-sticky">
+          <span class="hero-word hero-word--left" aria-hidden="true">Gianna</span>
+          <div class="hero-portrait">
+            <PortraitCanvas />
+          </div>
+          <span class="hero-word hero-word--right" aria-hidden="true">Crisha</span>
+        </div>
       </section>
 
-      <!-- migration history -->
-      <section class="about-section">
-        <h2 class="section-heading">where's home?</h2>
-        <div class="migration-map">
-          <div id="migration-leaflet" style="height:340px;width:100%;"></div>
+      <div class="hero-marquee" aria-hidden="true">
+        <div class="hero-marquee-track">{"design · tech · society · ".repeat(12)}</div>
+      </div>
 
-          <div class="migration-card">
-            <div class="migration-card-header">
-              <div class="migration-progress" id="migration-progress">
-                <span id="migration-step">1</span> / 5
-              </div>
-              <div class="migration-nav">
-                <button id="migration-prev" aria-label="previous city" disabled>
-                  <Icon name="chevron-left" size={14} />
-                </button>
-                <button id="migration-next" aria-label="next city">
-                  <Icon name="chevron-right" size={14} />
-                </button>
-              </div>
-            </div>
+    </div>
+  </div>
+
+  <!-- migration map: full-bleed, outside page-wrapper -->
+  <section class="map-section" id="migration-section">
+    <div class="map-sticky">
+      <div id="migration-leaflet"></div>
+      <!-- two-layer liquid glass (same pattern as heart cursor) -->
+      <div class="migration-card-wrap">
+        <div class="migration-card-glass"></div>
+        <LiquidGlass class="migration-card-lg" backdrop={false} cornerRadius={16} displacement={120} aberration={3} filterId="migration-glass">
+          <div class="migration-card-inner">
+            <p class="migration-label">where's home?</p>
+            <p class="migration-progress"><span id="migration-step">1</span> / 5</p>
             <p class="migration-city-name" id="migration-city-name"></p>
             <p class="migration-city-sub" id="migration-city-sub"></p>
             <p class="migration-city-text" id="migration-city-text"></p>
           </div>
-        </div>
-      </section>
+        </LiquidGlass>
+      </div>
+      <div class="scroll-hint" id="scroll-hint" aria-hidden="true">
+        <span class="scroll-hint-text">scroll to travel</span>
+        <svg class="scroll-hint-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- identity web + linkedin: constrained to page-wrapper -->
+  <div class="page-wrapper">
+    <div class="about about--post">
 
       <!-- identity web -->
       <section class="about-section">
@@ -62,45 +74,92 @@ import IdentityWeb from '../components/IdentityWeb.astro';
         </a>
       </section>
 
-
     </div>
   </div>
 </Garden>
 
 <style>
   .about {
-    max-width: 720px;
-    padding: 0 0 calc(var(--space-section) * 2);
     display: flex;
     flex-direction: column;
     gap: var(--space-section);
   }
+  .about--pre {
+    padding-bottom: 0;
+  }
+  .about--post {
+    padding: var(--space-section) 0 calc(var(--space-section) * 2);
+  }
 
-  /* full-viewport hero */
+  /* sticky scroll hero — pulled behind nav (56px) so hero fills true full viewport */
   .about-hero-section {
-    min-height: calc(100vh - 60px);
+    height: 200vh;
+    margin-top: -56px;
+    /* clip without creating a scroll container (overflow:hidden breaks sticky) */
+    overflow: clip;
+  }
+  .hero-sticky {
+    position: sticky;
+    top: 0;
+    height: 100vh;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    text-align: center;
-    gap: var(--space-md);
-    padding: var(--space-section) 0;
-    position: relative;
+    gap: clamp(16px, 3vw, 40px);
+    /* needed for absolute-positioned marquee */
+    isolation: isolate;
   }
-  .portrait {
-    width: 160px;
-    aspect-ratio: 3 / 4;
-    object-fit: cover;
-    object-position: center top;
-    border-radius: var(--radius-card);
-    display: block;
-    margin-bottom: var(--space-sm);
+  .hero-portrait {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+  }
+  .hero-word {
+    font-family: var(--font-display);
+    font-size: clamp(64px, 10vw, 140px);
+    color: var(--color-fg);
+    line-height: 1;
+    white-space: nowrap;
+    will-change: transform;
+    transform: translateY(60vh);
+  }
+  .hero-word--left { text-align: right; }
+  .hero-word--right { text-align: left; }
+
+  /* marquee strip — full-bleed dark band below the hero */
+  .hero-marquee {
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    background: var(--color-fg);
+    padding: 10px 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .hero-marquee-track {
+    display: inline-block;
+    white-space: nowrap;
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-bg);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    animation: marquee-scroll 28s linear infinite;
+  }
+  @keyframes marquee-scroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  /* bio section */
+  .about-bio-section {
+    padding-top: var(--space-section);
   }
   .about-name {
     font-family: var(--font-serif);
     font-weight: 600;
-    font-size: var(--text-section);
+    font-size: clamp(36px, 5vw, 64px);
     color: var(--color-heading);
     line-height: 1.1;
   }
@@ -114,11 +173,12 @@ import IdentityWeb from '../components/IdentityWeb.astro';
     font-size: var(--text-md);
     color: var(--color-fg);
     line-height: var(--leading-loose);
-    max-width: 480px;
+    max-width: 48ch;
     margin-top: var(--space-sm);
   }
-  @media (min-width: 600px) {
-    .portrait { width: 200px; }
+  @media (max-width: 640px) {
+    .hero-word { font-size: clamp(40px, 11vw, 80px); }
+    .about-bio { max-width: none; }
   }
 
   /* sections */
@@ -155,73 +215,103 @@ import IdentityWeb from '../components/IdentityWeb.astro';
     border-color: var(--color-heading);
   }
 
-  /* migration map */
-  .migration-intro {
-    font-family: var(--font-body);
-    font-size: var(--text-md);
-    color: var(--color-muted);
-    font-style: italic;
+  /* full-screen satellite map — lives outside page-wrapper so it's naturally full-bleed */
+  .map-section {
+    height: 600vh;
   }
-  .migration-map {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    border-radius: var(--radius-card);
+  .map-sticky {
+    position: sticky;
+    top: 0;
+    height: 100vh;
     overflow: hidden;
   }
   #migration-leaflet {
-    height: 340px;
-    width: 100%;
+    position: absolute;
+    inset: 0;
     z-index: 0;
   }
-  .migration-card {
-    background: #ffffff;
-    padding: var(--space-xl);
+  /* two-layer liquid glass — mirrors heart cursor pattern */
+  .migration-card-wrap {
+    position: absolute;
+    left: clamp(20px, 4vw, 48px);
+    top: 50%;
+    transform: translateY(-50%);
+    width: clamp(300px, 36vw, 440px);
+    z-index: 10;
+  }
+  /* layer 1: backdrop blur + SVG refraction (Chromium-only) */
+  .migration-card-glass {
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    overflow: hidden;
+    clip-path: inset(0 round 16px);
+    background: rgba(255, 255, 255, 0.10);
+    backdrop-filter: blur(20px) saturate(200%);
+    -webkit-backdrop-filter: blur(20px) saturate(200%);
+    box-shadow:
+      0 0 0 0.75px rgba(255, 255, 255, 0.35) inset,
+      0 8px 40px rgba(0, 0, 0, 0.22),
+      0 2px 8px rgba(0, 0, 0, 0.14);
+  }
+  :root[data-lg-refract="1"] .migration-card-glass {
+    filter: url(#migration-glass);
+  }
+  /* layer 2: LiquidGlass chrome + content */
+  .migration-card-inner {
     display: flex;
     flex-direction: column;
-    gap: var(--space-md);
+    gap: var(--space-sm);
+    padding: var(--space-xl);
+    max-height: calc(100vh - 80px);
+    overflow-y: auto;
   }
-  .migration-card-header {
+
+  /* scroll hint — bottom-center of the map viewport */
+  .scroll-hint {
+    position: absolute;
+    bottom: 36px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: space-between;
+    gap: 4px;
+    color: rgba(255, 255, 255, 0.9);
+    font-family: var(--font-body);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-shadow: 0 1px 6px rgba(0,0,0,0.9);
+    pointer-events: none;
+    transition: opacity 0.7s ease;
+  }
+  .scroll-hint-arrow {
+    animation: hint-bounce 1.3s ease-in-out infinite;
+  }
+  @keyframes hint-bounce {
+    0%, 100% { transform: translateY(0); opacity: 0.65; }
+    50%       { transform: translateY(7px); opacity: 1; }
+  }
+  .migration-label {
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
   }
   .migration-progress {
     font-family: var(--font-body);
     font-size: var(--text-xs);
     color: var(--color-muted);
-    letter-spacing: 0.06em;
-  }
-  .migration-nav {
-    display: flex;
-    gap: var(--space-sm);
-  }
-  .migration-nav button {
-    background: none;
-    border: 1px solid var(--color-border);
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--color-fg);
-    cursor: pointer;
-    transition: background 0.15s, border-color 0.15s;
-  }
-  .migration-nav button:hover:not(:disabled) {
-    background: var(--color-accent-light);
-    border-color: var(--color-accent);
-  }
-  .migration-nav button:disabled {
-    opacity: 0.3;
-    cursor: default;
   }
   .migration-city-name {
     font-family: var(--font-serif);
     font-size: var(--text-xl);
     color: var(--color-fg);
     line-height: var(--leading-tight);
+    margin-top: var(--space-sm);
   }
   .migration-city-sub {
     font-family: var(--font-body);
@@ -234,9 +324,40 @@ import IdentityWeb from '../components/IdentityWeb.astro';
     font-size: var(--text-md);
     color: var(--color-fg);
     line-height: var(--leading-loose);
+    margin-top: var(--space-sm);
+  }
+  @media (max-width: 640px) {
+    .migration-card-wrap {
+      left: 16px;
+      right: 16px;
+      width: auto;
+      top: auto;
+      bottom: 24px;
+      transform: none;
+    }
   }
 
-  @media (min-width: 600px) {
+</style>
+
+<style is:global>
+  /* nav slides away when satellite map is in view */
+  .site-nav {
+    transition: transform 0.35s ease, opacity 0.35s ease;
+  }
+  .site-nav.nav-map-hide {
+    transform: translateY(-110%);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* LiquidGlass layout overrides for the migration card */
+  .migration-card-lg.lg {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+  .migration-card-lg .lg__body {
+    width: 100%;
   }
 </style>
 
@@ -278,55 +399,152 @@ const stops = [
   },
 ];
 
-let current = 0;
+let current = -1;
 
-const nameEl  = document.getElementById('migration-city-name') as HTMLElement;
-const subEl   = document.getElementById('migration-city-sub') as HTMLElement;
-const textEl  = document.getElementById('migration-city-text') as HTMLElement;
-const stepEl  = document.getElementById('migration-step') as HTMLElement;
-const prevBtn = document.getElementById('migration-prev') as HTMLButtonElement;
-const nextBtn = document.getElementById('migration-next') as HTMLButtonElement;
+const nameEl = document.getElementById('migration-city-name') as HTMLElement;
+const subEl  = document.getElementById('migration-city-sub') as HTMLElement;
+const textEl = document.getElementById('migration-city-text') as HTMLElement;
+const stepEl = document.getElementById('migration-step') as HTMLElement;
+const hint   = document.getElementById('scroll-hint') as HTMLElement | null;
 
 const map = L.map('migration-leaflet', {
   zoomControl: false,
   scrollWheelZoom: false,
-  dragging: true,
+  dragging: false,
   attributionControl: true,
+  keyboard: false,
 });
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>',
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+  attribution: 'Tiles &copy; Esri',
   maxZoom: 19,
 }).addTo(map);
 
-function makeIcon(active: boolean) {
+// --- airplane marker ---
+// Material Design "flight" icon — naturally points NE (~45°), so offset bearing by -45
+function makePlaneIcon(bearing: number) {
+  const rot = bearing - 45;
   return L.divIcon({
     className: '',
-    html: `<div style="width:12px;height:12px;border-radius:50%;background:${active ? '#3d2f1f' : '#9C8B6E'};border:2px solid #ffffff;box-shadow:0 0 0 3px rgba(156,139,110,0.3);"></div>`,
-    iconSize: [12, 12],
-    iconAnchor: [6, 6],
+    html: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="28" height="28" style="transform:rotate(${rot}deg);filter:drop-shadow(0 0 6px rgba(0,0,0,.95)) drop-shadow(0 2px 5px rgba(0,0,0,.8));"><path fill="white" d="M21 16v-2l-8-5V3.5C13 2.67 12.33 2 11.5 2S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>`,
+    iconSize: [28, 28],
+    iconAnchor: [14, 14],
   });
 }
 
-const markers = stops.map(s => L.marker([s.lat, s.lng], { icon: makeIcon(false) }).addTo(map));
+let planeMarker: L.Marker | null = null;
+let planeAnim = 0;
+
+function calcBearing(fromLat: number, fromLng: number, toLat: number, toLng: number): number {
+  const f1 = fromLat * Math.PI / 180, f2 = toLat * Math.PI / 180;
+  const dl = (toLng - fromLng) * Math.PI / 180;
+  const y = Math.sin(dl) * Math.cos(f2);
+  const x = Math.cos(f1) * Math.sin(f2) - Math.sin(f1) * Math.cos(f2) * Math.cos(dl);
+  return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+}
+
+function movePlane(to: typeof stops[0]) {
+  if (!planeMarker) {
+    planeMarker = L.marker([to.lat, to.lng], { icon: makePlaneIcon(45), zIndexOffset: 200 }).addTo(map);
+    return;
+  }
+  const from = planeMarker.getLatLng();
+  const bearing = calcBearing(from.lat, from.lng, to.lat, to.lng);
+  const fromLat = from.lat, fromLng = from.lng;
+  const dur = 1500, t0 = performance.now();
+  if (planeAnim) cancelAnimationFrame(planeAnim);
+  planeMarker.setIcon(makePlaneIcon(bearing));
+  function tick(now: number) {
+    const t = Math.min(1, (now - t0) / dur);
+    const e = t < 0.5 ? 2*t*t : -1+(4-2*t)*t;
+    planeMarker!.setLatLng([fromLat + (to.lat - fromLat)*e, fromLng + (to.lng - fromLng)*e]);
+    planeAnim = t < 1 ? requestAnimationFrame(tick) : 0;
+  }
+  planeAnim = requestAnimationFrame(tick);
+}
+
+// --- tile preloading ---
+function latLngToTile(lat: number, lng: number, zoom: number) {
+  const n = 1 << zoom;
+  const x = Math.floor((lng + 180) / 360 * n);
+  const lr = lat * Math.PI / 180;
+  const y = Math.floor((1 - Math.log(Math.tan(lr) + 1 / Math.cos(lr)) / Math.PI) / 2 * n);
+  return { x, y, z: zoom };
+}
+function preloadStop(s: typeof stops[0]) {
+  const { x, y, z } = latLngToTile(s.lat, s.lng, s.zoom);
+  for (let dx = -3; dx <= 3; dx++)
+    for (let dy = -3; dy <= 3; dy++)
+      new Image().src = `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${z}/${y+dy}/${x+dx}`;
+}
 
 function goTo(index: number) {
+  if (index === current) return;
   const s = stops[index];
-  map.flyTo([s.lat, s.lng], s.zoom, { duration: 1.6, easeLinearity: 0.4 });
+  if (current === -1) {
+    map.setView([s.lat, s.lng], s.zoom);
+  } else {
+    map.flyTo([s.lat, s.lng], s.zoom, { duration: 1.6, easeLinearity: 0.4 });
+  }
   nameEl.textContent = s.name;
   subEl.textContent  = s.sub;
   textEl.textContent = s.text;
   stepEl.textContent = String(index + 1);
-  prevBtn.disabled = index === 0;
-  nextBtn.disabled = index === stops.length - 1;
-  markers.forEach((m, i) => m.setIcon(makeIcon(i === index)));
+  movePlane(s);
+  if (index + 1 < stops.length) preloadStop(stops[index + 1]);
   current = index;
 }
 
-const s0 = stops[0];
-map.setView([s0.lat, s0.lng], s0.zoom);
-goTo(0);
+const mapSection = document.getElementById('migration-section') as HTMLElement;
 
-prevBtn.addEventListener('click', () => { if (current > 0) goTo(current - 1); });
-nextBtn.addEventListener('click', () => { if (current < stops.length - 1) goTo(current + 1); });
+// hide nav while satellite map is in view
+const nav = document.querySelector('.site-nav') as HTMLElement | null;
+if (nav) {
+  new IntersectionObserver(([e]) => nav.classList.toggle('nav-map-hide', e.isIntersecting), { threshold: 0.01 })
+    .observe(mapSection);
+}
+
+function updateMap() {
+  const rect  = mapSection.getBoundingClientRect();
+  const raw   = Math.min(1, Math.max(0, -rect.top / (mapSection.offsetHeight - window.innerHeight)));
+  if (hint && raw > 0.08) hint.style.opacity = '0';
+  goTo(Math.min(stops.length - 1, Math.floor(raw * stops.length)));
+}
+window.addEventListener('scroll', updateMap, { passive: true });
+updateMap();
+
+// preload first two stops immediately
+preloadStop(stops[0]);
+if (stops[1]) preloadStop(stops[1]);
+</script>
+
+<script>
+// scroll-driven hero: slide "Gianna" and "Crisha" up into position
+const heroSection = document.getElementById('about-top') as HTMLElement;
+const wordLeft    = heroSection?.querySelector<HTMLElement>('.hero-word--left');
+const wordRight   = heroSection?.querySelector<HTMLElement>('.hero-word--right');
+
+if (heroSection && wordLeft && wordRight) {
+  const left = wordLeft;   // narrow to HTMLElement so closure captures the non-null type
+  const right = wordRight;
+  const WORD_OFFSET = 60; // vh
+
+  function easeInOut(t: number) {
+    return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+  }
+
+  function updateHero() {
+    const rect     = heroSection.getBoundingClientRect();
+    const sectionH = heroSection.offsetHeight;
+    const winH     = window.innerHeight;
+    const raw      = Math.min(1, Math.max(0, -rect.top / (sectionH - winH)));
+    const p        = easeInOut(raw);
+    left.style.transform  = `translateY(${(1 - p) * WORD_OFFSET}vh)`;
+    right.style.transform = `translateY(${(1 - p) * WORD_OFFSET}vh)`;
+  }
+
+  window.addEventListener('scroll', updateHero, { passive: true });
+  updateHero();
+}
+
 </script>

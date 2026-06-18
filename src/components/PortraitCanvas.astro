@@ -1,0 +1,163 @@
+---
+// PortraitCanvas.astro — gold 3-D self-portrait, Three.js.
+// Loads portrait.glb and applies the same gold PBR material used on heart.glb.
+// Drag left/right to spin (full Y); drag up/down clamped so bottom face stays hidden.
+const { model = '/portrait.glb' } = Astro.props;
+---
+<div class="portrait-stage" data-portrait-model={model}>
+  <canvas class="portrait-canvas" aria-hidden="true"></canvas>
+</div>
+
+<style>
+  .portrait-stage {
+    width: clamp(160px, 28vw, 240px);
+    aspect-ratio: 3 / 4;
+    position: relative;
+    z-index: 3;
+    margin-bottom: var(--space-sm);
+  }
+  .portrait-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    border-radius: var(--radius-card);
+    filter: drop-shadow(0 0 26px rgba(255, 255, 255, 0.65))
+            drop-shadow(0 0 64px rgba(255, 255, 255, 0.40));
+  }
+  :global(:root[data-theme="dark"]) .portrait-canvas {
+    filter: drop-shadow(0 0 20px rgba(216, 175, 120, 0.32))
+            drop-shadow(0 0 52px rgba(216, 175, 120, 0.20));
+  }
+  @media (min-width: 600px) {
+    .portrait-stage { width: clamp(180px, 28vw, 260px); }
+  }
+</style>
+
+<script>
+  import * as THREE from 'three';
+  import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+  import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
+  import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
+
+  function initPortrait(stage: HTMLElement) {
+    const canvas = stage.querySelector('.portrait-canvas');
+    if (!canvas) return;
+    const dpr = Math.min(window.devicePixelRatio, 2);
+
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    renderer.setPixelRatio(dpr);
+    renderer.setClearColor(0x000000, 0);
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 1000);
+
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    const key = new THREE.DirectionalLight(0xfff4d6, 2.2);
+    key.position.set(2, 3, 4);
+    scene.add(key);
+    const fill = new THREE.DirectionalLight(0xd6e4ff, 0.6);
+    fill.position.set(-3, 1, 2);
+    scene.add(fill);
+
+    const goldColor = () => {
+      const css = getComputedStyle(document.documentElement).getPropertyValue('--color-heading').trim();
+      return new THREE.Color(css || '#90642f');
+    };
+    const gold = new THREE.MeshStandardMaterial({
+      color: goldColor(), metalness: 1.0, roughness: 0.26, envMapIntensity: 1.25,
+    });
+    new MutationObserver(() => {
+      gold.color.set(goldColor());
+      startLoop();
+    }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+    let loaded = false;
+    let root: THREE.Object3D | null = null;
+
+    // rotation state — lerped each frame toward target
+    let curY = 0, curX = 0;
+    let tgtY = 0, tgtX = 0;
+    let loopRunning = false;
+
+    // max X clamp so bottom face never tilts into view
+    // adjust MAX_X: lower = less tilt, e.g. 0.05 ≈ ±9°, 0.15 ≈ ±27°
+    const TILT_Y = 0.5;
+    const TILT_X = 0.25;
+
+    function startLoop() {
+      if (loopRunning || !loaded) return;
+      loopRunning = true;
+      (function tick() {
+        if (!root) { loopRunning = false; return; }
+        curY += (tgtY - curY) * 0.08;
+        curX += (tgtX - curX) * 0.08;
+        root.rotation.y = curY;
+        root.rotation.x = curX;
+        renderer.render(scene, camera);
+        const done = Math.abs(tgtY - curY) < 0.0005 && Math.abs(tgtX - curX) < 0.0005;
+        if (done) {
+          root.rotation.y = tgtY; root.rotation.x = tgtX;
+          renderer.render(scene, camera);
+          loopRunning = false;
+        } else {
+          requestAnimationFrame(tick);
+        }
+      })();
+    }
+
+    function resize() {
+      const w = stage.clientWidth, h = stage.clientHeight;
+      if (!w || !h) return;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      if (loaded) startLoop();
+    }
+    new ResizeObserver(resize).observe(stage);
+    resize();
+
+    // cursor tracking — tilt toward cursor anywhere on the page
+    // offset is relative to stage center, normalized by viewport size
+    document.addEventListener('mousemove', (e: MouseEvent) => {
+      const rect = stage.getBoundingClientRect();
+      const cx = rect.left + rect.width  / 2;
+      const cy = rect.top  + rect.height / 2;
+      const nx = (e.clientX - cx) / (window.innerWidth  / 2);
+      const ny = (e.clientY - cy) / (window.innerHeight / 2);
+      tgtY = nx * TILT_Y;
+      tgtX = ny * TILT_X;
+      startLoop();
+    });
+
+    const loader = new GLTFLoader();
+    loader.setMeshoptDecoder(MeshoptDecoder);
+    loader.load(
+      stage.dataset.portraitModel || '/portrait.glb',
+      (gltf) => {
+        root = gltf.scene;
+        root.traverse((o) => { if ((o as THREE.Mesh).isMesh) (o as THREE.Mesh).material = gold; });
+
+        const box = new THREE.Box3().setFromObject(root);
+        root.position.sub(box.getCenter(new THREE.Vector3()));
+
+        const size = box.getSize(new THREE.Vector3());
+        const maxDim = Math.max(size.x, size.y, size.z);
+        const dist = (maxDim / 2) / Math.tan((camera.fov * Math.PI) / 360) * 1.15;
+        camera.position.set(0, 0, dist);
+        camera.lookAt(0, 0, 0);
+
+        scene.add(root);
+        loaded = true;
+        resize();
+        startLoop();
+      },
+      undefined,
+      () => { /* model failed to load — canvas stays empty */ },
+    );
+  }
+
+  document.querySelectorAll<HTMLElement>('.portrait-stage').forEach(initPortrait);
+</script>
