@@ -141,8 +141,9 @@ const { model = '/portrait.glb' } = Astro.props;
 
   function initPortrait(stage: HTMLElement) {
     const widget = stage.closest<HTMLElement>('.portrait-widget');
+    const hero = stage.closest<HTMLElement>('.hero-sticky');
     const canvas = stage.querySelector('.portrait-canvas');
-    if (!canvas || !widget) return;
+    if (!canvas || !widget || !hero) return;
 
     const cursorLabel = widget.querySelector<HTMLElement>('.portrait-cursor-label');
     const cursorGlass = widget.querySelector<HTMLElement>('.portrait-cursor-glass');
@@ -168,9 +169,18 @@ const { model = '/portrait.glb' } = Astro.props;
       }
     };
 
+    const isOverStage = (clientX: number, clientY: number) => {
+      const rect = stage.getBoundingClientRect();
+      return clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom;
+    };
+
+    const setCursorVisible = (visible: boolean) => {
+      cursorLabel?.classList.toggle('is-visible', visible);
+      cursorGlass?.classList.toggle('is-visible', visible);
+    };
+
     stage.addEventListener('pointerenter', (e) => {
-      cursorLabel?.classList.add('is-visible');
-      cursorGlass?.classList.add('is-visible');
+      setCursorVisible(true);
       moveCursor(e.clientX, e.clientY);
     });
 
@@ -313,13 +323,17 @@ const { model = '/portrait.glb' } = Astro.props;
       scrollEndTimer = setTimeout(() => { scrolling = false; }, 120);
     }, { passive: true });
 
-    stage.addEventListener('pointermove', (e) => {
+    hero.addEventListener('pointermove', (e) => {
       moveCursor(e.clientX, e.clientY);
+      if (isOverStage(e.clientX, e.clientY)) {
+        setCursorVisible(true);
+      } else {
+        setCursorVisible(false);
+      }
       updateTilt(e.clientX, e.clientY);
     });
     stage.addEventListener('pointerleave', () => {
-      cursorLabel?.classList.remove('is-visible');
-      cursorGlass?.classList.remove('is-visible');
+      setCursorVisible(false);
       tgtY = 0;
       tgtX = 0;
       startLoop();
