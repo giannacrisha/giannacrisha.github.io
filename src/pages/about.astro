@@ -525,6 +525,8 @@ const wordLeft    = heroSection?.querySelector<HTMLElement>('.hero-word--left');
 const wordRight   = heroSection?.querySelector<HTMLElement>('.hero-word--right');
 
 if (heroSection && wordLeft && wordRight) {
+  const left = wordLeft;   // narrow to HTMLElement so closure captures the non-null type
+  const right = wordRight;
   const WORD_OFFSET = 60; // vh
 
   function easeInOut(t: number) {
@@ -537,8 +539,8 @@ if (heroSection && wordLeft && wordRight) {
     const winH     = window.innerHeight;
     const raw      = Math.min(1, Math.max(0, -rect.top / (sectionH - winH)));
     const p        = easeInOut(raw);
-    wordLeft.style.transform  = `translateY(${(1 - p) * WORD_OFFSET}vh)`;
-    wordRight.style.transform = `translateY(${(1 - p) * WORD_OFFSET}vh)`;
+    left.style.transform  = `translateY(${(1 - p) * WORD_OFFSET}vh)`;
+    right.style.transform = `translateY(${(1 - p) * WORD_OFFSET}vh)`;
   }
 
   window.addEventListener('scroll', updateHero, { passive: true });
