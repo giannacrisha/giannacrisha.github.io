@@ -1,0 +1,120 @@
+---
+// Loader.astro — fullscreen page loader: logo.glb spinning.
+---
+<div id="page-loader" aria-hidden="true">
+  <canvas id="loader-canvas"></canvas>
+</div>
+
+<style>
+  #page-loader {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-bg);
+    transition: opacity 0.4s ease;
+  }
+  #page-loader.fade-out {
+    opacity: 0;
+    pointer-events: none;
+  }
+  #loader-canvas {
+    width: 72px;
+    height: 72px;
+    display: block;
+  }
+</style>
+
+<script>
+  import * as THREE from 'three';
+  import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+  import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
+  import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
+
+  const loaderEl = document.getElementById('page-loader')!;
+  const canvas   = document.getElementById('loader-canvas') as HTMLCanvasElement;
+
+  const dpr = Math.min(window.devicePixelRatio, 2);
+
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+  renderer.setPixelRatio(dpr);
+  renderer.setSize(72, 72, false);
+  renderer.setClearColor(0x000000, 0);
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.1;
+
+  const scene  = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 1000);
+
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+  const key = new THREE.DirectionalLight(0xfff4d6, 2.2);
+  key.position.set(2, 3, 4);
+  scene.add(key);
+
+  const pivot = new THREE.Group();
+  scene.add(pivot);
+
+  const goldColor = () => {
+    const css = getComputedStyle(document.documentElement).getPropertyValue('--color-heading').trim();
+    return new THREE.Color(css || '#90642f');
+  };
+  const mat = new THREE.MeshStandardMaterial({
+    color: goldColor(), metalness: 1.0, roughness: 0.26, envMapIntensity: 1.25,
+  });
+  new MutationObserver(() => mat.color.set(goldColor()))
+    .observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+  let pageLoaded = false;
+  let modelReady = false;
+  let dismissed  = false;
+  const startTime = performance.now();
+  const MIN_MS = 600;
+
+  function tryDismiss() {
+    if (dismissed || !pageLoaded || !modelReady) return;
+    dismissed = true;
+    const elapsed = performance.now() - startTime;
+    setTimeout(() => {
+      loaderEl.classList.add('fade-out');
+      loaderEl.addEventListener('transitionend', () => {
+        loaderEl.style.display = 'none';
+        renderer.dispose();
+      }, { once: true });
+    }, Math.max(0, MIN_MS - elapsed));
+  }
+
+  if (document.readyState === 'complete') { pageLoaded = true; }
+  else { window.addEventListener('load', () => { pageLoaded = true; tryDismiss(); }, { once: true }); }
+
+  const loader = new GLTFLoader();
+  loader.setMeshoptDecoder(MeshoptDecoder);
+  loader.load('/logo.glb', (gltf) => {
+    const root = gltf.scene;
+    root.traverse(o => { if ((o as THREE.Mesh).isMesh) (o as THREE.Mesh).material = mat; });
+    const box    = new THREE.Box3().setFromObject(root);
+    const center = box.getCenter(new THREE.Vector3());
+    const size   = box.getSize(new THREE.Vector3());
+    root.position.sub(center);
+    const maxDim = Math.max(size.x, size.y, size.z);
+    const dist   = (maxDim / 2) / Math.tan((camera.fov * Math.PI) / 360) * 1.15;
+    camera.position.set(0, 0, dist);
+    camera.lookAt(0, 0, 0);
+    pivot.add(root);
+    modelReady = true;
+    tryDismiss();
+  }, undefined, () => { modelReady = true; tryDismiss(); });
+
+  let last = performance.now();
+  function loop(now: number) {
+    if (loaderEl.style.display === 'none') return;
+    const delta = Math.min((now - last) / 1000, 0.05);
+    last = now;
+    pivot.rotation.y += 1.4 * delta;
+    renderer.render(scene, camera);
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+</script>

@@ -191,7 +191,7 @@ const { model = '/portrait.glb' } = Astro.props;
 
     function playTerminal() {
       if (!terminal) return;
-      const body = terminal.querySelector<HTMLElement>('.pt-body');
+      const body = terminal.querySelector<HTMLElement>('.pt-body') as HTMLElement;
       if (!body) return;
       if (typeTimer !== null) {
         clearTimeout(typeTimer);

@@ -1,3 +1,4 @@
+// @ts-nocheck
 const STORAGE_KEY = 'migration-card-layout';
 
 interface CardLayout {

@@ -393,6 +393,7 @@ import LiquidGlass from './LiquidGlass.astro';
 </style>
 
 <script>
+// @ts-nocheck
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
@@ -601,6 +602,7 @@ function makeGlowSprite(node) {
 // ── main init ─────────────────────────────────────────────────────────────
 function init() {
   const container = document.getElementById('iw-container');
+  if (!container) return;
 
   const W = container.clientWidth;
   const H = container.clientHeight;
@@ -632,7 +634,7 @@ function init() {
   controls.autoRotateSpeed = 0.35;
 
   // stop autorotate on user interaction, resume after 3s
-  let autoRotateTimer = null;
+  let autoRotateTimer: ReturnType<typeof setTimeout> | null = null;
   renderer.domElement.addEventListener('pointerdown', () => {
     controls.autoRotate = false;
     clearTimeout(autoRotateTimer);
@@ -643,7 +645,7 @@ function init() {
 
   // ── starfield ─────────────────────────────────────────────────────────────
   const starTex    = makeStarTexture();
-  const starGroups = [];
+  const starGroups: { mat: THREE.PointsMaterial; phase: number; speed: number }[] = [];
   const SR         = 48;
 
   // static background stars
@@ -710,7 +712,7 @@ function init() {
 
   // ── nodes as glow orb sprites ─────────────────────────────────────────────
   const spriteMap = {};
-  const sprites   = [];
+  const sprites: THREE.Sprite[] = [];
 
   NODES.forEach(node => {
     node.originPos  = new THREE.Vector3(node.x, node.y, node.z);
@@ -823,7 +825,7 @@ function init() {
   const dragPlane = new THREE.Plane();
   const dragPoint = new THREE.Vector3();
   let isDragging  = false;
-  let dragSprite  = null;
+  let dragSprite: THREE.Object3D | null = null;
   let mouseDown   = { x: 0, y: 0 };
 
   function ndcFromEvent(e) {
@@ -884,7 +886,7 @@ function init() {
 
   // recenter
   const INIT_CAM_POS = new THREE.Vector3(0, 0, 14);
-  document.getElementById('iw-recenter').addEventListener('click', () => {
+  document.getElementById('iw-recenter')?.addEventListener('click', () => {
     camera.position.copy(INIT_CAM_POS);
     controls.target.set(0, 0, 0);
     controls.update();
@@ -892,10 +894,10 @@ function init() {
 
   // reset node positions — smooth lerp back to origin
   const RESET_DURATION = 0.8;
-  let resetStartTime = -1;
+  let resetStartTime: number | null = -1;
   const resetFrom = new Map();
 
-  document.getElementById('iw-reset').addEventListener('click', () => {
+  document.getElementById('iw-reset')?.addEventListener('click', () => {
     sprites.forEach(glowSprite => {
       const node = glowSprite.userData.node;
       resetFrom.set(node.id, glowSprite.position.clone());

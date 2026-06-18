@@ -8,6 +8,7 @@ import '@fontsource/iosevka/700.css';
 import '@hackernoon/pixel-icon-library/fonts/iconfont.css';
 import { fonts, site } from '../config/design';
 import ThemeToggle from '../components/ThemeToggle.astro';
+import Loader from '../components/Loader.astro';
 
 const jsonLd = JSON.stringify({
   "@context": "https://schema.org",
@@ -100,6 +101,7 @@ const ogImageUrl   = ogImage.startsWith('http') ? ogImage : new URL(ogImage, sit
     </script>
   </head>
   <body>
+    <Loader />
     <a href="#main-content" class="skip-link">skip to content</a>
     <slot />
 
