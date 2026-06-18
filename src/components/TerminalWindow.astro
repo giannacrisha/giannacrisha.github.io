@@ -1,19 +1,40 @@
 ---
 // TerminalWindow.astro — macOS-style terminal chrome.
-// Renders the traffic-light bar + title + slotted body content.
 // The close dot exposes data-tw-close so parents can wire up dismissal.
+// Set interactiveMinimize to wire the yellow dot via data-tw-minimize.
 interface Props {
   title?: string;
   class?: string;
+  showClose?: boolean;
+  interactiveMinimize?: boolean;
 }
-const { title = '', class: className } = Astro.props;
+const {
+  title = '',
+  class: className,
+  showClose = true,
+  interactiveMinimize = false,
+} = Astro.props;
 ---
 
 <div class:list={['tw-window', className]}>
-  <div class="tw-bar">
-    <button class="tw-dot tw-close" data-tw-close aria-label="Close"></button>
-    <span class="tw-dot tw-min"></span>
-    <span class="tw-dot tw-max"></span>
+  <div class="tw-bar" data-terminal-drag>
+    {showClose ? (
+      <button class="tw-dot tw-close" data-tw-close type="button" aria-label="Close"></button>
+    ) : (
+      <span class="tw-dot tw-close tw-close--static" aria-hidden="true"></span>
+    )}
+    {interactiveMinimize ? (
+      <button
+        class="tw-dot tw-min"
+        data-tw-minimize
+        type="button"
+        aria-label="Minimize"
+        aria-pressed="false"
+      ></button>
+    ) : (
+      <span class="tw-dot tw-min" aria-hidden="true"></span>
+    )}
+    <span class="tw-dot tw-max" aria-hidden="true"></span>
     {title && <span class="tw-title">{title}</span>}
   </div>
   <slot />
@@ -43,7 +64,9 @@ const { title = '', class: className } = Astro.props;
     flex-shrink: 0;
   }
   .tw-close { background: var(--color-traffic-red); cursor: pointer; }
+  .tw-close--static { cursor: default; opacity: 0.45; }
   .tw-min   { background: #ffbd2e; }
+  .tw-min[type="button"] { cursor: pointer; border: none; padding: 0; }
   .tw-max   { background: #28c841; }
   .tw-title {
     margin-left: 8px;

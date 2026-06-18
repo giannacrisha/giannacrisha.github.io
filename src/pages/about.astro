@@ -4,6 +4,45 @@ import Icon from '../components/Icon.astro';
 import IdentityWeb from '../components/IdentityWeb.astro';
 import PortraitCanvas from '../components/PortraitCanvas.astro';
 import LiquidGlass from '../components/LiquidGlass.astro';
+import TerminalWindow from '../components/TerminalWindow.astro';
+
+const migrationStops = [
+  {
+    name: 'antipolo',
+    rail: 'antipolo',
+    sub: 'philippines · 2004 – 2014',
+    lat: 14.5888, lng: 121.1228, zoom: 15,
+    text: 'i was born in quezon city and raised in antipolo city. my family owned a small internet cafe, one of the firsts in the area. This is where i fell in love with computers. our house had two spaces: the back was our living space and the front was the internet cafe, where i spent my after-school hours playing games and exploring the web. at six, i troubleshot my first computer problem and became the family technician.',
+  },
+  {
+    name: 'abu dhabi',
+    rail: 'abu dhabi',
+    sub: 'uae · 2014 – 2017',
+    lat: 24.4539, lng: 54.3773, zoom: 14,
+    text: 'we moved to abu dhabi after 4th grade. i wrote a story about it! my brother and i went to Philippine Emirates Private School.',
+  },
+  {
+    name: 'butuan',
+    rail: 'butuan',
+    sub: 'philippines · 2017 – 2021',
+    lat: 8.9475, lng: 125.5406, zoom: 14,
+    text: 'my family moved back to the Philippines after 6th grade. i didnt know any Cebuano, but thankfully, i managed to pick it up in my first two months.',
+  },
+  {
+    name: 'cagayan de oro',
+    rail: 'cdo',
+    sub: 'philippines · 2021 – 2024',
+    lat: 8.4542, lng: 124.6319, zoom: 14,
+    text: 'i got a scholarship at Xavier University - Ateneo de Cagayan and moved to cagayan de oro for senior high school. this city and its people molded me in so many ways! ill write about it soon.',
+  },
+  {
+    name: 'boston',
+    rail: 'boston',
+    sub: 'usa · 2024 – present ✦',
+    lat: 42.3601, lng: -71.0589, zoom: 15,
+    text: "after getting the wien international scholarship at brandeis university, i moved to boston!",
+  },
+];
 ---
 <Garden title="about">
   <!-- hero + marquee: constrained to page-wrapper -->
@@ -18,6 +57,20 @@ import LiquidGlass from '../components/LiquidGlass.astro';
             <PortraitCanvas />
           </div>
           <span class="hero-word hero-word--right" aria-hidden="true">Crisha</span>
+          <nav class="hero-socials" aria-label="social links">
+            <a href="https://linkedin.com/in/giannacrisha" class="hero-social" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer">
+              <Icon name="linkedin" size={18} />
+            </a>
+            <a href="https://github.com/giannacrisha" class="hero-social" aria-label="GitHub" target="_blank" rel="noopener noreferrer">
+              <Icon name="github" size={18} />
+            </a>
+            <a href="https://x.com/giannaesque" class="hero-social" aria-label="X" target="_blank" rel="noopener noreferrer">
+              <Icon name="x" size={18} />
+            </a>
+            <a href="https://bsky.app/profile/giannacrisha.com" class="hero-social" aria-label="Bluesky" target="_blank" rel="noopener noreferrer">
+              <Icon name="bluesky" size={18} />
+            </a>
+          </nav>
         </div>
       </section>
 
@@ -28,54 +81,96 @@ import LiquidGlass from '../components/LiquidGlass.astro';
     </div>
   </div>
 
-  <!-- migration map: full-bleed, outside page-wrapper -->
-  <section class="map-section" id="migration-section">
-    <div class="map-sticky">
-      <div id="migration-leaflet"></div>
-      <!-- two-layer liquid glass (same pattern as heart cursor) -->
-      <div class="migration-card-wrap">
-        <div class="migration-card-glass"></div>
-        <LiquidGlass class="migration-card-lg" backdrop={false} cornerRadius={16} displacement={120} aberration={3} filterId="migration-glass">
-          <div class="migration-card-inner">
-            <p class="migration-label">where's home?</p>
-            <p class="migration-progress"><span id="migration-step">1</span> / 5</p>
-            <p class="migration-city-name" id="migration-city-name"></p>
-            <p class="migration-city-sub" id="migration-city-sub"></p>
-            <p class="migration-city-text" id="migration-city-text"></p>
-          </div>
-        </LiquidGlass>
-      </div>
-      <div class="scroll-hint" id="scroll-hint" aria-hidden="true">
-        <span class="scroll-hint-text">scroll to travel</span>
-        <svg class="scroll-hint-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="6 9 12 15 18 9"/>
-        </svg>
-      </div>
+  <!-- identity web: full-bleed -->
+  <section class="about-identity-section" id="about-identity">
+    <div class="about-identity-stage">
+      <IdentityWeb />
+    </div>
+    <div class="hero-marquee identity-marquee" aria-hidden="true">
+      <div class="hero-marquee-track">{"where's home? · ".repeat(12)}</div>
     </div>
   </section>
 
-  <!-- identity web + linkedin: constrained to page-wrapper -->
-  <div class="page-wrapper">
-    <div class="about about--post">
+  <!-- migration map: full-bleed, outside page-wrapper -->
+  <section class="map-section" id="migration-section">
+    <div class="map-sticky">
+      <div class="map-sticky-body">
+        <div class="map-sticky-map">
+          <div id="migration-leaflet"></div>
+          <script type="application/json" id="migration-data" set:html={JSON.stringify(migrationStops)}></script>
+          <div class="migration-ui">
+        <div class="migration-card-wrap" id="migration-card-wrap">
+          <TerminalWindow
+            title="where-ive-lived.sh"
+            class="migration-card migration-terminal"
+            showClose={false}
+            interactiveMinimize
+          >
+            <div class="migration-terminal-body">
+              <div class="migration-terminal-line">
+                <span class="migration-terminal-prompt" aria-hidden="true">$</span>
+                <span class="migration-terminal-cmd" id="migration-city-name">{migrationStops[0].name}</span>
+              </div>
+              <p class="migration-terminal-meta" id="migration-city-sub">{migrationStops[0].sub}</p>
+              <p class="migration-terminal-output" id="migration-city-text">{migrationStops[0].text}</p>
+            </div>
+          </TerminalWindow>
+          <div class="migration-resize-handle migration-resize-handle--e" data-axis="e" aria-hidden="true"></div>
+          <div class="migration-resize-handle migration-resize-handle--w" data-axis="w" aria-hidden="true"></div>
+        </div>
 
-      <!-- identity web -->
-      <section class="about-section">
-        <h2 class="section-heading">who am i?</h2>
-        <IdentityWeb />
-      </section>
+        <nav class="migration-rail" id="migration-rail" aria-label="cities">
+          <div class="migration-rail-track" aria-hidden="true"></div>
+          {migrationStops.map((stop, i) => (
+            <button
+              type="button"
+              class:list={['migration-rail-btn', { 'is-active': i === 0 }]}
+              data-index={i}
+              aria-current={i === 0 ? 'true' : 'false'}
+            >
+              <div
+                class="migration-rail-btn-glass"
+                aria-hidden="true"
+                style={`--lg-filter: url(#migration-rail-${i})`}
+              ></div>
+              <div class="migration-rail-btn-panel">
+                <LiquidGlass
+                  displacement={100}
+                  aberration={3}
+                  cornerRadius={16}
+                  filterId={`migration-rail-${i}`}
+                  backdrop={false}
+                >
+                  <div class="migration-rail-btn-inner">
+                    <span class="migration-rail-dot" aria-hidden="true"></span>
+                    <span class="migration-rail-label">{stop.rail}</span>
+                  </div>
+                </LiquidGlass>
+              </div>
+            </button>
+          ))}
+        </nav>
 
-      <!-- linkedin -->
-      <section class="about-section">
-        <h2 class="section-heading">what i've done</h2>
-        <a href="https://linkedin.com/in/giannacrisha" target="_blank" rel="noopener noreferrer" class="linkedin-cta">
-          <Icon name="linkedin" size={22} />
-          <span>see my full experience on linkedin</span>
-          <Icon name="chevron-right" size={16} />
-        </a>
-      </section>
-
+        <button type="button" class="migration-section-nav migration-section-nav--prev" id="migration-section-prev">
+          previous section
+        </button>
+        <button type="button" class="migration-section-nav migration-section-nav--next" id="migration-section-next">
+          next section
+        </button>
+        </div>
+        <div class="scroll-hint" id="scroll-hint" aria-hidden="true">
+          <span class="scroll-hint-text">scroll to travel</span>
+          <svg class="scroll-hint-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </div>
+        </div>
+        <div class="hero-marquee migration-marquee" aria-hidden="true">
+          <div class="hero-marquee-track">{"anthropology · art · engineering · ".repeat(12)}</div>
+        </div>
+      </div>
     </div>
-  </div>
+  </section>
 </Garden>
 
 <style>
@@ -86,9 +181,6 @@ import LiquidGlass from '../components/LiquidGlass.astro';
   }
   .about--pre {
     padding-bottom: 0;
-  }
-  .about--post {
-    padding: var(--space-section) 0 calc(var(--space-section) * 2);
   }
 
   /* sticky scroll hero — pulled behind nav (56px) so hero fills true full viewport */
@@ -127,6 +219,28 @@ import LiquidGlass from '../components/LiquidGlass.astro';
   }
   .hero-word--left { text-align: right; }
   .hero-word--right { text-align: left; }
+
+  .hero-socials {
+    position: absolute;
+    bottom: clamp(20px, 4vw, 40px);
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+    z-index: 2;
+  }
+  .hero-social {
+    display: flex;
+    align-items: center;
+    color: var(--color-muted);
+    transition: color 0.15s ease;
+  }
+  .hero-social:hover,
+  .hero-social:focus-visible {
+    color: var(--color-fg);
+    outline: none;
+  }
 
   /* marquee strip — full-bleed dark band below the hero */
   .hero-marquee {
@@ -181,90 +295,303 @@ import LiquidGlass from '../components/LiquidGlass.astro';
     .about-bio { max-width: none; }
   }
 
-  /* sections */
-  .about-section {
+  /* identity web — full viewport */
+  .about-identity-section {
+    position: relative;
     display: flex;
     flex-direction: column;
-    gap: var(--space-xl);
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    height: 100vh;
+    min-height: 100svh;
   }
-  .section-heading {
-    font-family: var(--font-serif);
-    font-weight: 600;
-    font-size: var(--text-xxl);
-    color: var(--color-heading);
-    line-height: var(--leading-tight);
+  .about-identity-stage {
+    position: relative;
+    flex: 1;
+    min-height: 0;
   }
-
-  /* now list */
-  /* linkedin cta */
-  .linkedin-cta {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-md);
-    font-family: var(--font-body);
-    font-size: var(--text-md);
-    color: var(--color-heading);
-    text-decoration: none;
-    border: 1px solid var(--color-accent-border);
-    border-radius: var(--radius-pill);
-    padding: var(--space-md) var(--space-xl);
-    transition: background 0.18s, border-color 0.18s, color 0.18s;
+  .identity-marquee {
+    flex-shrink: 0;
+    width: 100%;
+    margin-left: 0;
+    z-index: 25;
   }
-  .linkedin-cta:hover {
-    background: var(--color-accent-light);
-    border-color: var(--color-heading);
-  }
-
   /* full-screen satellite map — lives outside page-wrapper so it's naturally full-bleed */
   .map-section {
-    height: 600vh;
+    height: 500vh;
   }
   .map-sticky {
     position: sticky;
     top: 0;
     height: 100vh;
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
+  }
+  .map-sticky-body {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .map-sticky-map {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .migration-marquee {
+    flex-shrink: 0;
+    position: relative;
+    width: 100%;
+    margin-left: 0;
+    z-index: 5;
   }
   #migration-leaflet {
     position: absolute;
     inset: 0;
     z-index: 0;
   }
-  /* two-layer liquid glass — mirrors heart cursor pattern */
+  :global(.migration-logo-marker) {
+    background: none !important;
+    border: none !important;
+  }
+  :global(.migration-logo-marker img) {
+    display: block;
+    mix-blend-mode: screen;
+    filter:
+      drop-shadow(0 0 6px rgba(0, 0, 0, 0.85))
+      drop-shadow(0 2px 10px rgba(0, 0, 0, 0.6));
+    pointer-events: none;
+  }
+  .migration-ui {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    pointer-events: none;
+  }
+  .migration-card-wrap,
+  .migration-rail,
+  .migration-section-nav {
+    pointer-events: auto;
+  }
   .migration-card-wrap {
     position: absolute;
     left: clamp(20px, 4vw, 48px);
     top: 50%;
-    transform: translateY(-50%);
     width: clamp(300px, 36vw, 440px);
-    z-index: 10;
+    transform: translateY(-50%);
+    touch-action: none;
   }
-  /* layer 1: backdrop blur + SVG refraction (Chromium-only) */
-  .migration-card-glass {
+  .migration-card.migration-terminal {
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.45);
+  }
+  .migration-card.migration-terminal :global(.tw-bar) {
+    cursor: grab;
+    user-select: none;
+  }
+  .migration-card.migration-terminal.is-dragging :global(.tw-bar) {
+    cursor: grabbing;
+  }
+  .migration-card-wrap.is-minimized .migration-terminal-body,
+  .migration-card.migration-terminal.is-minimized .migration-terminal-body {
+    display: none;
+  }
+  .migration-card-wrap.is-minimized .migration-resize-handle {
+    display: none;
+  }
+  .migration-card.migration-terminal :global(.tw-dot[type="button"]) {
+    pointer-events: auto;
+    position: relative;
+    z-index: 2;
+  }
+  .migration-card.migration-terminal.is-minimized :global(.tw-min) {
+    box-shadow: 0 0 0 2px rgba(255, 189, 46, 0.45);
+  }
+  .migration-terminal-body {
+    padding: var(--space-md) var(--space-lg) var(--space-lg);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    line-height: 1.55;
+    color: #d4d4d8;
+  }
+  .migration-terminal-line {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-xs);
+  }
+  .migration-terminal-prompt {
+    color: #28c841;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .migration-terminal-cmd {
+    color: #f4f4f5;
+    font-weight: 600;
+    text-transform: lowercase;
+  }
+  .migration-terminal-meta {
+    margin: 0 0 var(--space-sm);
+    padding-left: calc(1ch + var(--space-sm));
+    color: #71717a;
+    font-size: var(--text-xs);
+    letter-spacing: 0.03em;
+  }
+  .migration-terminal-output {
+    margin: 0;
+    padding-left: calc(1ch + var(--space-sm));
+    color: #a1a1aa;
+    white-space: pre-wrap;
+    user-select: text;
+    cursor: text;
+  }
+  .migration-resize-handle {
     position: absolute;
-    inset: 0;
+    z-index: 2;
+    touch-action: none;
+  }
+  .migration-resize-handle--e,
+  .migration-resize-handle--w {
+    top: 8px;
+    bottom: 8px;
+    width: 10px;
+    cursor: ew-resize;
+  }
+  .migration-resize-handle--e { right: -4px; }
+  .migration-resize-handle--w { left: -4px; }
+  .migration-rail {
+    position: absolute;
+    right: clamp(20px, 4vw, 48px);
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    padding: var(--space-sm) 0;
+  }
+  .migration-rail-track {
+    position: absolute;
+    left: 17px;
+    top: 20px;
+    bottom: 20px;
+    width: 2px;
+    background: rgba(255, 255, 255, 0.35);
+    border-radius: 1px;
+    pointer-events: none;
+  }
+  .migration-rail-btn {
+    position: relative;
+    display: block;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    text-align: left;
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    letter-spacing: 0.02em;
+  }
+  .migration-rail-btn-panel {
+    position: relative;
+    display: inline-flex;
+    z-index: 1;
+  }
+  .migration-rail-btn-glass {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 0;
     border-radius: 16px;
     overflow: hidden;
     clip-path: inset(0 round 16px);
     background: rgba(255, 255, 255, 0.10);
-    backdrop-filter: blur(20px) saturate(200%);
-    -webkit-backdrop-filter: blur(20px) saturate(200%);
+    backdrop-filter: blur(2px) saturate(200%);
+    -webkit-backdrop-filter: blur(2px) saturate(200%);
     box-shadow:
       0 0 0 0.75px rgba(255, 255, 255, 0.35) inset,
-      0 8px 40px rgba(0, 0, 0, 0.22),
-      0 2px 8px rgba(0, 0, 0, 0.14);
+      0 4px 16px rgba(0, 0, 0, 0.12);
   }
-  :root[data-lg-refract="1"] .migration-card-glass {
-    filter: url(#migration-glass);
+  :global(:root[data-lg-refract="1"]) .migration-rail-btn-glass {
+    filter: var(--lg-filter);
   }
-  /* layer 2: LiquidGlass chrome + content */
-  .migration-card-inner {
+  .migration-rail-btn-inner {
     display: flex;
-    flex-direction: column;
-    gap: var(--space-sm);
-    padding: var(--space-xl);
-    max-height: calc(100vh - 80px);
-    overflow-y: auto;
+    align-items: center;
+    gap: var(--space-md);
+    padding: 6px 14px 6px 10px;
+  }
+  .migration-rail-btn:hover,
+  .migration-rail-btn:focus-visible {
+    outline: none;
+  }
+  .migration-rail-dot {
+    flex-shrink: 0;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.75);
+    background: transparent;
+    transition:
+      background 0.28s ease,
+      border-color 0.28s ease,
+      transform 0.28s ease;
+  }
+  .migration-rail-btn:hover .migration-rail-dot,
+  .migration-rail-btn:focus-visible .migration-rail-dot {
+    transform: scale(1.35);
+    border-color: #fff;
+  }
+  .migration-rail-btn.is-active .migration-rail-dot {
+    background: #fff;
+    border-color: #fff;
+    transform: scale(1.2);
+  }
+  .migration-rail-label {
+    white-space: nowrap;
+    color: #fff;
+    font-weight: 400;
+    text-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.55),
+      0 0 10px rgba(0, 0, 0, 0.35);
+    transition: font-weight 0.28s ease;
+  }
+  .migration-rail-btn.is-active .migration-rail-label {
+    font-weight: 700;
+  }
+
+  .migration-section-nav {
+    position: absolute;
+    right: clamp(20px, 4vw, 48px);
+    z-index: 11;
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    letter-spacing: 0.04em;
+    color: #fff;
+    background: rgba(20, 20, 22, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: var(--radius-pill);
+    padding: 8px 14px;
+    cursor: pointer;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: background 0.2s ease, border-color 0.2s ease;
+  }
+  .migration-section-nav:hover,
+  .migration-section-nav:focus-visible {
+    background: rgba(32, 32, 36, 0.88);
+    border-color: rgba(255, 255, 255, 0.38);
+    outline: none;
+  }
+  .migration-section-nav--prev {
+    top: clamp(20px, 4vw, 48px);
+  }
+  .migration-section-nav--next {
+    bottom: clamp(20px, 4vw, 48px);
+    display: none;
   }
 
   /* scroll hint — bottom-center of the map viewport */
@@ -294,46 +621,45 @@ import LiquidGlass from '../components/LiquidGlass.astro';
     0%, 100% { transform: translateY(0); opacity: 0.65; }
     50%       { transform: translateY(7px); opacity: 1; }
   }
-  .migration-label {
-    font-family: var(--font-body);
-    font-size: var(--text-xs);
-    color: var(--color-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-  }
-  .migration-progress {
-    font-family: var(--font-body);
-    font-size: var(--text-xs);
-    color: var(--color-muted);
-  }
-  .migration-city-name {
-    font-family: var(--font-serif);
-    font-size: var(--text-xl);
-    color: var(--color-fg);
-    line-height: var(--leading-tight);
-    margin-top: var(--space-sm);
-  }
-  .migration-city-sub {
-    font-family: var(--font-body);
-    font-size: var(--text-sm);
-    color: var(--color-accent);
-    letter-spacing: 0.04em;
-  }
-  .migration-city-text {
-    font-family: var(--font-body);
-    font-size: var(--text-md);
-    color: var(--color-fg);
-    line-height: var(--leading-loose);
-    margin-top: var(--space-sm);
-  }
   @media (max-width: 640px) {
     .migration-card-wrap {
       left: 16px;
       right: 16px;
-      width: auto;
+      width: auto !important;
       top: auto;
       bottom: 24px;
       transform: none;
+    }
+    .migration-resize-handle {
+      display: none;
+    }
+    .migration-rail {
+      right: 16px;
+      left: auto;
+      top: auto;
+      bottom: 24px;
+      transform: none;
+      gap: var(--space-xs);
+      padding: var(--space-xs) 0;
+    }
+    .migration-rail-btn {
+      font-size: var(--text-xs);
+    }
+    .migration-rail-dot {
+      width: 10px;
+      height: 10px;
+    }
+    .migration-section-nav {
+      right: 16px;
+      font-size: 10px;
+      padding: 7px 12px;
+    }
+    .migration-section-nav--prev {
+      top: 16px;
+    }
+    .migration-section-nav--next {
+      top: 52px;
+      bottom: auto;
     }
   }
 
@@ -349,173 +675,59 @@ import LiquidGlass from '../components/LiquidGlass.astro';
     opacity: 0;
     pointer-events: none;
   }
-
-  /* LiquidGlass layout overrides for the migration card */
-  .migration-card-lg.lg {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-  }
-  .migration-card-lg .lg__body {
-    width: 100%;
-  }
 </style>
 
 
 <script>
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+  import { initMigrationMap } from '../lib/migration-map';
+  import { initMigrationCard } from '../lib/migration-card';
 
-const stops = [
-  {
-    name: 'antipolo',
-    sub: 'philippines · 2004 – 2014',
-    lat: 14.5888, lng: 121.1228, zoom: 13,
-    text: 'i was born in quezon city and raised in antipolo city. my family owned a small internet cafe, one of the firsts in the area. This is where i fell in love with computers. our house had two spaces: the back was our living space and the front was the internet cafe, where i spent my after-school hours playing games and exploring the web. at six, i troubleshot my first computer problem and became the family technician.',
-  },
-  {
-    name: 'abu dhabi',
-    sub: 'uae · 2014 – 2017',
-    lat: 24.4539, lng: 54.3773, zoom: 11,
-    text: 'we moved to abu dhabi after 4th grade. i wrote a story about it! my brother and i went to Philippine Emirates Private School.',
-  },
-  {
-    name: 'butuan',
-    sub: 'philippines · 2017 – 2021',
-    lat: 8.9475, lng: 125.5406, zoom: 12,
-    text: 'my family moved back to the Philippines after 6th grade. i didnt know any Cebuano, but thankfully, i managed to pick it up in my first two months.',
-  },
-  {
-    name: 'cagayan de oro',
-    sub: 'philippines · 2021 – 2024',
-    lat: 8.4542, lng: 124.6319, zoom: 12,
-    text: 'i got a scholarship at Xavier University - Ateneo de Cagayan and moved to cagayan de oro for senior high school. this city and its people molded me in so many ways! ill write about it soon.',
-  },
-  {
-    name: 'boston',
-    sub: 'usa · 2024 – present ✦',
-    lat: 42.3601, lng: -71.0589, zoom: 12,
-    text: "after getting the wien international scholarship at brandeis university, i moved to boston!",
-  },
-];
+  const dataEl = document.getElementById('migration-data');
+  if (dataEl?.textContent) {
+    initMigrationMap(JSON.parse(dataEl.textContent));
+  }
+  initMigrationCard();
 
-let current = -1;
+  const nav = document.querySelector('.site-nav');
+  const immersiveSections = [
+    document.getElementById('migration-section'),
+    document.getElementById('about-identity'),
+  ].filter((el): el is HTMLElement => !!el);
+  if (nav && immersiveSections.length) {
+    const visible = new Set<Element>();
+    const syncNav = () => nav.classList.toggle('nav-map-hide', visible.size > 0);
+    const navObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) visible.add(e.target);
+          else visible.delete(e.target);
+        });
+        syncNav();
+      },
+      { threshold: 0.01 },
+    );
+    immersiveSections.forEach((el) => navObserver.observe(el));
+  }
 
-const nameEl = document.getElementById('migration-city-name') as HTMLElement;
-const subEl  = document.getElementById('migration-city-sub') as HTMLElement;
-const textEl = document.getElementById('migration-city-text') as HTMLElement;
-const stepEl = document.getElementById('migration-step') as HTMLElement;
-const hint   = document.getElementById('scroll-hint') as HTMLElement | null;
-
-const map = L.map('migration-leaflet', {
-  zoomControl: false,
-  scrollWheelZoom: false,
-  dragging: false,
-  attributionControl: true,
-  keyboard: false,
-});
-
-L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-  attribution: 'Tiles &copy; Esri',
-  maxZoom: 19,
-}).addTo(map);
-
-// --- airplane marker ---
-// Material Design "flight" icon — naturally points NE (~45°), so offset bearing by -45
-function makePlaneIcon(bearing: number) {
-  const rot = bearing - 45;
-  return L.divIcon({
-    className: '',
-    html: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="28" height="28" style="transform:rotate(${rot}deg);filter:drop-shadow(0 0 6px rgba(0,0,0,.95)) drop-shadow(0 2px 5px rgba(0,0,0,.8));"><path fill="white" d="M21 16v-2l-8-5V3.5C13 2.67 12.33 2 11.5 2S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>`,
-    iconSize: [28, 28],
-    iconAnchor: [14, 14],
+  document.querySelectorAll<HTMLElement>('.migration-rail-btn').forEach((btn) => {
+    const panel = btn.querySelector<HTMLElement>('.migration-rail-btn-panel');
+    const glass = btn.querySelector<HTMLElement>('.migration-rail-btn-glass');
+    const sync = () => {
+      if (!panel || !glass) return;
+      glass.style.width = `${panel.offsetWidth}px`;
+      glass.style.height = `${panel.offsetHeight}px`;
+    };
+    sync();
+    if (panel) new ResizeObserver(sync).observe(panel);
   });
-}
 
-let planeMarker: L.Marker | null = null;
-let planeAnim = 0;
+  const prevBtn = document.getElementById('migration-section-prev');
+  const identitySection = document.getElementById('about-identity');
 
-function calcBearing(fromLat: number, fromLng: number, toLat: number, toLng: number): number {
-  const f1 = fromLat * Math.PI / 180, f2 = toLat * Math.PI / 180;
-  const dl = (toLng - fromLng) * Math.PI / 180;
-  const y = Math.sin(dl) * Math.cos(f2);
-  const x = Math.cos(f1) * Math.sin(f2) - Math.sin(f1) * Math.cos(f2) * Math.cos(dl);
-  return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
-}
-
-function movePlane(to: typeof stops[0]) {
-  if (!planeMarker) {
-    planeMarker = L.marker([to.lat, to.lng], { icon: makePlaneIcon(45), zIndexOffset: 200 }).addTo(map);
-    return;
-  }
-  const from = planeMarker.getLatLng();
-  const bearing = calcBearing(from.lat, from.lng, to.lat, to.lng);
-  const fromLat = from.lat, fromLng = from.lng;
-  const dur = 1500, t0 = performance.now();
-  if (planeAnim) cancelAnimationFrame(planeAnim);
-  planeMarker.setIcon(makePlaneIcon(bearing));
-  function tick(now: number) {
-    const t = Math.min(1, (now - t0) / dur);
-    const e = t < 0.5 ? 2*t*t : -1+(4-2*t)*t;
-    planeMarker!.setLatLng([fromLat + (to.lat - fromLat)*e, fromLng + (to.lng - fromLng)*e]);
-    planeAnim = t < 1 ? requestAnimationFrame(tick) : 0;
-  }
-  planeAnim = requestAnimationFrame(tick);
-}
-
-// --- tile preloading ---
-function latLngToTile(lat: number, lng: number, zoom: number) {
-  const n = 1 << zoom;
-  const x = Math.floor((lng + 180) / 360 * n);
-  const lr = lat * Math.PI / 180;
-  const y = Math.floor((1 - Math.log(Math.tan(lr) + 1 / Math.cos(lr)) / Math.PI) / 2 * n);
-  return { x, y, z: zoom };
-}
-function preloadStop(s: typeof stops[0]) {
-  const { x, y, z } = latLngToTile(s.lat, s.lng, s.zoom);
-  for (let dx = -3; dx <= 3; dx++)
-    for (let dy = -3; dy <= 3; dy++)
-      new Image().src = `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${z}/${y+dy}/${x+dx}`;
-}
-
-function goTo(index: number) {
-  if (index === current) return;
-  const s = stops[index];
-  if (current === -1) {
-    map.setView([s.lat, s.lng], s.zoom);
-  } else {
-    map.flyTo([s.lat, s.lng], s.zoom, { duration: 1.6, easeLinearity: 0.4 });
-  }
-  nameEl.textContent = s.name;
-  subEl.textContent  = s.sub;
-  textEl.textContent = s.text;
-  stepEl.textContent = String(index + 1);
-  movePlane(s);
-  if (index + 1 < stops.length) preloadStop(stops[index + 1]);
-  current = index;
-}
-
-const mapSection = document.getElementById('migration-section') as HTMLElement;
-
-// hide nav while satellite map is in view
-const nav = document.querySelector('.site-nav') as HTMLElement | null;
-if (nav) {
-  new IntersectionObserver(([e]) => nav.classList.toggle('nav-map-hide', e.isIntersecting), { threshold: 0.01 })
-    .observe(mapSection);
-}
-
-function updateMap() {
-  const rect  = mapSection.getBoundingClientRect();
-  const raw   = Math.min(1, Math.max(0, -rect.top / (mapSection.offsetHeight - window.innerHeight)));
-  if (hint && raw > 0.08) hint.style.opacity = '0';
-  goTo(Math.min(stops.length - 1, Math.floor(raw * stops.length)));
-}
-window.addEventListener('scroll', updateMap, { passive: true });
-updateMap();
-
-// preload first two stops immediately
-preloadStop(stops[0]);
-if (stops[1]) preloadStop(stops[1]);
+  prevBtn?.addEventListener('click', () => {
+    if (!identitySection) return;
+    window.scrollTo({ top: identitySection.offsetTop, behavior: 'smooth' });
+  });
 </script>
 
 <script>

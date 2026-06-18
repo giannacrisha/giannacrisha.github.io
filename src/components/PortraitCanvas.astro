@@ -1,11 +1,24 @@
 ---
-// PortraitCanvas.astro — gold 3-D self-portrait, Three.js.
-// Loads portrait.glb and applies the same gold PBR material used on heart.glb.
-// Drag left/right to spin (full Y); drag up/down clamped so bottom face stays hidden.
+import LiquidGlass from './LiquidGlass.astro';
+import TerminalWindow from './TerminalWindow.astro';
+
 const { model = '/portrait.glb' } = Astro.props;
 ---
-<div class="portrait-stage" data-portrait-model={model}>
-  <canvas class="portrait-canvas" aria-hidden="true"></canvas>
+<div class="portrait-widget">
+  <div class="portrait-stage" data-portrait-model={model}>
+    <canvas class="portrait-canvas" aria-hidden="true"></canvas>
+  </div>
+  <div class="portrait-cursor-glass" aria-hidden="true"></div>
+  <div class="portrait-cursor-label" aria-hidden="true">
+    <LiquidGlass displacement={100} aberration={3} cornerRadius={24} filterId="portrait-pill" backdrop={false}>
+      <span class="portrait-cursor-text">who is gi?</span>
+    </LiquidGlass>
+  </div>
+  <div class="portrait-terminal" role="dialog" aria-modal="true" aria-hidden="true">
+    <TerminalWindow title="who-is-gi.sh" class="pt-window">
+      <pre class="pt-body"></pre>
+    </TerminalWindow>
+  </div>
 </div>
 
 <style>
@@ -15,6 +28,11 @@ const { model = '/portrait.glb' } = Astro.props;
     position: relative;
     z-index: 3;
     margin-bottom: var(--space-sm);
+    cursor: none;
+    transition: transform 0.3s ease;
+  }
+  .portrait-stage:hover {
+    transform: scale(1.06);
   }
   .portrait-canvas {
     width: 100%;
@@ -31,6 +49,88 @@ const { model = '/portrait.glb' } = Astro.props;
   @media (min-width: 600px) {
     .portrait-stage { width: clamp(180px, 28vw, 260px); }
   }
+
+  .portrait-cursor-glass {
+    position: fixed;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 9998;
+    opacity: 0;
+    transition: opacity 0.15s;
+    border-radius: 24px;
+    overflow: hidden;
+    clip-path: inset(0 round 24px);
+    background: rgba(255, 255, 255, 0.10);
+    backdrop-filter: blur(2px) saturate(200%);
+    -webkit-backdrop-filter: blur(2px) saturate(200%);
+    box-shadow:
+      0 0 0 0.75px rgba(255, 255, 255, 0.35) inset,
+      0 4px 16px rgba(0, 0, 0, 0.12);
+  }
+  :global(:root[data-lg-refract="1"]) .portrait-cursor-glass {
+    filter: url(#portrait-pill);
+  }
+  .portrait-cursor-glass.is-visible { opacity: 1; }
+
+  .portrait-cursor-label {
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: inline-flex;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .portrait-cursor-label.is-visible { opacity: 1; }
+  .portrait-cursor-text {
+    font-family: var(--font-display);
+    font-size: var(--text-md);
+    line-height: 1.5;
+    color: #fff;
+    white-space: nowrap;
+    padding: 32px 16px;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.55), 0 0 2px rgba(0, 0, 0, 0.3);
+  }
+
+  .portrait-terminal {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+  .portrait-terminal.is-open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .pt-window { width: min(520px, 90vw); }
+  .pt-body {
+    padding: 24px 28px;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: var(--text-base);
+    line-height: 2.2;
+    color: #d4d4d4;
+    margin: 0;
+    white-space: pre-wrap;
+    text-align: left;
+  }
+  :global(.pt-user) { color: #d4d4d4; }
+  :global(.pt-dir)  { color: #89b4fa; }
+  :global(.pt-pct)  { color: #cdd6f4; }
+  :global(.pt-blink) { display: inline-block; animation: pt-blink 1s step-start infinite; }
+  @keyframes pt-blink { 50% { opacity: 0; } }
+  @media (max-width: 768px) {
+    .pt-body { padding: 20px; }
+  }
 </style>
 
 <script>
@@ -40,8 +140,114 @@ const { model = '/portrait.glb' } = Astro.props;
   import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 
   function initPortrait(stage: HTMLElement) {
+    const widget = stage.closest<HTMLElement>('.portrait-widget');
     const canvas = stage.querySelector('.portrait-canvas');
-    if (!canvas) return;
+    if (!canvas || !widget) return;
+
+    const cursorLabel = widget.querySelector<HTMLElement>('.portrait-cursor-label');
+    const cursorGlass = widget.querySelector<HTMLElement>('.portrait-cursor-glass');
+    const terminal = widget.querySelector<HTMLElement>('.portrait-terminal');
+
+    const syncGlassSize = () => {
+      if (!cursorGlass || !cursorLabel) return;
+      cursorGlass.style.width = `${cursorLabel.offsetWidth}px`;
+      cursorGlass.style.height = `${cursorLabel.offsetHeight}px`;
+    };
+    syncGlassSize();
+    if (cursorLabel) new ResizeObserver(syncGlassSize).observe(cursorLabel);
+
+    const moveCursor = (clientX: number, clientY: number) => {
+      if (!cursorLabel) return;
+      const x = clientX + 14;
+      const y = clientY - cursorLabel.offsetHeight / 2;
+      cursorLabel.style.left = `${x}px`;
+      cursorLabel.style.top = `${y}px`;
+      if (cursorGlass) {
+        cursorGlass.style.left = `${x}px`;
+        cursorGlass.style.top = `${y}px`;
+      }
+    };
+
+    stage.addEventListener('pointerenter', (e) => {
+      cursorLabel?.classList.add('is-visible');
+      cursorGlass?.classList.add('is-visible');
+      moveCursor(e.clientX, e.clientY);
+    });
+
+    const PROMPT_HTML =
+      `<span class="pt-user">giannacrisha@Giannas-MacBook-Air</span> ` +
+      `<span class="pt-dir">giannacrisha.github.io</span> ` +
+      `<span class="pt-pct">%</span> `;
+    const CMD = 'cat who-is-gi.sh';
+    const FILE_CONTENT =
+      '\ndesigner · developer · anthropologist\n\n' +
+      'hey, im gi! i was raised in metro manila,\n' +
+      'grew up in abu dhabi, then moved to butuan.\n' +
+      'now, im based in boston and currently a\n' +
+      'wien international scholar at brandeis\n' +
+      'university!\n';
+
+    let typeTimer: ReturnType<typeof setTimeout> | null = null;
+
+    function playTerminal() {
+      if (!terminal) return;
+      const body = terminal.querySelector<HTMLElement>('.pt-body');
+      if (!body) return;
+      if (typeTimer !== null) {
+        clearTimeout(typeTimer);
+        typeTimer = null;
+      }
+
+      body.innerHTML =
+        `<span>${PROMPT_HTML}<span class="pt-cmd"></span><span class="pt-blink">▋</span></span>`;
+
+      const cmdEl = body.querySelector<HTMLElement>('.pt-cmd')!;
+      const cursor = body.querySelector<HTMLElement>('.pt-blink')!;
+      let i = 0;
+
+      function typeNext() {
+        if (i < CMD.length) {
+          cmdEl.textContent += CMD[i++];
+          typeTimer = setTimeout(typeNext, 65 + Math.random() * 45);
+        } else {
+          typeTimer = setTimeout(() => {
+            cursor.remove();
+            const out = document.createElement('span');
+            out.textContent = FILE_CONTENT;
+            body.appendChild(out);
+            const p2 = document.createElement('span');
+            p2.innerHTML = `${PROMPT_HTML}<span class="pt-blink">▋</span>`;
+            body.appendChild(p2);
+          }, 250);
+        }
+      }
+
+      typeTimer = setTimeout(typeNext, 450);
+    }
+
+    function closeTerminal() {
+      if (!terminal) return;
+      terminal.classList.remove('is-open');
+      terminal.setAttribute('aria-hidden', 'true');
+    }
+
+    stage.addEventListener('click', () => {
+      if (!terminal) return;
+      terminal.classList.add('is-open');
+      terminal.removeAttribute('aria-hidden');
+      playTerminal();
+    });
+
+    if (terminal) {
+      terminal.addEventListener('click', (e) => {
+        if (e.target === terminal) closeTerminal();
+      });
+      terminal.querySelector<HTMLElement>('[data-tw-close]')?.addEventListener('click', closeTerminal);
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && terminal.classList.contains('is-open')) closeTerminal();
+      });
+    }
+
     const dpr = Math.min(window.devicePixelRatio, 2);
 
     const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
@@ -77,15 +283,47 @@ const { model = '/portrait.glb' } = Astro.props;
     let loaded = false;
     let root: THREE.Object3D | null = null;
 
-    // rotation state — lerped each frame toward target
     let curY = 0, curX = 0;
     let tgtY = 0, tgtX = 0;
     let loopRunning = false;
 
-    // max X clamp so bottom face never tilts into view
-    // adjust MAX_X: lower = less tilt, e.g. 0.05 ≈ ±9°, 0.15 ≈ ±27°
-    const TILT_Y = 0.5;
-    const TILT_X = 0.25;
+    const TILT_Y = 0.35;
+    const TILT_X = 0.18;
+    const clamp = (v: number, max: number) => Math.max(-max, Math.min(max, v));
+
+    let scrolling = false;
+    let scrollEndTimer: ReturnType<typeof setTimeout>;
+
+    function updateTilt(clientX: number, clientY: number) {
+      if (scrolling) return;
+      const rect = stage.getBoundingClientRect();
+      const nx = ((clientX - rect.left) / rect.width - 0.5) * 2;
+      const ny = ((clientY - rect.top) / rect.height - 0.5) * 2;
+      tgtY = clamp(nx * TILT_Y, TILT_Y);
+      tgtX = clamp(ny * TILT_X, TILT_X);
+      startLoop();
+    }
+
+    window.addEventListener('scroll', () => {
+      scrolling = true;
+      tgtY = 0;
+      tgtX = 0;
+      startLoop();
+      clearTimeout(scrollEndTimer);
+      scrollEndTimer = setTimeout(() => { scrolling = false; }, 120);
+    }, { passive: true });
+
+    stage.addEventListener('pointermove', (e) => {
+      moveCursor(e.clientX, e.clientY);
+      updateTilt(e.clientX, e.clientY);
+    });
+    stage.addEventListener('pointerleave', () => {
+      cursorLabel?.classList.remove('is-visible');
+      cursorGlass?.classList.remove('is-visible');
+      tgtY = 0;
+      tgtX = 0;
+      startLoop();
+    });
 
     function startLoop() {
       if (loopRunning || !loaded) return;
@@ -99,7 +337,8 @@ const { model = '/portrait.glb' } = Astro.props;
         renderer.render(scene, camera);
         const done = Math.abs(tgtY - curY) < 0.0005 && Math.abs(tgtX - curX) < 0.0005;
         if (done) {
-          root.rotation.y = tgtY; root.rotation.x = tgtX;
+          root.rotation.y = tgtY;
+          root.rotation.x = tgtX;
           renderer.render(scene, camera);
           loopRunning = false;
         } else {
@@ -118,19 +357,6 @@ const { model = '/portrait.glb' } = Astro.props;
     }
     new ResizeObserver(resize).observe(stage);
     resize();
-
-    // cursor tracking — tilt toward cursor anywhere on the page
-    // offset is relative to stage center, normalized by viewport size
-    document.addEventListener('mousemove', (e: MouseEvent) => {
-      const rect = stage.getBoundingClientRect();
-      const cx = rect.left + rect.width  / 2;
-      const cy = rect.top  + rect.height / 2;
-      const nx = (e.clientX - cx) / (window.innerWidth  / 2);
-      const ny = (e.clientY - cy) / (window.innerHeight / 2);
-      tgtY = nx * TILT_Y;
-      tgtX = ny * TILT_X;
-      startLoop();
-    });
 
     const loader = new GLTFLoader();
     loader.setMeshoptDecoder(MeshoptDecoder);

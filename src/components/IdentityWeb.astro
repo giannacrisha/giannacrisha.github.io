@@ -1,7 +1,27 @@
 ---
+import LiquidGlass from './LiquidGlass.astro';
 ---
 
 <div class="iw-outer" id="iw-outer">
+  <div class="iw-cover" id="iw-cover" aria-hidden="false">
+    <canvas class="iw-cover-stars" aria-hidden="true"></canvas>
+    <div class="iw-cover-glow" id="iw-cover-glow" aria-hidden="true"></div>
+    <div class="iw-cover-inner">
+      <h2 class="iw-cover-title">who am i?</h2>
+      <p class="iw-cover-text">
+        intersectionality is one of my favorite topics in anthropology, and i developed this star map to visualize that.
+      </p>
+      <div class="iw-cover-actions">
+        <button type="button" class="iw-cover-action iw-cover-action--enter" id="iw-cover-enter">
+          <span class="iw-cover-action-label">enter my star map</span>
+        </button>
+        <button type="button" class="iw-cover-action iw-cover-action--soon" id="iw-cover-create" aria-disabled="true">
+          <span class="iw-cover-action-label">create your own</span>
+          <span class="iw-cover-soon">coming soon</span>
+        </button>
+      </div>
+    </div>
+  </div>
   <div class="iw-container" id="iw-container"></div>
   <div class="iw-legend">
     <span class="iw-leg-label">most salient</span>
@@ -14,13 +34,6 @@
     <span class="iw-leg iw-leg--M"></span>
     <span class="iw-leg-label">least</span>
   </div>
-  <button class="iw-reset" id="iw-reset" aria-label="reset node positions">
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M2.5 8a5.5 5.5 0 1 0 1.2-3.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-      <polyline points="2.5,2.5 2.5,5.5 5.5,5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-    reset nodes
-  </button>
   <button class="iw-recenter" id="iw-recenter" aria-label="recenter view">
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
       <circle cx="8" cy="8" r="2.5" fill="currentColor"/>
@@ -28,20 +41,256 @@
     </svg>
     recenter
   </button>
-  <p class="iw-hint">drag to orbit · scroll to zoom · drag nodes to reposition</p>
+  <button class="iw-reset" id="iw-reset" aria-label="reset node positions">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M2.5 8a5.5 5.5 0 1 0 1.2-3.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      <polyline points="2.5,2.5 2.5,5.5 5.5,5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    reset nodes
+  </button>
+  <p class="iw-hint">drag to orbit · drag nodes to reposition</p>
+  <button type="button" class="iw-menu" id="iw-menu" aria-label="back to menu">
+    <div class="iw-menu-glass" aria-hidden="true"></div>
+    <div class="iw-menu-panel">
+      <LiquidGlass displacement={100} aberration={3} cornerRadius={24} filterId="iw-menu" backdrop={false}>
+        <span class="iw-glass-inner">
+          <span class="iw-menu-label">menu</span>
+        </span>
+      </LiquidGlass>
+    </div>
+  </button>
 </div>
 
 <style>
   .iw-outer {
     position: relative;
     width: 100%;
-    height: 75vh;
-    min-height: 520px;
-    max-height: 780px;
-    border-radius: var(--radius-card);
-    border: var(--border);
+    height: 100%;
+    min-height: 0;
+    border-radius: 0;
+    border: none;
     overflow: hidden;
-    background: radial-gradient(ellipse at 50% 45%, #0d1828 0%, #060a10 70%);
+    background: radial-gradient(ellipse at 50% 45%, #201612 0%, #100908 70%);
+  }
+
+  .iw-cover {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(24px, 5vw, 64px);
+    background: radial-gradient(ellipse at 50% 45%, #201612 0%, #100908 70%);
+    transition: opacity 0.45s ease, visibility 0.45s ease;
+    cursor: none;
+  }
+  .iw-cover.is-hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+  .iw-cover-stars {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .iw-cover-glow {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 44px;
+    height: 44px;
+    pointer-events: none;
+    z-index: 2;
+    opacity: 0;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      rgba(255, 250, 240, 0.95) 0%,
+      rgba(255, 230, 200, 0.42) 38%,
+      transparent 72%
+    );
+    box-shadow: 0 0 32px rgba(255, 228, 190, 0.5);
+    mix-blend-mode: screen;
+    will-change: transform, opacity;
+    transform: translate3d(-1000px, -1000px, 0) translate(-50%, -50%);
+  }
+  .iw-cover-action,
+  .iw-cover-action * {
+    cursor: pointer;
+  }
+  .iw-cover-action--soon,
+  .iw-cover-action--soon * {
+    cursor: not-allowed;
+  }
+  .iw-cover-inner {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+    max-width: 42ch;
+    text-align: left;
+  }
+  .iw-cover-title {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: clamp(2rem, 5vw, var(--text-xxl));
+    color: #f4f4f5;
+    line-height: var(--leading-tight);
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.65);
+  }
+  .iw-cover-text {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: var(--text-md);
+    line-height: var(--leading-loose);
+    color: rgba(244, 244, 245, 0.78);
+    text-wrap: pretty;
+  }
+  .iw-cover-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-sm);
+    margin-top: var(--space-xs);
+  }
+  .iw-cover-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    padding: 10px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.08);
+    cursor: pointer;
+    text-align: left;
+    transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+  }
+  .iw-cover-action-label {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    letter-spacing: 0.02em;
+    color: #f4f4f5;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.55), 0 0 2px rgba(0, 0, 0, 0.3);
+    white-space: nowrap;
+    transition: color 0.15s ease;
+  }
+  .iw-cover-action--enter {
+    background: rgba(232, 212, 184, 0.14);
+    border-color: rgba(232, 212, 184, 0.38);
+  }
+  .iw-cover-action--enter .iw-cover-action-label {
+    color: #e8d4b8;
+  }
+  .iw-cover-action--enter:hover,
+  .iw-cover-action--enter:focus-visible {
+    background: rgba(232, 212, 184, 0.22);
+    border-color: rgba(232, 212, 184, 0.55);
+    outline: none;
+  }
+  .iw-cover-action--enter:hover .iw-cover-action-label,
+  .iw-cover-action--enter:focus-visible .iw-cover-action-label {
+    color: #fff;
+  }
+  .iw-cover-action--soon {
+    cursor: not-allowed;
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+  .iw-cover-action--soon .iw-cover-action-label {
+    color: rgba(244, 244, 245, 0.55);
+  }
+  .iw-cover-soon {
+    font-size: var(--text-xs);
+    letter-spacing: 0.04em;
+    text-transform: lowercase;
+    color: rgba(244, 244, 245, 0.42);
+    padding: 2px 8px;
+    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.08);
+    text-shadow: none;
+  }
+
+  .iw-outer:not(.is-open) .iw-container,
+  .iw-outer:not(.is-open) .iw-legend,
+  .iw-outer:not(.is-open) .iw-reset,
+  .iw-outer:not(.is-open) .iw-recenter,
+  .iw-outer:not(.is-open) .iw-hint,
+  .iw-outer:not(.is-open) .iw-menu {
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .iw-menu {
+    position: absolute;
+    top: clamp(20px, 4vw, 40px);
+    right: clamp(20px, 4vw, 48px);
+    z-index: 21;
+    display: inline-flex;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+  }
+  .iw-menu-glass {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 0;
+    border-radius: 24px;
+    overflow: hidden;
+    clip-path: inset(0 round 24px);
+    background: rgba(255, 255, 255, 0.10);
+    backdrop-filter: blur(2px) saturate(200%);
+    -webkit-backdrop-filter: blur(2px) saturate(200%);
+    box-shadow:
+      0 0 0 0.75px rgba(255, 255, 255, 0.35) inset,
+      0 4px 16px rgba(0, 0, 0, 0.12);
+  }
+  :global(:root[data-lg-refract="1"]) .iw-menu-glass {
+    filter: url(#iw-menu);
+  }
+  .iw-menu-panel {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+  }
+  .iw-menu-panel :global(.lg) {
+    box-shadow: none;
+  }
+  .iw-menu-panel :global(.lg__back) {
+    background: transparent;
+  }
+  .iw-glass-inner {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    padding: 10px 16px;
+  }
+  .iw-menu-label {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    letter-spacing: 0.04em;
+    color: #f4f4f5;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.55), 0 0 2px rgba(0, 0, 0, 0.3);
+    white-space: nowrap;
+    transition: color 0.15s ease;
+  }
+  .iw-menu:hover .iw-menu-label,
+  .iw-menu:focus-visible .iw-menu-label {
+    color: #fff;
+    outline: none;
+  }
+  .iw-menu:focus-visible {
+    outline: none;
   }
 
   .iw-container {
@@ -55,7 +304,7 @@
   /* legend — spectral scale */
   .iw-legend {
     position: absolute;
-    top: var(--space-md);
+    top: clamp(20px, 4vw, 40px);
     left: var(--space-md);
     display: flex;
     align-items: center;
@@ -83,17 +332,11 @@
   .iw-leg--K { background: #FF8030; color: #FF8030; }
   .iw-leg--M { background: #FF2810; color: #FF2810; }
 
-  /* reset + recenter buttons — shared style */
-  .iw-reset,
-  .iw-recenter {
+  /* reset + recenter buttons */
+  .iw-reset {
     position: absolute;
-    bottom: var(--space-xl);
-  }
-  .iw-reset   { left:  var(--space-xl); }
-  .iw-recenter { right: var(--space-xl); }
-
-  .iw-reset,
-  .iw-recenter {
+    left: clamp(20px, 4vw, 48px);
+    bottom: clamp(20px, 4vw, 48px);
     display: flex;
     align-items: center;
     gap: 6px;
@@ -105,7 +348,26 @@
     border-radius: var(--radius-pill);
     padding: 6px 12px;
     cursor: pointer;
-    z-index: 10;
+    z-index: 11;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+  }
+  .iw-recenter {
+    position: absolute;
+    left: clamp(20px, 4vw, 48px);
+    right: auto;
+    bottom: calc(clamp(20px, 4vw, 48px) + 2.5rem);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-body);
+    font-size: 11px;
+    color: rgba(255,255,255,0.45);
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: var(--radius-pill);
+    padding: 6px 12px;
+    cursor: pointer;
+    z-index: 11;
     transition: color 0.15s, border-color 0.15s, background 0.15s;
   }
   .iw-reset:hover,
@@ -260,8 +522,8 @@ function makeStarTexture() {
   c.width = c.height = S;
   const ctx = c.getContext('2d');
   const g = ctx.createRadialGradient(S/2, S/2, 0, S/2, S/2, S/2);
-  g.addColorStop(0.0, 'rgba(255,255,255,1.0)');
-  g.addColorStop(0.3, 'rgba(200,215,255,0.7)');
+  g.addColorStop(0.0, 'rgba(255,252,245,1.0)');
+  g.addColorStop(0.3, 'rgba(255,228,196,0.72)');
   g.addColorStop(1.0, 'rgba(0,0,0,0)');
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, S, S);
@@ -353,7 +615,7 @@ function init() {
 
   // scene & camera
   const scene  = new THREE.Scene();
-  scene.fog    = new THREE.FogExp2(0x060a10, 0.030); // deep space fade
+  scene.fog    = new THREE.FogExp2(0x100908, 0.030);
 
   const camera = new THREE.PerspectiveCamera(52, W / H, 0.1, 60);
   camera.position.set(0, 0, 14);
@@ -365,6 +627,7 @@ function init() {
   controls.minDistance    = 5;
   controls.maxDistance    = 22;
   controls.enablePan      = false;
+  controls.enableZoom     = false;
   controls.autoRotate     = true;
   controls.autoRotateSpeed = 0.35;
 
@@ -381,15 +644,15 @@ function init() {
   // ── starfield ─────────────────────────────────────────────────────────────
   const starTex    = makeStarTexture();
   const starGroups = [];
-  const SR         = 38;
+  const SR         = 48;
 
-  // static background — 1000 tiny stars
+  // static background stars
   (() => {
-    const N = 1000, pos = new Float32Array(N * 3);
+    const N = 2800, pos = new Float32Array(N * 3);
     for (let i = 0; i < N; i++) {
       const th = Math.random() * Math.PI * 2;
       const ph = Math.acos(2 * Math.random() - 1);
-      const r  = SR * (0.55 + Math.random() * 0.45);
+      const r  = SR * (0.45 + Math.random() * 0.55);
       pos[i*3]   = r * Math.sin(ph) * Math.cos(th);
       pos[i*3+1] = r * Math.sin(ph) * Math.sin(th);
       pos[i*3+2] = r * Math.cos(ph);
@@ -397,15 +660,35 @@ function init() {
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
     scene.add(new THREE.Points(geo, new THREE.PointsMaterial({
-      map: starTex, size: 0.09, transparent: true, opacity: 0.30,
+      map: starTex, size: 0.09, transparent: true, opacity: 0.34,
       sizeAttenuation: true, fog: false, depthWrite: false,
       blending: THREE.AdditiveBlending,
     })));
   })();
 
-  // twinkling stars — 8 groups of 40, each with independent phase
-  for (let g = 0; g < 8; g++) {
-    const N = 40, pos = new Float32Array(N * 3);
+  // mid-layer dim stars
+  (() => {
+    const N = 1200, pos = new Float32Array(N * 3);
+    for (let i = 0; i < N; i++) {
+      const th = Math.random() * Math.PI * 2;
+      const ph = Math.acos(2 * Math.random() - 1);
+      const r  = SR * (0.60 + Math.random() * 0.40);
+      pos[i*3]   = r * Math.sin(ph) * Math.cos(th);
+      pos[i*3+1] = r * Math.sin(ph) * Math.sin(th);
+      pos[i*3+2] = r * Math.cos(ph);
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    scene.add(new THREE.Points(geo, new THREE.PointsMaterial({
+      map: starTex, size: 0.12, transparent: true, opacity: 0.22,
+      sizeAttenuation: true, fog: false, depthWrite: false,
+      blending: THREE.AdditiveBlending,
+    })));
+  })();
+
+  // twinkling stars — independent phase groups
+  for (let g = 0; g < 14; g++) {
+    const N = 55, pos = new Float32Array(N * 3);
     for (let i = 0; i < N; i++) {
       const th = Math.random() * Math.PI * 2;
       const ph = Math.acos(2 * Math.random() - 1);
@@ -422,7 +705,7 @@ function init() {
       blending: THREE.AdditiveBlending,
     });
     scene.add(new THREE.Points(geo, mat));
-    starGroups.push({ mat, phase: (g / 8) * Math.PI * 2, speed: 0.5 + Math.random() * 1.5 });
+    starGroups.push({ mat, phase: (g / 14) * Math.PI * 2, speed: 0.5 + Math.random() * 1.5 });
   }
 
   // ── nodes as glow orb sprites ─────────────────────────────────────────────
@@ -671,6 +954,191 @@ function init() {
   ro.observe(container);
 }
 
-// wait for fonts so canvas text renders correctly
-document.fonts.ready.then(init);
+let mapReady = false;
+
+function initCoverStars() {
+  const cover = document.getElementById('iw-cover');
+  const canvas = cover?.querySelector<HTMLCanvasElement>('.iw-cover-stars');
+  if (!cover || !canvas) return;
+
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const stars = Array.from({ length: 220 }, () => ({
+    x: Math.random(),
+    y: Math.random(),
+    r: Math.random() * 1.35 + 0.25,
+    phase: Math.random() * Math.PI * 2,
+    speed: 0.35 + Math.random() * 1.4,
+    base: 0.12 + Math.random() * 0.38,
+    tint: Math.random() > 0.7 ? '255, 228, 200' : '255, 245, 235',
+  }));
+
+  let running = true;
+  let raf = 0;
+
+  const resize = () => {
+    const dpr = Math.min(window.devicePixelRatio, 2);
+    const w = cover.clientWidth;
+    const h = cover.clientHeight;
+    canvas.width = Math.max(1, Math.floor(w * dpr));
+    canvas.height = Math.max(1, Math.floor(h * dpr));
+    canvas.style.width = `${w}px`;
+    canvas.style.height = `${h}px`;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  };
+
+  const draw = (time = 0) => {
+    const w = cover.clientWidth;
+    const h = cover.clientHeight;
+    ctx.clearRect(0, 0, w, h);
+    const t = time * 0.001;
+
+    for (const star of stars) {
+      const twinkle = reduce
+        ? star.base
+        : star.base + 0.42 * (0.5 + 0.5 * Math.sin(t * star.speed + star.phase));
+      ctx.fillStyle = `rgba(${star.tint}, ${twinkle})`;
+      ctx.beginPath();
+      ctx.arc(star.x * w, star.y * h, star.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  };
+
+  const frame = (time: number) => {
+    if (!running) return;
+    draw(time);
+    raf = requestAnimationFrame(frame);
+  };
+
+  resize();
+  draw();
+  if (!reduce) raf = requestAnimationFrame(frame);
+
+  const ro = new ResizeObserver(() => {
+    resize();
+    draw();
+  });
+  ro.observe(cover);
+
+  const mo = new MutationObserver(() => {
+    const active = !cover.classList.contains('is-hidden');
+    if (active === running) return;
+    running = active;
+    if (running && !reduce) {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(frame);
+    } else {
+      cancelAnimationFrame(raf);
+    }
+  });
+  mo.observe(cover, { attributes: true, attributeFilter: ['class'] });
+}
+
+initCoverStars();
+
+function initCoverCursor() {
+  const cover = document.getElementById('iw-cover');
+  const glow = document.getElementById('iw-cover-glow');
+  if (!cover || !glow) return;
+
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce) return;
+
+  let targetX = -1000;
+  let targetY = -1000;
+  let curX = -1000;
+  let curY = -1000;
+  let active = false;
+  let raf = 0;
+
+  const tick = (time: number) => {
+    curX += (targetX - curX) * 0.14;
+    curY += (targetY - curY) * 0.14;
+    glow.style.transform = `translate3d(${curX}px, ${curY}px, 0) translate(-50%, -50%)`;
+
+    if (active) {
+      const flicker = 0.84 + 0.16 * (0.5 + 0.5 * Math.sin(time * 0.005));
+      glow.style.opacity = String(flicker);
+    }
+
+    raf = requestAnimationFrame(tick);
+  };
+  raf = requestAnimationFrame(tick);
+
+  const show = () => { active = true; };
+  const hide = () => {
+    active = false;
+    glow.style.opacity = '0';
+  };
+
+  const setTarget = (x: number, y: number) => {
+    targetX = x;
+    targetY = y;
+  };
+
+  cover.addEventListener('pointerenter', (e) => {
+    setTarget(e.clientX, e.clientY);
+    curX = e.clientX;
+    curY = e.clientY;
+    show();
+  });
+  cover.addEventListener('pointerleave', hide);
+  cover.addEventListener('pointermove', (e) => {
+    if ((e.target as HTMLElement).closest('button')) return;
+    setTarget(e.clientX, e.clientY);
+    show();
+  });
+
+  cover.querySelectorAll('button').forEach((btn) => {
+    btn.addEventListener('pointerenter', hide);
+    btn.addEventListener('pointerleave', () => {
+      if (cover.matches(':hover') && !cover.classList.contains('is-hidden')) show();
+    });
+  });
+
+  const mo = new MutationObserver(() => {
+    if (cover.classList.contains('is-hidden')) hide();
+  });
+  mo.observe(cover, { attributes: true, attributeFilter: ['class'] });
+}
+
+initCoverCursor();
+
+document.querySelectorAll<HTMLElement>('.iw-menu').forEach((btn) => {
+  const glass = btn.querySelector<HTMLElement>('.iw-menu-glass');
+  const lg = btn.querySelector<HTMLElement>('.lg');
+  const sync = () => {
+    if (!lg || !glass) return;
+    glass.style.width = `${lg.offsetWidth}px`;
+    glass.style.height = `${lg.offsetHeight}px`;
+  };
+  sync();
+  if (lg) new ResizeObserver(sync).observe(lg);
+});
+
+function openMap() {
+  const outer = document.getElementById('iw-outer');
+  const cover = document.getElementById('iw-cover');
+  outer?.classList.add('is-open');
+  cover?.classList.add('is-hidden');
+  cover?.setAttribute('aria-hidden', 'true');
+
+  if (!mapReady) {
+    mapReady = true;
+    document.fonts.ready.then(init);
+  }
+}
+
+function openMenu() {
+  const outer = document.getElementById('iw-outer');
+  const cover = document.getElementById('iw-cover');
+  outer?.classList.remove('is-open');
+  cover?.classList.remove('is-hidden');
+  cover?.setAttribute('aria-hidden', 'false');
+}
+
+document.getElementById('iw-cover-enter')?.addEventListener('click', openMap);
+document.getElementById('iw-menu')?.addEventListener('click', openMenu);
 </script>
