@@ -2,6 +2,13 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "framework": "astro",
+  "redirects": [
+    {
+      "source": "/meet",
+      "destination": "https://calendar.app.google/uPcHwDo2gUSafwL47",
+      "permanent": false
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
