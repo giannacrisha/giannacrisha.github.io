@@ -1,20 +1,7 @@
 // No emoji. All visual indicators use SVG. See src/components/icons/
 // src/config/design.ts
-// Single source of truth for all design tokens.
-
-export const colors = {
-  bg:           '#fffdfa',
-  fg:           '#3d2f1f',
-  heading:      '#90642f',
-  card:         '#ffffff',
-  muted:        '#7A6035',
-  accent:       '#9C8B6E',
-  accentLight:  '#EDE5D8',
-  border:       '#E8DCC8',
-  pillBg:       '#E8DDD0',
-  pillText:     '#6B5C47',
-  accentBorder: '#C4B49A',
-} as const;
+// Non-CSS design data only (fonts for <link>, taxonomy, site meta).
+// Visual tokens live in src/styles/tokens.css — do not duplicate them here.
 
 export const fonts = {
   display: "'Jacquard 12', monospace",
@@ -22,45 +9,6 @@ export const fonts = {
   serif:   "'Lora', serif",
   body:    "'Atkinson Hyperlegible Next', sans-serif",
   googleFontsUrl: "https://fonts.googleapis.com/css2?family=Jacquard+12&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600;1,700&family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,700;1,400&display=swap",
-} as const;
-
-export const fontSizes = {
-  xs:      '11px',
-  sm:      '12px',
-  base:    '14px',
-  md:      '16px',
-  lg:      '18px',
-  xl:      '24px',
-  xxl:     '36px',
-  hero:    'clamp(48px, 8vw, 80px)',
-  section: 'clamp(28px, 4vw, 40px)',
-} as const;
-
-export const lineHeights = {
-  tight: '1.3',
-  base:  '1.6',
-  loose: '1.8',
-  poem:  '2.0',
-} as const;
-
-export const spacing = {
-  xs:      '4px',
-  sm:      '8px',
-  md:      '12px',
-  lg:      '16px',
-  xl:      '24px',
-  xxl:     '40px',
-  section: '64px',
-} as const;
-
-export const layout = {
-  contentWidth: '720px',
-  siteWidth:    '1100px',
-  cardRadius:   '12px',
-  pillRadius:   '20px',
-  inputRadius:  '8px',
-  borderWidth:  '0.5px',
-  borderStyle:  'solid',
 } as const;
 
 export const growthStages = {

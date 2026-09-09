@@ -7,7 +7,14 @@ import StarRating from '../components/icons/StarRating.astro';
 import GrowthPill from '../components/GrowthPill.astro';
 import Timestamps from '../components/Timestamps.astro';
 import Card from '../components/Card.astro';
-import { colors, fonts, fontSizes, spacing, growthStages } from '../config/design';
+import { growthStages } from '../config/design';
+
+// Swatches render live from tokens.css — the single source of truth.
+const colorTokens = [
+  'bg', 'fg', 'heading', 'card', 'muted', 'accent', 'accent-light',
+  'border', 'pill-bg', 'pill-text', 'accent-border', 'danger',
+];
+const spaceTokens = ['xs', 'sm', 'md', 'lg', 'xl', 'xxl', 'section'];
 ---
 <Garden title="design system">
   <div class="page-wrapper system-page">
@@ -18,11 +25,11 @@ import { colors, fonts, fontSizes, spacing, growthStages } from '../config/desig
     <section class="system-section">
       <h2 class="section-header">colors</h2>
       <div class="swatch-row">
-        {Object.entries(colors).map(([key, value]) => (
+        {colorTokens.map((key) => (
           <div class="swatch">
-            <div class="swatch-block" style={`background: ${value};`}></div>
+            <div class="swatch-block" style={`background: var(--color-${key});`}></div>
             <span class="swatch-name">{key}</span>
-            <span class="swatch-hex">{value}</span>
+            <span class="swatch-hex">--color-{key}</span>
           </div>
         ))}
       </div>
@@ -31,15 +38,15 @@ import { colors, fonts, fontSizes, spacing, growthStages } from '../config/desig
     <!-- 2. Typography -->
     <section class="system-section">
       <h2 class="section-header">typography</h2>
-      <div class="type-sample" style={`font-family: ${fonts.display}; font-size: ${fontSizes.hero};`}>
+      <div class="type-sample" style="font-family: var(--font-display); font-size: var(--text-hero);">
         gi's digital garden
       </div>
       <p class="type-label">display / Jacquard 12 / hero</p>
-      <div class="type-sample" style={`font-family: ${fonts.serif}; font-size: ${fontSizes.xxl};`}>
+      <div class="type-sample" style="font-family: var(--font-serif); font-size: var(--text-xxl);">
         subsection header
       </div>
       <p class="type-label">serif / Lora / xxl</p>
-      <div class="type-sample" style={`font-family: ${fonts.body}; font-size: ${fontSizes.lg};`}>
+      <div class="type-sample" style="font-family: var(--font-body); font-size: var(--text-lg);">
         The quick brown fox builds a garden. Body text at its intended size, showing rhythm and readability.
       </div>
       <p class="type-label">body / Atkinson Hyperlegible Next / lg</p>
@@ -131,11 +138,11 @@ import { colors, fonts, fontSizes, spacing, growthStages } from '../config/desig
     <section class="system-section">
       <h2 class="section-header">spacing</h2>
       <div class="spacing-row">
-        {Object.entries(spacing).map(([key, value]) => (
+        {spaceTokens.map((key) => (
           <div class="spacing-item">
-            <div class="spacing-block" style={`height: ${value}; width: ${value};`}></div>
+            <div class="spacing-block" style={`height: var(--space-${key}); width: var(--space-${key});`}></div>
             <span class="spacing-label">{key}</span>
-            <span class="spacing-value">{value}</span>
+            <span class="spacing-value">--space-{key}</span>
           </div>
         ))}
       </div>
