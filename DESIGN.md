@@ -29,7 +29,7 @@ slightly medieval; a garden, not a dashboard.
 7. **Accessible by default.** Text ≥ 4.5:1 (`--color-muted` is tuned to exactly that in both themes). Keep the `:focus-visible` rings and the `prefers-reduced-motion` block in `global.css`.
 
 ## Token map (names, not values — values are in tokens.css)
-- Color: `--color-{bg,fg,heading,card,muted,accent,accent-light,border,pill-bg,pill-text,accent-border,danger}`, plus `--card-grad` (metallic gold gradient) and `--shadow-gold`.
+- Color: `--color-{bg,fg,heading,card,muted,accent,accent-light,border,pill-bg,pill-text,accent-border,danger,traffic-red}`, plus dark-only `--color-{title,surface}`, `--card-grad` (metallic gold gradient) and `--shadow-gold`.
 - Type: `--text-{xs,sm,base,md,lg,xl,xxl,section,hero}` (fluid, except `--text-base` = fixed 14px for tiny UI labels). Leading: `--leading-{tight,base,loose,poem}`.
 - Space: `--space-{xs,sm,md,lg,xl,xxl,section}` → fluid steps.
 - Layout: `--width-content` 720, `--width-site` 1100, `--radius-{card,lg,pill,input}`, `--border`.
