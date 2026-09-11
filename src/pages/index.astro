@@ -1,10 +1,11 @@
 ---
 // src/pages/index.astro — home (scrolling landing). Replaces the old overlay gate.
-// Sections: hero → art wall → the garden → our garden (community) → now → footer.
+// Sections: hero → case studies → the garden → our garden (community) → now → footer.
 import Garden from '../layouts/Garden.astro';
 import HeartCanvas from '../components/HeartCanvas.astro';
 import Icon from '../components/Icon.astro';
 import TerminalWindow from '../components/TerminalWindow.astro';
+import CaseStudyRail from '../components/CaseStudyRail.astro';
 import { getCollection } from 'astro:content';
 import { site } from '../config/design';
 
@@ -31,35 +32,6 @@ function bookColor(s: string) {
   return p[Math.abs(h)%p.length];
 }
 
-type FrameShape = 'rect' | 'circle' | 'square' | 'oval';
-type FrameItem  = { shape: FrameShape; href: string; image: string; title: string };
-
-const featuredFrames: FrameItem[] = [
-  ...lab.filter(e => e.data.featured && e.data.frame_shape && e.data.cover_image).map(e => ({
-    shape: e.data.frame_shape as FrameShape,
-    href:  `/lab/${e.slug}`,
-    image: e.data.cover_image!,
-    title: e.data.title,
-  })),
-  ...gallery.filter(e => e.data.featured && e.data.frame_shape).map(e => ({
-    shape: e.data.frame_shape as FrameShape,
-    href:  `/gallery/${e.slug}`,
-    image: e.data.image,
-    title: e.data.title,
-  })),
-  ...archives.filter(e => e.data.featured && e.data.frame_shape && e.data.cover_image).map(e => ({
-    shape: e.data.frame_shape as FrameShape,
-    href:  `/archives/${e.slug}`,
-    image: e.data.cover_image!,
-    title: e.data.title,
-  })),
-];
-
-// Split into rows of 4
-const frameRows: FrameItem[][] = [];
-for (let i = 0; i < featuredFrames.length; i += 4) {
-  frameRows.push(featuredFrames.slice(i, i + 4));
-}
 ---
 
 <Garden title={site.name} description={site.description}>
@@ -75,21 +47,8 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
       </div>
     </section>
 
-    <!-- ── Feature wall ──────────────────────────────────────────────────── -->
-    {frameRows.length > 0 && (
-      <section class="featurewall" aria-label="featured work">
-        {frameRows.map(row => (
-          <div class="featurewall-row">
-            {row.map(item => (
-              <a class={`frame-slot frame-slot--${item.shape}`} href={item.href} title={item.title}>
-                <img class="frame-project-img" src={item.image} alt={item.title} loading="lazy" />
-                <img class="frame-overlay" src={`/home/frame-${item.shape}.png`} alt="" aria-hidden="true" />
-              </a>
-            ))}
-          </div>
-        ))}
-      </section>
-    )}
+    <!-- ── Featured case studies ─────────────────────────────────────────── -->
+    <CaseStudyRail />
 
     <!-- ── About intro ──────────────────────────────────────────────────── -->
     <section class="about-intro">
@@ -247,34 +206,6 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
     padding-inline: clamp(20px, 5vw, 64px);
   }
 
-  /* shared section heading (Lora, gold) */
-  .sec-head {
-    display: flex;
-    align-items: baseline;
-    gap: clamp(12px, 2vw, 32px);
-    flex-wrap: wrap;
-    margin-bottom: var(--space-xxl);
-  }
-  .sec-head--end { justify-content: flex-end; text-align: right; }
-  .sec-head--center { justify-content: center; flex-direction: column; align-items: center; text-align: center; gap: 4px; }
-  .sec-title {
-    font-family: var(--font-serif);
-    font-weight: 600;
-    font-size: var(--text-section);
-    color: var(--color-heading);
-    line-height: 1.1;
-    text-decoration: none;
-    transition: opacity 0.15s;
-  }
-  .sec-title:hover { opacity: 0.72; }
-  .sec-phon {
-    font-family: var(--font-serif);
-    font-weight: 400;
-    font-size: var(--text-lg);
-    color: var(--color-heading);
-    opacity: 0.85;
-  }
-  .sec-phon--italic { font-style: italic; }
   .garden-summary .garden-phonetic {
     font-family: var(--font-body);
     font-size: var(--text-md);
@@ -349,9 +280,6 @@ for (let i = 0; i < featuredFrames.length; i += 4) {
     display: flex;
     justify-content: center;
   }
-
-  /* ── Art wall (hidden until fixed) ───────────────────────────────────── */
-  .featurewall { display: none; }
 
   /* ── About intro ─────────────────────────────────────────────────────── */
   .about-intro {

@@ -103,6 +103,7 @@
   --space-xxl:     var(--fluid-space-l);   /* ~40px  */
   --space-section: var(--fluid-space-xl);  /* ~60px  */
 
+  --nav-height:    56px;   /* fixed top nav — sticky sections pad past it */
   --width-content: 720px;
   --width-site:    1100px;
   --radius-card:   12px;
@@ -111,6 +112,16 @@
   --radius-input:  12px;
   --border:        0.5px solid var(--color-border);
   --shadow-gold:   0 4px 16px rgba(144, 100, 47, 0.25); /* gold-tinted card shadow */
+
+  /* ── Motion ───────────────────────────────────────────────────────────── */
+  /* Weighted and calm. Decelerating, never springy — no overshoot in the curve. */
+  --ease-out-quiet:  cubic-bezier(0.22, 0.61, 0.36, 1);
+  --dur-card:        650ms;  /* a card travelling into place        */
+  --dur-text:        420ms;  /* title / tags fading up             */
+  --delay-text:      100ms;  /* card settles, then it speaks       */
+  --stagger-tag:     40ms;   /* per-tag offset within a tag row    */
+  --scale-recede:    0.92;   /* outgoing card pulls back           */
+  --opacity-recede:  0.4;    /* ...and dims as it goes             */
 }
 
 

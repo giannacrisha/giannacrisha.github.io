@@ -26,13 +26,18 @@ slightly medieval; a garden, not a dashboard.
 4. **Both themes.** Every color must be a token that has a `:root[data-theme="dark"]` value. Never define a color only inside a media/theme block.
 5. **DRY.** Repeated markup or values get centralized. Delete dead code, imports, and vars as part of the change — no leftovers.
 6. **Smallest fix wins.** Don't abstract working code. Prefer reverting to a proven form over inventing a new one.
-7. **Accessible by default.** Text ≥ 4.5:1 (`--color-muted` is tuned to exactly that in both themes). Keep the `:focus-visible` rings and the `prefers-reduced-motion` block in `global.css`.
+7. **Motion is weighted, never springy.** One easing — `--ease-out-quiet`. Things
+   decelerate into place and never overshoot or bounce. Animate `transform` and
+   `opacity` only, never layout properties. Scroll-linked motion uses CSS
+   `animation-timeline`; never hijack the wheel or `preventDefault` a scroll.
+8. **Accessible by default.** Text ≥ 4.5:1 (`--color-muted` is tuned to exactly that in both themes). Keep the `:focus-visible` rings and the `prefers-reduced-motion` block in `global.css`.
 
 ## Token map (names, not values — values are in tokens.css)
 - Color: `--color-{bg,fg,heading,card,muted,accent,accent-light,border,pill-bg,pill-text,accent-border,danger,traffic-red}`, plus dark-only `--color-{title,surface}`, `--card-grad` (metallic gold gradient) and `--shadow-gold`.
 - Type: `--text-{xs,sm,base,md,lg,xl,xxl,section,hero}` (fluid, except `--text-base` = fixed 14px for tiny UI labels). Leading: `--leading-{tight,base,loose,poem}`.
 - Space: `--space-{xs,sm,md,lg,xl,xxl,section}` → fluid steps.
-- Layout: `--width-content` 720, `--width-site` 1100, `--radius-{card,lg,pill,input}`, `--border`.
+- Layout: `--width-content` 720, `--width-site` 1100, `--nav-height` 56, `--radius-{card,lg,pill,input}`, `--border`.
+- Motion: `--ease-out-quiet` (the only easing — decelerating, no overshoot), `--dur-{card,text}`, `--delay-text`, `--stagger-tag`, `--scale-recede`, `--opacity-recede`.
 
 ## Growth taxonomy (`src/config/design.ts`)
 `dust` → scattered, not yet gathered · `spark` → taking shape · `star` → complete, fully itself.
