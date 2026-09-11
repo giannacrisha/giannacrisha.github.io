@@ -64,7 +64,9 @@ const n = caseStudies.length;
      length, so scroll distance through the track is the animation's progress. */
   .rail-track {
     position: relative;
-    height: calc(var(--n) * 100svh);
+    /* one viewport of pinned stage, plus --pace-card of scrolling for each
+       move between cards. This height IS the animation's duration. */
+    height: calc(100svh + (var(--n) - 1) * var(--pace-card));
     /* full-bleed: the side slots sit near the viewport edges, outside the
        .home column this component is mounted in. body is overflow-x: clip. */
     width: 100vw;

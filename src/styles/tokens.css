@@ -124,6 +124,9 @@
   --scale-recede:    0.46;   /* card parked in a side slot          */
   --opacity-recede:  0.4;    /* ...dimmed                           */
   --blur-recede:     6px;    /* ...and thrown out of focus          */
+  /* scroll distance a pinned sequence spends moving from one card to the next.
+     Raise it to slow the sequence down, lower it to speed it up. */
+  --pace-card:       175svh;
 }
 
 
