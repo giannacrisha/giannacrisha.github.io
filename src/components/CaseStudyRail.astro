@@ -9,13 +9,12 @@
 // explicit indicator click or focus jump — the page always scrolls natively.
 //
 // Card data: src/data/case-studies.ts
-import Icon from './Icon.astro';
 import { caseStudies } from '../data/case-studies';
 
 const n = caseStudies.length;
 ---
 
-<section class="rail" aria-labelledby="rail-heading">
+<section class="rail" aria-label="selected work">
   <div class="rail-track" data-rail style={`--n: ${n}`}>
 
     {/* One per card, stacked down the track. The observer uses these to decide
@@ -25,11 +24,6 @@ const n = caseStudies.length;
     </div>
 
     <div class="rail-stage" data-stage data-active="0">
-      <div class="sec-head">
-        <h2 class="sec-title" id="rail-heading">selected work</h2>
-        <span class="sec-phon sec-phon--italic">three things I made and why</span>
-      </div>
-
       <ol class="rail-cards" data-cards>
         {caseStudies.map((study, i) => (
           <li class="rail-card" style={`--i: ${i}`} data-card={i} data-state={i === 0 ? 'current' : 'next'}>
@@ -38,13 +32,15 @@ const n = caseStudies.length;
                 <img class="rail-card-img" src={study.image} alt="" loading="lazy" />
               </div>
               <div class="rail-card-block">
-                <h3 class="rail-card-title">{study.title}</h3>
+                <div class="rail-card-headline">
+                  <h3 class="rail-card-title">{study.title}</h3>
+                  <ul class="rail-tags">
+                    {study.skills.map((skill, t) => (
+                      <li class="rail-tag" style={`--t: ${t}`}>{skill}</li>
+                    ))}
+                  </ul>
+                </div>
                 <p class="rail-card-desc">{study.description}</p>
-                <ul class="rail-tags">
-                  {study.skills.map((skill, t) => (
-                    <li class="rail-tag" style={`--t: ${t}`}><span class="pill">{skill}</span></li>
-                  ))}
-                </ul>
               </div>
             </a>
           </li>
@@ -52,17 +48,11 @@ const n = caseStudies.length;
       </ol>
 
       <nav class="rail-dots" aria-label="case study navigation">
-        <button class="rail-dot-arrow" type="button" data-step="-1" aria-label="previous case study">
-          <Icon name="chevron-left" size={14} />
-        </button>
         {caseStudies.map((study, i) => (
           <button class="rail-dot" type="button" data-goto={i} aria-label={`go to ${study.title}`} aria-current={i === 0 ? 'true' : 'false'}>
             <span class="rail-dot-mark"></span>
           </button>
         ))}
-        <button class="rail-dot-arrow" type="button" data-step="1" aria-label="next case study">
-          <Icon name="chevron-right" size={14} />
-        </button>
       </nav>
     </div>
   </div>
@@ -75,6 +65,10 @@ const n = caseStudies.length;
   .rail-track {
     position: relative;
     height: calc(var(--n) * 100svh);
+    /* the cards' transforms change as the active card changes; without this,
+       scroll anchoring treats that as content shift and cancels the smooth
+       scroll an indicator click just started */
+    overflow-anchor: none;
   }
 
   .rail-sentinels {
@@ -92,13 +86,12 @@ const n = caseStudies.length;
     flex-direction: column;
     justify-content: center;
     gap: var(--space-xl);
-    overflow: hidden;
+    /* clip, not hidden — hidden makes this a scroll container, and the browser
+       then scrolls it sideways to reveal a focused card, shifting the layout */
+    overflow: clip;
     /* clear the fixed nav at the top and the minimize bar at the bottom */
-    padding-block: calc(var(--nav-height) + var(--space-lg)) var(--space-xl);
+    padding-block: calc(var(--nav-height) + var(--space-lg)) var(--space-section);
   }
-
-  /* the shared .sec-head margin is redundant against the stage's own gap */
-  .rail-stage .sec-head { flex: 0 0 auto; margin-bottom: 0; }
 
   /* ── Cards ──────────────────────────────────────────────────────────────
      All cards occupy the same box; only transform/opacity separate them. */
@@ -119,40 +112,46 @@ const n = caseStudies.length;
     will-change: transform, opacity;
   }
 
+  /* No card chrome — the image is the card. Only it is rounded, and the copy
+     sits directly on the page below it. */
   .rail-card-link {
     display: flex;
     flex-direction: column;
     height: 100%;
-    background: var(--color-card);
-    border: var(--border);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
+    gap: var(--space-lg);
     text-decoration: none;
     color: inherit;
-    transition: border-color 0.15s ease;
   }
-  .rail-card-link:hover { border-color: var(--color-accent); }
 
   .rail-card-media {
     flex: 1 1 auto;
     min-height: 0;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
     background: var(--color-accent-light);
   }
   .rail-card-img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform var(--dur-card) var(--ease-out-quiet);
   }
+  .rail-card-link:hover .rail-card-img { transform: scale(1.02); }
 
-  /* the title block, pinned to the bottom of the card */
+  /* the title block, at the bottom of the card */
   .rail-card-block {
     flex: 0 0 auto;
-    padding: var(--space-xl);
     display: flex;
     flex-direction: column;
     gap: var(--space-sm);
-    background: var(--color-card);
-    border-top: var(--border);
+  }
+  /* title left, skills right, on one baseline */
+  .rail-card-headline {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-lg);
+    flex-wrap: wrap;
   }
   .rail-card-title {
     font-family: var(--font-serif);
@@ -160,20 +159,31 @@ const n = caseStudies.length;
     font-size: var(--text-lg);
     color: var(--color-heading);
     line-height: var(--leading-tight);
+    transition: opacity 0.15s ease;
   }
+  .rail-card-link:hover .rail-card-title { opacity: 0.72; }
   .rail-card-desc {
     font-family: var(--font-body);
     font-size: var(--text-sm);
     color: var(--color-muted);
     line-height: var(--leading-base);
+    max-width: var(--width-content);
   }
+  /* quiet uppercase labels rather than bordered chips */
   .rail-tags {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-sm);
+    gap: var(--space-md);
     list-style: none;
     margin: 0;
     padding: 0;
+  }
+  .rail-tag {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--color-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
   }
 
   /* ── The card arrives, then it speaks ───────────────────────────────────
@@ -261,8 +271,7 @@ const n = caseStudies.length;
     justify-content: center;
     gap: var(--space-sm);
   }
-  .rail-dot,
-  .rail-dot-arrow {
+  .rail-dot {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -270,24 +279,22 @@ const n = caseStudies.length;
     border: none;
     padding: var(--space-xs);
     cursor: pointer;
-    color: var(--color-muted);
-    transition: color 0.15s ease;
   }
-  .rail-dot-arrow:hover { color: var(--color-heading); }
+  /* a short bar that lengthens when active — no borders, no arrows */
   .rail-dot-mark {
     display: block;
-    width: var(--space-sm);
-    height: var(--space-sm);
+    width: var(--space-xl);
+    height: var(--rule-thickness);
     border-radius: var(--radius-pill);
     background: var(--color-border);
-    border: var(--border);
     transition:
       background-color var(--dur-text) var(--ease-out-quiet),
-      transform        var(--dur-text) var(--ease-out-quiet);
+      width            var(--dur-text) var(--ease-out-quiet);
   }
+  .rail-dot:hover .rail-dot-mark { background: var(--color-accent); }
   .rail-dot[aria-current='true'] .rail-dot-mark {
+    width: var(--space-section);
     background: var(--color-heading);
-    transform: scale(1.4);
   }
 
   /* ── Mobile: no pinning, swipe carousel ─────────────────────────────────── */
@@ -405,24 +412,26 @@ const n = caseStudies.length;
           - pad;
         list.scrollTo({ left, behavior: 'smooth' });
       } else {
-        const top = track.offsetTop + target * (track.offsetHeight / cards.length);
-        window.scrollTo({ top, behavior: 'smooth' });
+        // the pinned stretch is the track minus one viewport, and card i sits in
+        // place at i/(n-1) along it — same split the animation ranges use
+        const span = track.offsetHeight - window.innerHeight;
+        const step = cards.length > 1 ? span / (cards.length - 1) : 0;
+        window.scrollTo({ top: track.offsetTop + target * step, behavior: 'smooth' });
       }
-      setActive(target);
+      // deliberately not setActive() here: that rewrites the cards' transforms
+      // mid-flight, which interrupts the smooth scroll we just started. The
+      // observer sets the state as the scroll arrives.
     };
 
     dots.forEach(dot => dot.addEventListener('click', () => goTo(Number(dot.dataset.goto))));
-    track.querySelectorAll<HTMLElement>('[data-step]').forEach(btn => {
-      btn.addEventListener('click', () => goTo(active + Number(btn.dataset.step)));
-    });
+
+    if (reduced.matches) return;  // plain stack: native focus scrolling is fine
 
     // Tabbing into a card brings it into view — transforms put it off-screen, so
     // the browser's own focus scrolling can't do this for us.
     cards.forEach((card, i) => {
       card.addEventListener('focusin', () => { if (i !== active) goTo(i); });
     });
-
-    if (reduced.matches) return;
 
     // In carousel mode watch the cards inside their scroller; while pinned, watch
     // the sentinels striped down the track and take whichever crosses the middle.

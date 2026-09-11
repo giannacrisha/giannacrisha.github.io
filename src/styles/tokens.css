@@ -110,6 +110,7 @@
   --radius-lg:     30px;   /* large rounded cards (home sections, frames) */
   --radius-pill:   20px;
   --radius-input:  12px;
+  --rule-thickness: 2px;   /* solid indicator bars, underlines */
   --border:        0.5px solid var(--color-border);
   --shadow-gold:   0 4px 16px rgba(144, 100, 47, 0.25); /* gold-tinted card shadow */
 
