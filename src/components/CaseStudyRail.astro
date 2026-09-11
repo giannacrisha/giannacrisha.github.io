@@ -26,7 +26,7 @@ const n = caseStudies.length;
     <div class="rail-stage" data-stage data-active="0">
       <ol class="rail-cards" data-cards>
         {caseStudies.map((study, i) => (
-          <li class="rail-card" style={`--i: ${i}`} data-card={i} data-state={i === 0 ? 'current' : 'next'}>
+          <li class="rail-card" style={`--i: ${i}`} data-card={i} data-state={i === 0 ? 'current' : 'next'} data-far={i > 1 ? '' : undefined}>
             <a class="rail-card-link" href={study.href}>
               <div class="rail-card-media">
                 <img class="rail-card-img" src={study.image} alt="" loading="lazy" />
@@ -65,6 +65,10 @@ const n = caseStudies.length;
   .rail-track {
     position: relative;
     height: calc(var(--n) * 100svh);
+    /* full-bleed: the side slots sit near the viewport edges, outside the
+       .home column this component is mounted in. body is overflow-x: clip. */
+    width: 100vw;
+    margin-inline: calc(50% - 50vw);
     /* the cards' transforms change as the active card changes; without this,
        scroll anchoring treats that as content shift and cancels the smooth
        scroll an indicator click just started */
@@ -94,41 +98,46 @@ const n = caseStudies.length;
   }
 
   /* ── Cards ──────────────────────────────────────────────────────────────
-     All cards occupy the same box; only transform/opacity separate them. */
+     Every card sits in the same grid cell, centred; transform alone decides
+     whether it reads as the centre card or a side slot. */
   .rail-cards {
-    position: relative;
     flex: 1 1 auto;
     min-height: 0;
+    display: grid;
+    place-items: center;
     list-style: none;
     margin: 0;
     padding: 0;
   }
 
   .rail-card {
-    position: absolute;
-    inset: 0;
-    /* how far a card travels to clear the stage */
-    --rail-travel: 115%;
-    will-change: transform, opacity;
+    grid-area: 1 / 1;
+    /* 562/1280 of the frame, shrinking on short viewports so the card and its
+       copy still fit the stage */
+    width: min(44vw, calc(52svh * 562 / 312));
+    /* centre-to-centre distance to a side slot, as a share of card width:
+       half this card + the mock's 50px gap + half a 0.46-scaled card */
+    --rail-offset: 82%;
+    will-change: transform, opacity, filter;
   }
+  /* a card more than one slot away would stack on top of the one in the slot */
+  .rail-card[data-far] { visibility: hidden; }
 
   /* No card chrome — the image is the card. Only it is rounded, and the copy
      sits directly on the page below it. */
   .rail-card-link {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    gap: var(--space-lg);
+    display: block;
+    position: relative;
     text-decoration: none;
     color: inherit;
   }
 
   .rail-card-media {
-    flex: 1 1 auto;
-    min-height: 0;
+    aspect-ratio: 562 / 312;
     overflow: hidden;
     border-radius: var(--radius-lg);
     background: var(--color-accent-light);
+    box-shadow: var(--shadow-gold);
   }
   .rail-card-img {
     width: 100%;
@@ -138,9 +147,15 @@ const n = caseStudies.length;
   }
   .rail-card-link:hover .rail-card-img { transform: scale(1.02); }
 
-  /* the title block, at the bottom of the card */
+  /* The title block hangs below the media rather than sitting inside the card
+     box, so the card's box IS the image — which is what the side slots scale
+     and centre against. */
   .rail-card-block {
-    flex: 0 0 auto;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: var(--space-lg);
     display: flex;
     flex-direction: column;
     gap: var(--space-sm);
@@ -214,9 +229,21 @@ const n = caseStudies.length;
      that its midpoint — the in-place pose — lands on its own slot of the track.
      `both` fill holds the end poses outside the range. */
   @keyframes rail-slot {
-    0%   { transform: translateX(var(--rail-travel)) scale(1); opacity: 0; }
-    50%  { transform: translateX(0) scale(1); opacity: 1; }
-    100% { transform: translateX(calc(-1 * var(--rail-travel))) scale(var(--scale-recede)); opacity: var(--opacity-recede); }
+    0% {
+      transform: translateX(var(--rail-offset)) scale(var(--scale-recede));
+      opacity: var(--opacity-recede);
+      filter: blur(var(--blur-recede));
+    }
+    50% {
+      transform: translateX(0) scale(1);
+      opacity: 1;
+      filter: blur(0);
+    }
+    100% {
+      transform: translateX(calc(-1 * var(--rail-offset))) scale(var(--scale-recede));
+      opacity: var(--opacity-recede);
+      filter: blur(var(--blur-recede));
+    }
   }
 
   @supports (animation-timeline: view()) {
@@ -241,16 +268,19 @@ const n = caseStudies.length;
      reached. Where the timeline is supported it overrides these; where it isn't,
      the observer moves cards between them via the transition below. */
   .rail-card[data-state='next'] {
-    transform: translateX(var(--rail-travel));
-    opacity: 0;
+    transform: translateX(var(--rail-offset)) scale(var(--scale-recede));
+    opacity: var(--opacity-recede);
+    filter: blur(var(--blur-recede));
   }
   .rail-card[data-state='current'] {
-    transform: translateX(0);
+    transform: translateX(0) scale(1);
     opacity: 1;
+    filter: blur(0);
   }
   .rail-card[data-state='prev'] {
-    transform: translateX(calc(-1 * var(--rail-travel))) scale(var(--scale-recede));
+    transform: translateX(calc(-1 * var(--rail-offset))) scale(var(--scale-recede));
     opacity: var(--opacity-recede);
+    filter: blur(var(--blur-recede));
   }
 
   /* Only the fallback animates between the poses — with a scroll timeline the
@@ -259,7 +289,8 @@ const n = caseStudies.length;
     .rail-card {
       transition:
         transform var(--dur-card) var(--ease-out-quiet),
-        opacity   var(--dur-card) var(--ease-out-quiet);
+        opacity   var(--dur-card) var(--ease-out-quiet),
+        filter    var(--dur-card) var(--ease-out-quiet);
     }
   }
 
@@ -325,11 +356,15 @@ const n = caseStudies.length;
       position: static;
       flex: 0 0 86%;
       scroll-snap-align: start;
-      min-height: 70svh;
       animation: none;
       transform: none;
       opacity: 1;
+      filter: none;
+      visibility: visible;
+      width: auto;
     }
+    .rail-card-link { display: flex; flex-direction: column; gap: var(--space-lg); }
+    .rail-card-block { position: static; margin-top: 0; }
     /* copy is always readable in the carousel — nothing is waiting to arrive */
     .rail-card .rail-card-title,
     .rail-card .rail-card-desc,
@@ -358,12 +393,16 @@ const n = caseStudies.length;
     }
     .rail-card[data-state] {
       position: static;
-      min-height: 60svh;
       animation: none;
       transform: none;
       opacity: 1;
+      filter: none;
+      visibility: visible;
+      width: auto;
       transition: none;
     }
+    .rail-card-link { display: flex; flex-direction: column; gap: var(--space-lg); }
+    .rail-card-block { position: static; margin-top: 0; }
     .rail-card .rail-card-title,
     .rail-card .rail-card-desc,
     .rail-card .rail-tag {
@@ -395,6 +434,8 @@ const n = caseStudies.length;
       stage.dataset.active = String(active);
       cards.forEach((card, c) => {
         card.dataset.state = c < active ? 'prev' : c > active ? 'next' : 'current';
+        if (Math.abs(c - active) > 1) card.dataset.far = '';
+        else delete card.dataset.far;
       });
       dots.forEach((dot, d) => dot.setAttribute('aria-current', String(d === active)));
     };

@@ -121,8 +121,9 @@
   --dur-text:        420ms;  /* title / tags fading up             */
   --delay-text:      100ms;  /* card settles, then it speaks       */
   --stagger-tag:     40ms;   /* per-tag offset within a tag row    */
-  --scale-recede:    0.92;   /* outgoing card pulls back           */
-  --opacity-recede:  0.4;    /* ...and dims as it goes             */
+  --scale-recede:    0.46;   /* card parked in a side slot          */
+  --opacity-recede:  0.4;    /* ...dimmed                           */
+  --blur-recede:     6px;    /* ...and thrown out of focus          */
 }
 
 
