@@ -1,11 +1,14 @@
 ---
 // src/components/TableOfContents.astro
 // Renders a table of contents from rendered-markdown headings (h2 + h3).
-// Use variant="inline" inside the article body (mobile) and variant="sidebar"
-// inside the content sidebar (desktop); CSS shows whichever fits the viewport.
+// variant="inline" sits in the article body as a <details> (mobile);
+// variant="sidebar" is a fixed button below the nav that opens a panel of
+// links (desktop). CSS shows whichever fits the viewport.
 // Self-hides when there are fewer than two headings. The active-heading
-// highlight and smooth-scroll script are emitted once no matter how many
-// instances appear on the page.
+// highlight, smooth scroll and panel toggle are emitted once no matter how
+// many instances appear on the page.
+import Icon from './Icon.astro';
+
 interface Heading { depth: number; slug: string; text: string }
 interface Props {
   headings: Heading[];
@@ -15,21 +18,22 @@ interface Props {
 const { headings, variant = 'inline', label = 'in this article' } = Astro.props;
 const tocHeadings = headings.filter(h => h.depth === 2 || h.depth === 3);
 const isSidebar = variant === 'sidebar';
+// same list either way; only the disclosure wrapper differs
+const Wrap = isSidebar ? 'div' : 'details';
+const Head = isSidebar ? 'button' : 'summary';
+const wrapAttrs = isSidebar ? {} : { open: true };
+const headAttrs = isSidebar
+  ? { type: 'button', 'aria-expanded': 'false', 'aria-controls': 'toc-panel' }
+  : {};
 ---
 {tocHeadings.length >= 2 && (
-  <nav
-    class:list={['toc', isSidebar ? 'toc-sidebar' : 'toc-inline']}
-    aria-label="Table of contents"
-    id={isSidebar ? 'toc-sidebar' : undefined}
-  >
-    <details class="toc-details" open>
-      <summary class="toc-label">
+  <nav class:list={['toc', `toc-${variant}`]} aria-label="Table of contents">
+    <Wrap class="toc-details" {...wrapAttrs}>
+      <Head class="toc-label" {...headAttrs}>
         {label}
-        <svg class="toc-chevron" viewBox="0 0 12 12" width="11" height="11" fill="none" aria-hidden="true">
-          <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </summary>
-      <div class="toc-content">
+        <Icon name="chevron-down" size={11} class="toc-chevron" />
+      </Head>
+      <div class="toc-content" id={isSidebar ? 'toc-panel' : undefined}>
         <ol class="toc-list">
           {tocHeadings.map(h => (
             <li class:list={['toc-item', { 'toc-item--h3': h.depth === 3 }]}>
@@ -38,7 +42,7 @@ const isSidebar = variant === 'sidebar';
           ))}
         </ol>
       </div>
-    </details>
+    </Wrap>
   </nav>
 )}
 
@@ -59,27 +63,16 @@ const isSidebar = variant === 'sidebar';
   }
   .toc-label::-webkit-details-marker { display: none; }
   .toc-label:hover { color: var(--color-fg); }
-  .toc-chevron {
+  .toc-label :global(.toc-chevron) {
     flex-shrink: 0;
-    transition: transform 0.2s ease;
+    transition: transform var(--dur-text) var(--ease-out-quiet);
   }
-  .toc-details[open] .toc-chevron { transform: rotate(180deg); }
+  .toc-details[open] :global(.toc-chevron),
+  .toc-label[aria-expanded="true"] :global(.toc-chevron) { transform: rotate(180deg); }
 
-  /* Smooth collapse: a grid wrapper animates between 0fr and 1fr.
-     The author display:grid overrides the UA `display:none` that <details>
-     applies to closed content, so the list stays in flow and can transition. */
-  .toc-content {
-    display: grid;
-    grid-template-rows: 0fr;
-    transition: grid-template-rows 0.25s ease;
-  }
-  .toc-details[open] .toc-content { grid-template-rows: 1fr; }
   .toc-list {
     list-style: none;
-    padding-top: var(--space-md);
     margin: 0;
-    min-height: 0;
-    overflow: hidden;
     display: flex;
     flex-direction: column;
     gap: 2px;
@@ -102,20 +95,71 @@ const isSidebar = variant === 'sidebar';
     color: var(--color-fg);
     border-left-color: var(--color-accent);
   }
+
+  /* ── Inline: <details> in the article flow ────────────────────────────── */
   .toc-inline {
     margin: var(--space-xxl) 0;
     padding: var(--space-lg) var(--space-xl);
     background: var(--color-accent-light);
     border-radius: var(--radius-card);
-    border: 0.5px solid var(--color-border);
+    border: var(--border);
   }
+  /* Smooth collapse: a grid wrapper animates between 0fr and 1fr.
+     The author display:grid overrides the UA `display:none` that <details>
+     applies to closed content, so the list stays in flow and can transition. */
+  .toc-inline .toc-content {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.25s ease;
+  }
+  .toc-inline .toc-details[open] .toc-content { grid-template-rows: 1fr; }
+  .toc-inline .toc-list {
+    padding-top: var(--space-md);
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  /* ── Sidebar: fixed button below the nav, panel opens under it ────────── */
   .toc-sidebar {
-    margin-bottom: var(--space-xxl);
-    padding: var(--space-lg) var(--space-xl);
-    background: var(--color-card);
-    border: 0.5px solid var(--color-border);
-    border-radius: var(--radius-card);
+    position: fixed;
+    top: calc(var(--nav-height) + var(--space-md));
+    right: var(--space-xl);
+    z-index: 40; /* over the article, under the nav drawer and search modal */
   }
+  .toc-sidebar .toc-label {
+    padding: var(--space-xs) var(--space-md);
+    background: var(--color-card);
+    border: var(--border);
+    border-radius: var(--radius-pill);
+  }
+  .toc-sidebar .toc-label[aria-expanded="true"] { color: var(--color-fg); }
+  .toc-sidebar .toc-content {
+    position: absolute;
+    top: calc(100% + var(--space-sm));
+    right: 0;
+    width: var(--width-toc);
+    /* leaves room below for the fixed theme toggle and the tab dock */
+    max-height: calc(100svh - var(--nav-height) - 3 * var(--space-section));
+    overflow-y: auto;
+    padding: var(--space-md) var(--space-lg);
+    background: var(--color-card);
+    border: var(--border);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-gold);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(calc(-1 * var(--space-xs)));
+    transition: opacity var(--dur-text) var(--ease-out-quiet),
+                transform var(--dur-text) var(--ease-out-quiet),
+                visibility 0s linear var(--dur-text);
+  }
+  .toc-sidebar .toc-label[aria-expanded="true"] + .toc-content {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition-delay: 0s;
+  }
+
   @media (min-width: 900px) { .toc-inline { display: none; } }
   @media (max-width: 899px) { .toc-sidebar { display: none; } }
 </style>
@@ -139,6 +183,24 @@ const isSidebar = variant === 'sidebar';
     }
     window.addEventListener('scroll', updateActive, { passive: true });
     updateActive();
+  }
+
+  // Sidebar panel: the button toggles it; a link, an outside click or Escape closes it.
+  const toggle = document.querySelector<HTMLButtonElement>('.toc-sidebar .toc-label');
+  const panel = document.getElementById('toc-panel');
+  if (toggle && panel) {
+    const isOpen = () => toggle.getAttribute('aria-expanded') === 'true';
+    const setOpen = (open: boolean) => toggle.setAttribute('aria-expanded', String(open));
+    document.addEventListener('click', (e) => {
+      const target = e.target as Element;
+      if (toggle.contains(target)) setOpen(!isOpen());
+      else if (!panel.contains(target) || target.closest('.toc-link')) setOpen(false);
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape' || !isOpen()) return;
+      setOpen(false);
+      toggle.focus();
+    });
   }
 
   // Smooth scroll applies to every TOC link (inline + sidebar).

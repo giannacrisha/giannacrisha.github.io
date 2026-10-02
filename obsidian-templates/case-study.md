@@ -9,14 +9,13 @@ featured: false
 frame_shape: 
 cover_image: /lab/
 mux_video_id: 
-challenge: 
 with: 
 role: 
 timeline: 
 team: []
 ---
 
-<!-- The page renders title, challenge, hero video, and the With/Role/Timeline/Team
+<!-- The page renders title, hero video, and the With/Role/Timeline/Team
      row from frontmatter, so the body starts at Summary/Concept.
      Quote any frontmatter value that contains a colon.
      Media slots: put an image inside the empty figure, e.g.

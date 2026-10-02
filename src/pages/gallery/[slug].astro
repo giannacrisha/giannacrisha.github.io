@@ -31,74 +31,70 @@ const related = allEntries
   .slice(0, 3);
 ---
 <Garden title={title}>
-  <div class="content-with-sidebar">
+  <div class="article-column">
+    <article class="article">
 
-    <div class="content-main">
-      <article class="article">
+      <ArticleBreadcrumb section="gallery" title={title} />
 
-        <ArticleBreadcrumb section="gallery" title={title} />
-
-        <div class="entry-label-row">
-          <span class="pill">{medium}</span>
-          <GrowthPill stage={growth_stage} />
+      <div class="entry-label-row">
+        <span class="pill">{medium}</span>
+        <GrowthPill stage={growth_stage} />
+      </div>
+      <div class="entry-title-row">
+        <h1 class="entry-title">{title}</h1>
+      </div>
+      <div class="entry-meta-row">
+        <div class="entry-topics">
+          {topics && topics.map((t: string) => (
+            <a href={`/gallery?topic=${encodeURIComponent(t)}`} class="topic-tag">{t}</a>
+          ))}
         </div>
-        <div class="entry-title-row">
-          <h1 class="entry-title">{title}</h1>
+        <Timestamps
+          primaryLabel="made"
+          primaryDate={date_made}
+          secondaryLabel="planted"
+          secondaryDate={published}
+        />
+      </div>
+
+      {mux_video_id
+        ? <MuxVideo playbackId={mux_video_id} title={title} />
+        : (
+            <div class="image-full">
+              <img src={image} alt={title} />
+            </div>
+          )
+      }
+      {caption && <p class="entry-caption">{caption}</p>}
+
+      <hr class="article-divider" />
+
+      {images && images.length > 0 && (
+        <div class="process-carousel">
+          <ImageCarousel images={images} label="stages" title={title} />
         </div>
-        <div class="entry-meta-row">
-          <div class="entry-topics">
-            {topics && topics.map((t: string) => (
-              <a href={`/gallery?topic=${encodeURIComponent(t)}`} class="topic-tag">{t}</a>
-            ))}
-          </div>
-          <Timestamps
-            primaryLabel="made"
-            primaryDate={date_made}
-            secondaryLabel="planted"
-            secondaryDate={published}
-          />
-        </div>
+      )}
 
-        {mux_video_id
-          ? <MuxVideo playbackId={mux_video_id} title={title} />
-          : (
-              <div class="image-full">
-                <img src={image} alt={title} />
-              </div>
-            )
-        }
-        {caption && <p class="entry-caption">{caption}</p>}
+      <TableOfContents headings={headings} variant="inline" />
 
-        <hr class="article-divider" />
+      <div class="prose">
+        <Content />
+      </div>
 
-        {images && images.length > 0 && (
-          <div class="process-carousel">
-            <ImageCarousel images={images} label="stages" title={title} />
-          </div>
-        )}
+      {link && (
+        <a href={link} target="_blank" rel="noopener noreferrer" class="article-link">
+          view more about this work
+          <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+            <path d="M2 10L10 2M10 2H5M10 2V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+        </a>
+      )}
 
-        <TableOfContents headings={headings} variant="inline" />
+    </article>
 
-        <div class="prose">
-          <Content />
-        </div>
-
-        {link && (
-          <a href={link} target="_blank" rel="noopener noreferrer" class="article-link">
-            view more about this work
-            <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-              <path d="M2 10L10 2M10 2H5M10 2V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-            </svg>
-          </a>
-        )}
-
-      </article>
-    </div>
-
-    <div class="content-sidebar">
-      <TableOfContents headings={headings} variant="sidebar" />
-      <Recommended entries={related} />
-    </div>
+    <Recommended entries={related} />
 
   </div>
+
+  <TableOfContents headings={headings} variant="sidebar" />
 </Garden>

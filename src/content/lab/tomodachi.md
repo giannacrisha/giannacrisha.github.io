@@ -17,7 +17,6 @@ featured: true
 frame_shape: circle
 cover_image: /lab/tomodachi.png
 mux_video_id: xdu9rPbCOjatVb0201gxzmoIX3upeMtUA8KARhAGM6kgM
-challenge: Design a prototype solving a problem related to Macro-HCI.
 with: "COSI 125: Human Computer Interaction"
 role: Design Engineer (end-to-end)
 timeline: Spring 2026

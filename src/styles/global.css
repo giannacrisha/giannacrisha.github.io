@@ -426,32 +426,13 @@ ul, ol {
   margin-bottom: var(--space-xl);
 }
 
-/* sidebar layout for all entry pages */
-.content-with-sidebar {
-  display: grid;
-  /* minmax(0, …) lets the track shrink below its content's min-content size,
-     so long prose / pill rows wrap to the viewport instead of blowing the
-     column out horizontally. Matches the desktop track sizing below. */
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-xxl);
-  max-width: var(--width-site);
+/* centered reading column for all entry pages; the table of contents floats
+   over it (TableOfContents.astro) instead of taking a column */
+.article-column {
+  box-sizing: content-box;
+  max-width: var(--width-content);
   margin: 0 auto;
   padding: 0 var(--space-xl);
-}
-@media (min-width: 900px) {
-  .content-with-sidebar {
-    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
-    align-items: start;
-    padding: 0 var(--space-xl);
-  }
-}
-.content-main {
-  min-width: 0;
-}
-.content-sidebar {
-  min-width: 0;
-  position: sticky;
-  top: calc(56px + var(--space-xl));
 }
 
 .card-grid {
@@ -463,7 +444,7 @@ ul, ol {
 
 @media (max-width: 767px) {
   .page-wrapper,
-  .content-with-sidebar { padding: 0 var(--space-lg); }
+  .article-column { padding: 0 var(--space-lg); }
 }
 
 @media (max-width: 600px) {

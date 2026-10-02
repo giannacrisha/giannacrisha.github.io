@@ -20,7 +20,7 @@ const { entry } = Astro.props;
 const { Content, headings } = await entry.render();
 // the demo element is written straight into the vault markdown
 const hasTomodachiDemo = entry.body.includes('<tomodachi-demo');
-const { title, description, cover_image, link, mux_video_id, challenge, role, timeline, team } = entry.data;
+const { title, description, cover_image, link, mux_video_id, role, timeline, team } = entry.data;
 
 // `with` is a reserved word, so it is read off entry.data directly
 const meta: [string, string | string[] | undefined][] = [
@@ -39,86 +39,73 @@ const pager = i < 0 ? [] : [
 ].filter(p => p.item);
 ---
 <Garden title={title} description={description}>
-  <div class="content-with-sidebar">
+  <div class="article-column">
+    <article class="article">
 
-    <div class="content-main">
-      <article class="article">
+      <ArticleBreadcrumb section="lab" title={title} />
 
-        <ArticleBreadcrumb section="lab" title={title} />
+      <h1 class="entry-title">{title}</h1>
 
-        <h1 class="entry-title">{title}</h1>
-
-        {challenge && (
-          <dl class="cs-row cs-challenge">
-            <dt>challenge</dt>
-            <dd>{challenge}</dd>
-          </dl>
-        )}
-
-        {(mux_video_id || cover_image) && (
-          <div class="cs-hero">
-            {mux_video_id
-              ? <MuxVideo playbackId={mux_video_id} title={title} />
-              : <div class="image-full"><img src={cover_image} alt={title} /></div>}
-          </div>
-        )}
-
-        {metaRows.length > 0 && (
-          <dl class="cs-row cs-meta">
-            {metaRows.map(([label, value]) => (
-              <div>
-                <dt>{label}</dt>
-                {[value].flat().map(line => <dd>{line}</dd>)}
-              </div>
-            ))}
-          </dl>
-        )}
-
-        <hr class="article-divider" />
-
-        <div class="prose cs-body">
-          <Content />
+      {(mux_video_id || cover_image) && (
+        <div class="cs-hero">
+          {mux_video_id
+            ? <MuxVideo playbackId={mux_video_id} title={title} />
+            : <div class="image-full"><img src={cover_image} alt={title} /></div>}
         </div>
+      )}
 
-        {link && (
-          <a href={link} target="_blank" rel="noopener noreferrer" class="article-link">
-            view project <Icon name="external-link" size={10} />
-          </a>
-        )}
+      {metaRows.length > 0 && (
+        <dl class="cs-row cs-meta">
+          {metaRows.map(([label, value]) => (
+            <div>
+              <dt>{label}</dt>
+              {[value].flat().map(line => <dd>{line}</dd>)}
+            </div>
+          ))}
+        </dl>
+      )}
 
-        {pager.length > 0 && (
-          <nav class="cs-pager" aria-label="more case studies">
-            {pager.map(({ dir, item }) => {
-              const Tag = item.href ? 'a' : 'div';
-              return (
-                <Tag href={item.href} class:list={['cs-pager-item', dir]}>
-                  <span class="cs-label">{dir}</span>
-                  <span class="cs-pager-title">{item.title}</span>
-                  {!item.href && <span class="cs-label">coming soon</span>}
-                </Tag>
-              );
-            })}
-          </nav>
-        )}
+      <hr class="article-divider" />
 
-        <template id="cs-part-card">
-          <span class="cs-part-card" aria-hidden="true">
-            <span class="cs-part-img"><img alt="" /></span>
-            <span class="cs-part-name"></span>
-            <span class="cs-part-hint">view on amazon</span>
-          </span>
-        </template>
+      <div class="prose cs-body">
+        <Content />
+      </div>
 
-        {hasTomodachiDemo && <TomodachiDemo />}
+      {link && (
+        <a href={link} target="_blank" rel="noopener noreferrer" class="article-link">
+          view project <Icon name="external-link" size={10} />
+        </a>
+      )}
 
-      </article>
-    </div>
+      {pager.length > 0 && (
+        <nav class="cs-pager" aria-label="more case studies">
+          {pager.map(({ dir, item }) => {
+            const Tag = item.href ? 'a' : 'div';
+            return (
+              <Tag href={item.href} class:list={['cs-pager-item', dir]}>
+                <span class="cs-label">{dir}</span>
+                <span class="cs-pager-title">{item.title}</span>
+                {!item.href && <span class="cs-label">coming soon</span>}
+              </Tag>
+            );
+          })}
+        </nav>
+      )}
 
-    <div class="content-sidebar">
-      <TableOfContents headings={headings} variant="sidebar" />
-    </div>
+      <template id="cs-part-card">
+        <span class="cs-part-card" aria-hidden="true">
+          <span class="cs-part-img"><img alt="" /></span>
+          <span class="cs-part-name"></span>
+          <span class="cs-part-hint">view on amazon</span>
+        </span>
+      </template>
 
+      {hasTomodachiDemo && <TomodachiDemo />}
+
+    </article>
   </div>
+
+  <TableOfContents headings={headings} variant="sidebar" />
 </Garden>
 
 <script>
@@ -148,20 +135,15 @@ const pager = i < 0 ? [] : [
     margin-top: var(--space-xxl);
   }
   dt, .cs-label {
-    font-family: var(--font-mono);
     font-size: var(--text-xs);
     color: var(--color-muted);
   }
+  dt { font-family: var(--font-serif); }
+  .cs-label { font-family: var(--font-mono); }
   dd {
     font-family: var(--font-body);
     font-size: var(--text-sm);
     color: var(--color-fg);
-  }
-  .cs-challenge { margin-top: var(--space-xl); row-gap: var(--space-xs); }
-  .cs-challenge dd {
-    grid-column: 2 / -1;
-    font-size: var(--text-md);
-    line-height: var(--leading-base);
   }
   .cs-meta dt { margin-bottom: var(--space-xs); }
 
@@ -291,6 +273,5 @@ const pager = i < 0 ? [] : [
   /* site breakpoints, as in global.css */
   @media (max-width: 600px) {
     .cs-row { grid-template-columns: minmax(0, 1fr); }
-    .cs-challenge dd { grid-column: auto; }
   }
 </style>

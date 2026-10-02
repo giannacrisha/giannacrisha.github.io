@@ -53,6 +53,10 @@ export const ICONS = {
     viewBox: '0 0 14 14',
     body: '<path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>',
   },
+  'chevron-down': {
+    viewBox: '0 0 12 12',
+    body: '<path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>',
+  },
   'chevron-right': {
     viewBox: '0 0 14 14',
     body: '<path d="M5 2l5 5-5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>',

@@ -107,6 +107,7 @@
   --width-content: 720px;
   --width-site:    1100px;
   --width-preview: 200px;  /* hover cards and tooltips */
+  --width-toc:     280px;  /* floating table-of-contents panel */
   --ratio-media:   16 / 9; /* media slots and their placeholders */
   --radius-card:   12px;
   --radius-lg:     30px;   /* large rounded cards (home sections, frames) */

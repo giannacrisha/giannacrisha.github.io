@@ -51,66 +51,62 @@ const related = allEntries
     <div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
   )}
 
-  <div class="content-with-sidebar">
+  <div class="article-column">
+    <article class:list={['article', { 'poem-page': isPoem }]} id="article-body">
 
-    <div class="content-main">
-      <article class:list={['article', { 'poem-page': isPoem }]} id="article-body">
+      <ArticleBreadcrumb section="archives" title={title} />
 
-        <ArticleBreadcrumb section="archives" title={title} />
-
-        <div class="entry-label-row">
-          <span class="pill">{type}</span>
-          <GrowthPill stage={growth_stage} />
-          {isPoem ? (
-            <span class="reading-time" aria-label={`${lineCount} lines`}>
-              <Icon name="lines" size={12} />
-              {lineCount} lines
-            </span>
-          ) : (
-            <span class="reading-time" aria-label={`${readingMins} minute read`}>
-              <Icon name="clock" size={12} />
-              {readingMins} min read
-            </span>
-          )}
+      <div class="entry-label-row">
+        <span class="pill">{type}</span>
+        <GrowthPill stage={growth_stage} />
+        {isPoem ? (
+          <span class="reading-time" aria-label={`${lineCount} lines`}>
+            <Icon name="lines" size={12} />
+            {lineCount} lines
+          </span>
+        ) : (
+          <span class="reading-time" aria-label={`${readingMins} minute read`}>
+            <Icon name="clock" size={12} />
+            {readingMins} min read
+          </span>
+        )}
+      </div>
+      <div class="entry-title-row">
+        <h1 class="entry-title">{title}</h1>
+      </div>
+      <div class="entry-meta-row">
+        <div class="entry-topics">
+          {tags && tags.map((tag: string) => (
+            <a href={`/archives?tag=${encodeURIComponent(tag)}`} class="topic-tag">{tag}</a>
+          ))}
         </div>
-        <div class="entry-title-row">
-          <h1 class="entry-title">{title}</h1>
-        </div>
-        <div class="entry-meta-row">
-          <div class="entry-topics">
-            {tags && tags.map((tag: string) => (
-              <a href={`/archives?tag=${encodeURIComponent(tag)}`} class="topic-tag">{tag}</a>
-            ))}
-          </div>
-          <Timestamps
-            primaryLabel="written"
-            primaryDate={date_written}
-            secondaryLabel="planted"
-            secondaryDate={published}
-          />
-        </div>
+        <Timestamps
+          primaryLabel="written"
+          primaryDate={date_written}
+          secondaryLabel="planted"
+          secondaryDate={published}
+        />
+      </div>
 
-        {mux_video_id && <MuxVideo playbackId={mux_video_id} title={title} />}
+      {mux_video_id && <MuxVideo playbackId={mux_video_id} title={title} />}
 
-        {note && <AuthorNote note={note} />}
+      {note && <AuthorNote note={note} />}
 
-        <hr class="article-divider" />
+      <hr class="article-divider" />
 
-        <TableOfContents headings={headings} variant="inline" />
+      <TableOfContents headings={headings} variant="inline" />
 
-        <div class:list={['prose', { 'prose-poem': isPoem }]}>
-          <Content />
-        </div>
+      <div class:list={['prose', { 'prose-poem': isPoem }]}>
+        <Content />
+      </div>
 
-      </article>
-    </div>
+    </article>
 
-    <div class="content-sidebar">
-      <TableOfContents headings={headings} variant="sidebar" />
-      <Recommended entries={related} />
-    </div>
+    <Recommended entries={related} />
 
   </div>
+
+  <TableOfContents headings={headings} variant="sidebar" />
 </Garden>
 
 <style>
