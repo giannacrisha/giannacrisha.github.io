@@ -1,37 +1,12 @@
 ---
-// src/pages/index.astro — home (scrolling landing). Replaces the old overlay gate.
-// Sections: hero → case studies → the garden → our garden (community) → now → footer.
+// src/pages/index.astro: home (scrolling landing). Replaces the old overlay gate.
+// Sections: hero → case studies → our garden (community) → now → footer.
 import Garden from '../layouts/Garden.astro';
 import HeartCanvas from '../components/HeartCanvas.astro';
 import Icon from '../components/Icon.astro';
 import TerminalWindow from '../components/TerminalWindow.astro';
 import CaseStudyRail from '../components/CaseStudyRail.astro';
-import { getCollection } from 'astro:content';
 import { site } from '../config/design';
-
-const [lab, archives, gallery, library] = await Promise.all([
-  getCollection('lab'),
-  getCollection('archives'),
-  getCollection('gallery'),
-  getCollection('library'),
-]);
-
-const recent = <T,>(arr: T[], key: (e: T) => number, n = 4) =>
-  [...arr].sort((a, b) => key(b) - key(a)).slice(0, n);
-
-const labRecent     = recent(lab,      e => (e.data.date_published ?? e.data.date_built).getTime());
-const galleryRecent = recent(gallery,  e => (e.data.date_published ?? e.data.date_made).getTime());
-const archiveRecent = recent(archives, e => (e.data.date_published ?? e.data.date_written).getTime());
-const libraryRecent = recent(library,  e => e.data.date_added.getTime(), 6);
-
-const gardenPhonetic = '/ ˈɡɑːr.dən /';
-
-function bookColor(s: string) {
-  const p = ['#c9b99a','#b5c4b1','#b5a8c0','#c4b1b1','#a8bec4','#c4bdb5','#b1c4b5','#c4b5a8'];
-  let h = 0; for (const c of s) h = c.charCodeAt(0)+((h<<5)-h);
-  return p[Math.abs(h)%p.length];
-}
-
 ---
 
 <Garden title={site.name} description={site.description}>
@@ -93,77 +68,6 @@ function bookColor(s: string) {
       </div>
     </section>
 
-    <!-- ── The garden (summary of collections) ──────────────────────────── -->
-    <section class="garden-summary">
-      <header class="sec-head">
-        <a class="sec-title" href="/garden">the garden</a>
-        <span class="sec-phon garden-phonetic">{gardenPhonetic}</span>
-      </header>
-
-      <div class="bento-grid">
-
-        <!-- Lab: wide top-left tile -->
-        <a href="/lab" class="bento-tile bento-lab">
-          <span class="bento-label">lab →</span>
-          <div class="bento-lab-items">
-            {labRecent.slice(0, 3).map(entry => (
-              <div class="bento-lab-item">
-                {entry.data.cover_image
-                  ? <img class="bento-lab-thumb" src={entry.data.cover_image} alt={entry.data.title} loading="lazy" />
-                  : <div class="bento-lab-thumb bento-lab-thumb--empty" />
-                }
-              </div>
-            ))}
-          </div>
-        </a>
-
-        <!-- Gallery: tall right tile spanning both rows -->
-        <a href="/gallery" class="bento-tile bento-gallery">
-          {galleryRecent[0]?.data.image && (
-            <img class="bento-gallery-img" src={galleryRecent[0].data.image} alt={galleryRecent[0].data.title} loading="lazy" />
-          )}
-          <div class="bento-gallery-overlay">
-            <span class="bento-label bento-label--light">gallery →</span>
-            {galleryRecent[0] && (
-              <div class="bento-gallery-meta">
-                <span class="bento-gallery-title">{galleryRecent[0].data.title}</span>
-                <span class="bento-gallery-year">{galleryRecent[0].data.date_made.getFullYear()}</span>
-              </div>
-            )}
-          </div>
-        </a>
-
-        <!-- Archives: bottom-left tile -->
-        <a href="/archives" class="bento-tile bento-archives">
-          <span class="bento-label">archives →</span>
-          <ul class="bento-list">
-            {archiveRecent.slice(0, 3).map(entry => (
-              <li class="bento-list-item">
-                <span class="bento-list-type">{entry.data.type}</span>
-                <span class="bento-list-title">{entry.data.title}</span>
-              </li>
-            ))}
-          </ul>
-        </a>
-
-        <!-- Library: bottom-middle tile -->
-        <a href="/library" class="bento-tile bento-library">
-          <span class="bento-label">library →</span>
-          <div class="bento-books">
-            {libraryRecent.slice(0, 3).map(entry => (
-              <div class="bento-book" style={`--book-color:${bookColor(entry.data.title)}`}>
-                {entry.data.cover_image
-                  ? <img class="bento-book-img" src={entry.data.cover_image} alt={entry.data.title} loading="lazy" />
-                  : <div class="bento-book-spine" />
-                }
-              </div>
-            ))}
-          </div>
-        </a>
-
-      </div>
-    </section>
-
     <!-- ── Our garden (community) ───────────────────────────────────────── -->
     <section class="community-summary">
       <header class="sec-head sec-head--center">
@@ -206,14 +110,6 @@ function bookColor(s: string) {
     padding-inline: clamp(20px, 5vw, 64px);
   }
 
-  .garden-summary .garden-phonetic {
-    font-family: var(--font-body);
-    font-size: var(--text-md);
-    color: var(--color-muted);
-    letter-spacing: 0.02em;
-    opacity: 1;
-    font-weight: 400;
-  }
   /* shared section heading (Lora, gold) */
   .sec-head {
     display: flex;
@@ -222,7 +118,6 @@ function bookColor(s: string) {
     flex-wrap: wrap;
     margin-bottom: var(--space-xxl);
   }
-  .sec-head--end { justify-content: flex-end; text-align: right; }
   .sec-head--center { justify-content: center; flex-direction: column; align-items: center; text-align: center; gap: 4px; }
   .sec-title {
     font-family: var(--font-serif);
@@ -241,7 +136,6 @@ function bookColor(s: string) {
     color: var(--color-heading);
     opacity: 0.85;
   }
-  .sec-phon--italic { font-style: italic; }
   .kapwa-trigger {
     background: none;
     border: none;
@@ -348,7 +242,7 @@ function bookColor(s: string) {
     container-type: inline-size;
   }
   .about-card {
-    /* glow color — change just this hex (the hover gloss) */
+    /* glow color: change just this hex (the hover gloss) */
     --glow-color: #ffe3ba;
 
     position: absolute;
@@ -465,156 +359,6 @@ function bookColor(s: string) {
     .about-card-sizer { max-width: 360px; margin-inline: auto; }
   }
 
-  /* ── Bento garden grid ───────────────────────────────────────────────── */
-  .garden-summary { padding-block: clamp(56px, 9vw, 128px); }
-
-  .bento-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-template-rows: 220px 200px;
-    gap: 12px;
-  }
-  .bento-lab      { grid-column: 1 / 3; grid-row: 1 / 2; }
-  .bento-gallery  { grid-column: 3 / 4; grid-row: 1 / 3; }
-  .bento-archives { grid-column: 1 / 2; grid-row: 2 / 3; }
-  .bento-library  { grid-column: 2 / 3; grid-row: 2 / 3; }
-
-  .bento-tile {
-    background: var(--color-card);
-    border: 1px solid var(--color-border);
-    border-radius: 16px;
-    overflow: hidden;
-    position: relative;
-    text-decoration: none;
-    color: var(--color-fg);
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-md);
-    padding: var(--space-lg);
-    transition: border-color 0.15s, opacity 0.5s ease, transform 0.5s ease;
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  .bento-tile.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  .bento-tile:hover { border-color: var(--color-heading); }
-
-  .bento-label {
-    font-family: var(--font-body);
-    font-size: var(--text-xs);
-    letter-spacing: 0.10em;
-    text-transform: uppercase;
-    color: var(--color-muted);
-    flex-shrink: 0;
-  }
-  .bento-label--light { color: rgba(255, 255, 255, 0.8); }
-
-  /* Lab tile */
-  .bento-lab-items {
-    display: flex;
-    gap: var(--space-md);
-    flex: 1;
-    min-height: 0;
-  }
-  .bento-lab-item {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    min-height: 0;
-  }
-  .bento-lab-thumb {
-    width: 100%;
-    height: auto;
-    max-height: 100%;
-    object-fit: contain;
-    border-radius: 8px;
-    display: block;
-  }
-  .bento-lab-thumb--empty {
-    aspect-ratio: 4 / 3;
-    background: var(--color-accent-light);
-  }
-
-  /* Gallery tile */
-  .bento-gallery { padding: 0; }
-  .bento-gallery-img {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-  .bento-gallery-overlay {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: var(--space-md);
-    background: linear-gradient(
-      to bottom,
-      rgba(0, 0, 0, 0.42) 0%,
-      transparent 35%,
-      transparent 55%,
-      rgba(0, 0, 0, 0.65) 100%
-    );
-  }
-  .bento-gallery-meta { display: flex; flex-direction: column; gap: 2px; }
-  .bento-gallery-title {
-    font-family: var(--font-serif);
-    font-size: var(--text-md);
-    font-weight: 600;
-    color: #fff;
-    line-height: 1.3;
-  }
-  .bento-gallery-year {
-    font-family: var(--font-body);
-    font-size: var(--text-xs);
-    color: rgba(255, 255, 255, 0.65);
-  }
-
-  /* Archives tile */
-  .bento-list { list-style: none; display: flex; flex-direction: column; gap: var(--space-sm); flex: 1; }
-  .bento-list-item { display: flex; align-items: baseline; gap: var(--space-sm); overflow: hidden; }
-  .bento-list-type {
-    font-family: var(--font-body);
-    font-size: var(--text-xs);
-    color: var(--color-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-  .bento-list-title {
-    font-family: var(--font-serif);
-    font-size: var(--text-sm);
-    color: var(--color-fg);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  /* Library tile */
-  .bento-books { display: flex; gap: var(--space-sm); flex: 1; }
-  .bento-book { flex: 1; min-width: 0; }
-  .bento-book-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 3px 6px 6px 3px;
-    display: block;
-  }
-  .bento-book-spine {
-    width: 100%;
-    height: 100%;
-    background: var(--book-color, #c9b99a);
-    border-radius: 3px 6px 6px 3px;
-  }
-
   /* ── Community ────────────────────────────────────────────────────────── */
   .community-summary { padding-block: clamp(40px, 7vw, 96px); }
   .comm-title-row {
@@ -643,7 +387,7 @@ function bookColor(s: string) {
   }
   .comm-row { display: flex; gap: clamp(12px, 2vw, 24px); overflow-x: auto; padding: var(--space-md) 2px; scrollbar-width: none; }
   .comm-row::-webkit-scrollbar { display: none; }
-  /* tiles 5–9 blur progressively — affordance that more exists.
+  /* tiles 5–9 blur progressively, an affordance that more exists.
      --tile-o = each tile's resting opacity (reused as the reveal end-state) */
   .comm-tile:nth-child(5) { filter: blur(0.5px); opacity: 0.95; --tile-o: 0.95; }
   .comm-tile:nth-child(6) { filter: blur(1.5px); opacity: 0.85; --tile-o: 0.85; }
@@ -660,7 +404,7 @@ function bookColor(s: string) {
     transition: transform 0.18s ease;
   }
   .comm-tile:hover { transform: translateY(-4px); }
-  /* staggered fade + rise — frames appear one by one when scrolled into view */
+  /* staggered fade + rise: frames appear one by one when scrolled into view */
   .comm-row.reveal-armed .comm-tile { opacity: 0; }
   .comm-row.reveal-run .comm-tile {
     animation: comm-rise 0.6s cubic-bezier(0.23, 1, 0.32, 1) both;
@@ -716,15 +460,6 @@ function bookColor(s: string) {
   @media (max-width: 820px) {
     .hero { flex-direction: column; text-align: center; }
     .hero-title { max-width: none; }
-    .g-grid { grid-template-columns: 1fr; }
-    .bento-grid {
-      grid-template-columns: 1fr 1fr;
-      grid-template-rows: auto;
-    }
-    .bento-lab     { grid-column: 1 / 3; grid-row: auto; }
-    .bento-gallery { grid-column: 1 / 2; grid-row: auto; min-height: 240px; }
-    .bento-archives { grid-column: 2 / 3; grid-row: auto; }
-    .bento-library  { grid-column: 1 / 3; grid-row: auto; }
   }
 </style>
 
@@ -871,25 +606,6 @@ function bookColor(s: string) {
   last.addEventListener('animationend', function () {
     (row as Element).classList.remove('reveal-armed', 'reveal-run');
   });
-})();
-
-// ── Garden bento grid: fade-in on scroll into view ───────────────────────
-(function () {
-  var tiles = document.querySelectorAll('.bento-tile');
-  if (!tiles.length) return;
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    tiles.forEach(function (t) { t.classList.add('visible'); });
-    return;
-  }
-  var io = new IntersectionObserver(function (entries) {
-    entries.forEach(function (entry, i) {
-      if (entry.isIntersecting) {
-        setTimeout(function () { entry.target.classList.add('visible'); }, i * 80);
-        io.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.08 });
-  tiles.forEach(function (t) { io.observe(t); });
 })();
 
 // ── Kapwa terminal ────────────────────────────────────────────────────────
