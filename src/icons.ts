@@ -41,10 +41,6 @@ export const ICONS = {
   },
 
   // ── Chevrons / arrows ───────────────────────────────────────────────────────
-  'chevron-down': {
-    viewBox: '0 0 24 24',
-    body: '<path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>',
-  },
   'chevron-left': {
     viewBox: '0 0 14 14',
     body: '<path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>',

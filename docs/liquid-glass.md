@@ -1,6 +1,6 @@
 # Liquid glass
 
-Refractive frosted-glass panels used on the heart cursor, garden nav dropdown, and migration card.
+Refractive frosted-glass panels used on the heart cursor, portrait pill, and identity web menu.
 
 ## Architecture (two layers)
 
@@ -92,7 +92,7 @@ if (panel) new ResizeObserver(sync).observe(panel);
 
 ## Rules
 
-- **`filterId` must be unique** per instance on the page (`heart-pill`, `garden-dd`, `migration-glass`, …)
+- **`filterId` must be unique** per instance on the page (`heart-pill`, `iw-menu`, `portrait-pill`, …)
 - **`filter: url(#id)` on the glass div** must match `filterId` on `LiquidGlass`
 - **`cornerRadius` must match** the CSS `border-radius` on the glass div
 - **Something visually interesting should sit behind the glass** — map tiles, page content, imagery. On a flat solid background the effect is barely visible

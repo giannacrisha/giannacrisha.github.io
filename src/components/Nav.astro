@@ -3,15 +3,8 @@
 import ThemeToggle from './ThemeToggle.astro';
 import Icon from './Icon.astro';
 import LogoCanvas from './LogoCanvas.astro';
-import LiquidGlass from './LiquidGlass.astro';
 const current = Astro.url.pathname;
-const gardenActive = current.startsWith('/garden') || ['/lab','/archives','/gallery','/library'].some(p => current.startsWith(p));
-const sublinks: { href: string; label: string; desc: string }[] = [
-  { href: '/lab',      label: 'lab',      desc: 'design and code projects' },
-  { href: '/archives', label: 'archives', desc: 'essays, poems, thoughts'  },
-  { href: '/gallery',  label: 'gallery',  desc: 'artwork and visual work'  },
-  { href: '/library',  label: 'library',  desc: 'films, books, shows'      },
-];
+const labActive = ['/garden', '/lab', '/archives', '/gallery', '/library'].some(p => current.startsWith(p));
 ---
 <nav class="site-nav">
   <div class="nav-inner">
@@ -19,37 +12,16 @@ const sublinks: { href: string; label: string; desc: string }[] = [
 
     <!-- desktop -->
     <ul class="nav-links">
-      <!-- the garden with hover dropdown -->
-      <li class="nav-item nav-item--garden">
-        <a href="/garden" class:list={['nav-link', { active: gardenActive }]} aria-haspopup="true" aria-expanded="false" id="garden-nav-trigger">
-          the garden
-          <Icon name="chevron-down" size={10} class="caret" />
-        </a>
-        <div class="garden-dropdown" id="garden-dropdown" role="region" aria-label="Garden sections">
-          <div class="garden-dropdown-glass" aria-hidden="true"></div>
-          <div class="garden-dropdown-panel">
-            <LiquidGlass displacement={100} aberration={3} cornerRadius={24} filterId="garden-dd" backdrop={false}>
-              <div class="garden-dropdown-inner">
-                {sublinks.map(l => (
-                  <a href={l.href} class:list={['dropdown-link', { active: current.startsWith(l.href) }]}>
-                    <span class="dropdown-link-text">
-                      <span class="dropdown-link-label">{l.label}</span>
-                      <span class="dropdown-link-desc">{l.desc}</span>
-                    </span>
-                  </a>
-                ))}
-              </div>
-            </LiquidGlass>
-          </div>
-        </div>
+      <li>
+        <a href="/garden" class:list={['nav-link', { active: labActive }]}>the lab</a>
       </li>
-      <li class="nav-item">
+      <li>
         <a href="/community" class:list={['nav-link', { active: current.startsWith('/community') }]}>community</a>
       </li>
-      <li class="nav-item">
+      <li>
         <a href="/about" class:list={['nav-link', { active: current.startsWith('/about') }]}>about</a>
       </li>
-      <li class="nav-item">
+      <li>
         <a href="/now" class:list={['nav-link', { active: current.startsWith('/now') }]}>now</a>
       </li>
     </ul>
@@ -77,10 +49,7 @@ const sublinks: { href: string; label: string; desc: string }[] = [
     <button class="mobile-close" id="nav-close" aria-label="close menu">
       <Icon name="close" size={20} />
     </button>
-    <a href="/garden" class="mobile-link">the garden</a>
-    {sublinks.map(l => (
-      <a href={l.href} class="mobile-link mobile-link--sub">{l.label}</a>
-    ))}
+    <a href="/garden" class="mobile-link">the lab</a>
     <a href="/community" class="mobile-link">community</a>
     <a href="/about" class="mobile-link">about</a>
     <a href="/now" class="mobile-link">now</a>
@@ -123,12 +92,9 @@ const sublinks: { href: string; label: string; desc: string }[] = [
     padding: 0;
     align-items: center;
   }
-  .nav-item { position: relative; }
-
   .nav-link {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
     font-family: var(--font-serif);
     font-size: var(--text-md);
     color: var(--color-muted);
@@ -142,106 +108,6 @@ const sublinks: { href: string; label: string; desc: string }[] = [
   .nav-link.active {
     color: var(--color-fg);
     border-bottom: 2px solid var(--color-accent);
-  }
-  .caret { transition: transform 0.15s; }
-
-  /* hover dropdown — padding-top bridges the gap so mouse can travel to the menu */
-  .garden-dropdown {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    min-width: 220px;
-    padding-top: 12px;
-    --dd-stroke: 2.5px #fff;
-    --dd-stroke-desc: 2px #fff;
-    --dd-stroke-dark: 2.5px rgba(20, 20, 20, 0.95);
-    --dd-stroke-desc-dark: 2px rgba(20, 20, 20, 0.95);
-  }
-  /* panel wraps LiquidGlass — glass layer is sized to match via JS (same as heart-cursor) */
-  .garden-dropdown-panel {
-    position: relative;
-    display: inline-flex;
-    z-index: 1;
-  }
-  .garden-dropdown-glass {
-    position: absolute;
-    top: 12px;
-    left: 0;
-    pointer-events: none;
-    z-index: 0;
-    border-radius: 24px;
-    overflow: hidden;
-    clip-path: inset(0 round 24px);
-    background: rgba(255, 255, 255, 0.10);
-    backdrop-filter: blur(2px) saturate(200%);
-    -webkit-backdrop-filter: blur(2px) saturate(200%);
-    box-shadow:
-      0 0 0 0.75px rgba(255, 255, 255, 0.35) inset,
-      0 4px 16px rgba(0, 0, 0, 0.12);
-  }
-  :global(:root[data-lg-refract="1"]) .garden-dropdown-glass {
-    filter: url(#garden-dd);
-  }
-  .garden-dropdown-inner {
-    padding: var(--space-sm);
-    display: flex;
-    flex-direction: column;
-  }
-  .nav-item--garden:hover .garden-dropdown,
-  .nav-item--garden:focus-within .garden-dropdown {
-    display: block;
-  }
-  .nav-item--garden:hover .caret {
-    transform: rotate(180deg);
-  }
-  .dropdown-link {
-    padding: var(--space-sm) var(--space-lg);
-    display: flex;
-    align-items: center;
-    text-decoration: none;
-    border-radius: 16px;
-    transition: background 0.12s;
-  }
-  .dropdown-link:hover  { background: rgba(255, 255, 255, 0.5); }
-  .dropdown-link:hover .dropdown-link-label {
-    text-shadow: 0 0 0.6px var(--color-fg), 0 0 0.6px var(--color-fg);
-  }
-  .dropdown-link-text {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-  }
-  .dropdown-link-label {
-    font-family: var(--font-serif);
-    font-size: var(--text-sm);
-    color: var(--color-fg);
-    letter-spacing: 0.01em;
-    -webkit-text-stroke: var(--dd-stroke);
-    paint-order: stroke fill;
-    transition: text-shadow 0.2s ease;
-  }
-  .dropdown-link.active .dropdown-link-label {
-    color: var(--color-heading);
-    text-shadow: 0 0 0.6px var(--color-heading), 0 0 0.6px var(--color-heading);
-  }
-  .dropdown-link-desc {
-    font-family: var(--font-body);
-    font-size: 11px;
-    color: var(--color-muted);
-    letter-spacing: 0.02em;
-    -webkit-text-stroke: var(--dd-stroke-desc);
-    paint-order: stroke fill;
-  }
-  :global(:root[data-theme="dark"]) .dropdown-link-label {
-    -webkit-text-stroke: var(--dd-stroke-dark);
-  }
-  :global(:root[data-theme="dark"]) .dropdown-link-desc {
-    -webkit-text-stroke: var(--dd-stroke-desc-dark);
-  }
-  :global(:root[data-theme="dark"]) .dropdown-link:hover .dropdown-link-label,
-  :global(:root[data-theme="dark"]) .dropdown-link.active .dropdown-link-label {
-    text-shadow: 0 0 0.6px currentColor, 0 0 0.6px currentColor;
   }
 
   /* search */
@@ -362,15 +228,6 @@ const sublinks: { href: string; label: string; desc: string }[] = [
     outline-offset: 2px;
     border-radius: 2px;
   }
-  .mobile-link--sub {
-    padding-left: var(--space-lg);
-    font-size: var(--text-sm);
-    color: var(--color-muted);
-  }
-  :root[data-theme="dark"] .mobile-link--sub {
-    color: var(--color-fg);
-    opacity: 0.7;
-  }
 
   @media (max-width: 767px) {
     .nav-links     { display: none; }
@@ -423,26 +280,4 @@ const sublinks: { href: string; label: string; desc: string }[] = [
       if (document.activeElement === last)  { e.preventDefault(); first.focus(); }
     }
   });
-
-  // Garden dropdown aria-expanded on hover/focus
-  const gardenItem    = document.querySelector('.nav-item--garden');
-  const gardenTrigger = document.getElementById('garden-nav-trigger');
-  const gardenPanel   = document.querySelector<HTMLElement>('.garden-dropdown-panel');
-  const gardenGlass   = document.querySelector<HTMLElement>('.garden-dropdown-glass');
-  const syncGardenGlass = () => {
-    if (!gardenPanel || !gardenGlass) return;
-    gardenGlass.style.width  = gardenPanel.offsetWidth  + 'px';
-    gardenGlass.style.height = gardenPanel.offsetHeight + 'px';
-  };
-  syncGardenGlass();
-  if (gardenPanel) new ResizeObserver(syncGardenGlass).observe(gardenPanel);
-  if (gardenItem && gardenTrigger) {
-    const setExpanded = (v: boolean) => gardenTrigger.setAttribute('aria-expanded', String(v));
-    gardenItem.addEventListener('mouseenter', () => setExpanded(true));
-    gardenItem.addEventListener('mouseleave', () => setExpanded(false));
-    gardenItem.addEventListener('focusin',    () => setExpanded(true));
-    gardenItem.addEventListener('focusout',   (e) => {
-      if (!gardenItem.contains((e as FocusEvent).relatedTarget as Node)) setExpanded(false);
-    });
-  }
 </script>
