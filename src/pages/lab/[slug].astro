@@ -7,6 +7,7 @@ import ArticleBreadcrumb from '../../components/ArticleBreadcrumb.astro';
 import MuxVideo from '../../components/MuxVideo.astro';
 import Icon from '../../components/Icon.astro';
 import TableOfContents from '../../components/TableOfContents.astro';
+import TomodachiDemo from '../../components/TomodachiDemo.astro';
 import { caseStudies } from '../../data/case-studies';
 import { getCollection } from 'astro:content';
 
@@ -17,6 +18,8 @@ export async function getStaticPaths() {
 
 const { entry } = Astro.props;
 const { Content, headings } = await entry.render();
+// the demo element is written straight into the vault markdown
+const hasTomodachiDemo = entry.body.includes('<tomodachi-demo');
 const { title, description, cover_image, link, mux_video_id, challenge, role, timeline, team } = entry.data;
 
 // `with` is a reserved word, so it is read off entry.data directly
@@ -105,6 +108,8 @@ const pager = i < 0 ? [] : [
             <span class="cs-part-hint">view on amazon</span>
           </span>
         </template>
+
+        {hasTomodachiDemo && <TomodachiDemo />}
 
       </article>
     </div>

@@ -132,6 +132,31 @@
   /* scroll distance a pinned sequence spends moving from one card to the next.
      Raise it to slow the sequence down, lower it to speed it up. */
   --pace-card:       175svh;
+
+  /* ── Tomodachi demo (lab/tomodachi) ───────────────────────────────────── */
+  /* The app's own palette, copied from its SwiftUI code. It is content, like
+     a screenshot, so it reads the same in both themes; only the bezel adapts. */
+  --tomodachi-happy:      #F5DB6B;
+  --tomodachi-bored:      #F2EBD9;
+  --tomodachi-sad:        #7DC4E8;
+  --tomodachi-angry:      #E8706B;
+  --tomodachi-bored-dot:  #B3AB99; /* calendar dot: bored on a bored-colored sheet */
+  --tomodachi-ink:        #261F1A; /* text on happy / bored */
+  --tomodachi-ink-light:  #ffffff; /* text on sad / angry */
+  --tomodachi-connected:  #34C759; /* iOS system green, connection dot */
+  --tomodachi-material:      rgba(255, 255, 255, 0.45); /* iOS regular material, light */
+  --tomodachi-material-dark: rgba(0, 0, 0, 0.18);       /* ...and dark, on sad / angry */
+  --tomodachi-bezel:      #1f1a16;
+  --tomodachi-ink-soft:   70%; /* ink mixed toward transparent, by role */
+  --tomodachi-ink-faint:  45%;
+  --tomodachi-ink-wash:   10%;
+  --tomodachi-phone-width: 300px;
+  --tomodachi-phone-ratio: 9 / 19.5;
+  --tomodachi-face-size:   128px;
+  --tomodachi-dot:         8px;
+  --tomodachi-day-height:  36px;
+  --tomodachi-face-shadow: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+  --tomodachi-pop:         0.9; /* mood change: face and copy settle up from this scale */
 }
 
 
@@ -152,6 +177,9 @@
   --color-surface:      #242424;
   --color-danger:       #e5534b;
   --color-traffic-red:  #ff6059;
+
+  /* lifted off the near-black page so the phone keeps its edge */
+  --tomodachi-bezel:    #3a332c;
 
   /* warmer and dimmer so the heart doesn't blow out against the dark bg */
   --glow-heart: drop-shadow(0 0 16px rgba(216, 175, 120, 0.16))

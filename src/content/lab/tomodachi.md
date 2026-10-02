@@ -37,7 +37,7 @@ team:
 
 ## Summary
 
-<figure class="cs-media" data-label="interactive app"></figure>
+<figure class="cs-media"><tomodachi-demo></tomodachi-demo></figure>
 
 </div>
 <div>

@@ -1,0 +1,461 @@
+---
+// src/components/TomodachiDemo.astro
+// Web recreation of the Tomodachi iOS companion app, as <tomodachi-demo>.
+// Markdown can't import components, so the vault writes the bare tag and
+// [slug].astro renders this once when the body contains it. The markup lives
+// in the template below; the element clones it in. State is in memory only.
+import Icon from './Icon.astro';
+
+const moods = ['happy', 'bored', 'sad', 'angry'];
+const cap = (s: string) => s[0].toUpperCase() + s.slice(1);
+---
+<template id="tomodachi-demo">
+  <div class="tmd">
+    <div class="tmd-phone">
+      <div class="tmd-screen" data-mood="bored">
+
+        <div class="tmd-main" data-main>
+          <div class="tmd-top">
+            <span class="tmd-banner tmd-material"><span class="tmd-dot"></span>Demo device</span>
+            <button class="tmd-round tmd-material" data-open aria-haspopup="dialog" aria-label="Open mood calendar">
+              <Icon name="calendar" size={16} />
+            </button>
+          </div>
+
+          <div class="tmd-mood" data-mood-block>
+            <button class="tmd-face" data-face aria-expanded="false"
+              aria-label="Tomodachi. Press three times for the admin panel"></button>
+            <span class="tmd-label">Tomodachi</span>
+            <span class="tmd-mood-text" aria-live="polite">
+              <span class="tmd-mood-name" data-name>Bored</span>
+              <span class="tmd-tagline" data-tagline>Your Tomodachi is waiting on you…</span>
+            </span>
+          </div>
+
+          <div class="tmd-admin tmd-material" data-admin hidden>
+            <span class="tmd-label">Admin</span>
+            <div class="tmd-chips">
+              {moods.map(m => <button class="tmd-chip" data-set={m} aria-pressed={String(m === 'bored')}>{cap(m)}</button>)}
+            </div>
+          </div>
+
+          <div class="tmd-task tmd-material">
+            <span class="tmd-label">Today's task</span>
+            <span class="tmd-task-name">Water the plant</span>
+          </div>
+
+          <div class="tmd-actions">
+            <button class="tmd-did" data-set="happy">I did it <Icon name="check" size={18} /></button>
+            <button class="tmd-forgot" data-set="sad">I forgot…</button>
+          </div>
+        </div>
+
+        <div class="tmd-sheet" data-sheet role="dialog" aria-modal="true" aria-label="Mood calendar" inert>
+          <div class="tmd-sheet-top">
+            <span class="tmd-grabber"></span>
+            <button class="tmd-icon-btn" data-close aria-label="Close calendar"><Icon name="close" size={14} /></button>
+          </div>
+          <div class="tmd-cal-head">
+            <button class="tmd-icon-btn" data-step="-1" aria-label="Previous month"><Icon name="chevron-left" size={14} /></button>
+            <span class="tmd-month" data-month aria-live="polite"></span>
+            <button class="tmd-icon-btn" data-step="1" aria-label="Next month"><Icon name="chevron-right" size={14} /></button>
+          </div>
+          <div class="tmd-grid tmd-weekdays" aria-hidden="true">
+            {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(d => <span>{d}</span>)}
+          </div>
+          <div class="tmd-grid" data-days role="group" aria-label="Days this month"></div>
+          <div class="tmd-legend" aria-hidden="true">
+            {moods.map(m => <span><span class="tmd-dot" data-dot={m}></span>{cap(m)}</span>)}
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <span class="tmd-hint">press the face three times for the admin panel</span>
+  </div>
+</template>
+
+<script>
+  // Copy from the app's Mood enum
+  const TAGLINES = {
+    happy: 'Your Tomodachi is thriving!',
+    bored: 'Your Tomodachi is waiting on you…',
+    sad:   'Hey. You forgot.',
+    angry: 'Your Tomodachi is MAD.',
+  };
+  type Mood = keyof typeof TAGLINES;
+  const cap = (s: string) => s[0].toUpperCase() + s.slice(1);
+  const dayKey = (d: Date) => `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+
+  // a few weeks of made-up past days so the calendar has something to show
+  const SEED: (Mood | null)[] = ['happy', 'happy', 'sad', null, 'happy', 'bored', 'happy', 'angry', 'sad', 'happy', null, 'bored'];
+  const TRIPLE_TAP_MS = 500;
+
+  class TomodachiDemo extends HTMLElement {
+    connectedCallback() {
+      if (this.childElementCount) return;
+      const tpl = document.querySelector<HTMLTemplateElement>('#tomodachi-demo')!;
+      this.append(tpl.content.cloneNode(true));
+      const $ = <T extends HTMLElement>(sel: string) => this.querySelector<T>(sel)!;
+
+      const screen = $('.tmd-screen'), main = $('[data-main]'), sheet = $('[data-sheet]');
+      const block = $('[data-mood-block]'), face = $('[data-face]'), admin = $('[data-admin]');
+      const openBtn = $('[data-open]'), days = $('[data-days]'), monthTitle = $('[data-month]');
+
+      // dominant mood per day = the last mood set that day, as in the app
+      const history = new Map<string, Mood>();
+      const today = new Date();
+      for (let i = 1; i <= 40; i++) {
+        const mood = SEED[i % SEED.length];
+        if (mood) history.set(dayKey(new Date(today.getFullYear(), today.getMonth(), today.getDate() - i)), mood);
+      }
+
+      const setMood = (mood: Mood) => {
+        screen.dataset.mood = mood;
+        $('[data-name]').textContent = cap(mood);
+        $('[data-tagline]').textContent = TAGLINES[mood];
+        this.querySelectorAll('.tmd-chip').forEach(c => c.setAttribute('aria-pressed', String((c as HTMLElement).dataset.set === mood)));
+        history.set(dayKey(new Date()), mood);
+        block.classList.remove('tmd-pop');
+        void block.offsetWidth; // restart the settle animation
+        block.classList.add('tmd-pop');
+      };
+      this.querySelectorAll<HTMLElement>('[data-set]').forEach(b =>
+        b.addEventListener('click', () => setMood(b.dataset.set as Mood)));
+
+      // triple tap on the face toggles the admin panel
+      let taps = 0, last = 0;
+      face.addEventListener('click', e => {
+        taps = e.timeStamp - last < TRIPLE_TAP_MS ? taps + 1 : 1;
+        last = e.timeStamp;
+        if (taps < 3) return;
+        taps = 0;
+        admin.hidden = !admin.hidden;
+        face.setAttribute('aria-expanded', String(!admin.hidden));
+      });
+
+      // calendar sheet
+      let shown = new Date();
+      const renderMonth = () => {
+        const y = shown.getFullYear(), m = shown.getMonth();
+        monthTitle.textContent = shown.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+        const cells: HTMLElement[] = Array.from({ length: new Date(y, m, 1).getDay() }, () => document.createElement('span'));
+        for (let d = 1; d <= new Date(y, m + 1, 0).getDate(); d++) {
+          const date = new Date(y, m, d), mood = history.get(dayKey(date));
+          const cell = document.createElement('span');
+          cell.className = 'tmd-day';
+          cell.setAttribute('role', 'img');
+          cell.setAttribute('aria-label', `${date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}${mood ? `, ${mood}` : ''}`);
+          if (dayKey(date) === dayKey(today)) cell.setAttribute('aria-current', 'date');
+          cell.innerHTML = `${d}<span class="tmd-dot"${mood ? ` data-dot="${mood}"` : ''}></span>`;
+          cells.push(cell);
+        }
+        days.replaceChildren(...cells);
+      };
+      const toggleSheet = (open: boolean) => {
+        screen.toggleAttribute('data-sheet-open', open);
+        sheet.inert = !open;
+        main.inert = open;
+        if (open) {
+          shown = new Date();
+          renderMonth();
+          $('[data-close]').focus();
+        } else openBtn.focus();
+      };
+      openBtn.addEventListener('click', () => toggleSheet(true));
+      $('[data-close]').addEventListener('click', () => toggleSheet(false));
+      sheet.addEventListener('keydown', e => { if (e.key === 'Escape') toggleSheet(false); });
+      this.querySelectorAll<HTMLElement>('[data-step]').forEach(b => b.addEventListener('click', () => {
+        shown = new Date(shown.getFullYear(), shown.getMonth() + Number(b.dataset.step), 1);
+        renderMonth();
+      }));
+    }
+  }
+  customElements.define('tomodachi-demo', TomodachiDemo);
+</script>
+
+<style is:global>
+  /* everything is scoped by the tag; the markup is cloned in at runtime */
+  tomodachi-demo { display: block; }
+
+  tomodachi-demo .tmd {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-sm);
+  }
+
+  /* ── Phone ──────────────────────────────────────────────────────────── */
+  tomodachi-demo .tmd-phone {
+    width: min(100%, var(--tomodachi-phone-width));
+    padding: var(--space-xs);
+    background: var(--tomodachi-bezel);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-gold);
+  }
+  tomodachi-demo .tmd-screen {
+    --ink: var(--tomodachi-ink);
+    --material: var(--tomodachi-material);
+    --mood-bg: var(--tomodachi-bored);
+    position: relative;
+    overflow: clip;
+    aspect-ratio: var(--tomodachi-phone-ratio);
+    border-radius: calc(var(--radius-lg) - var(--space-xs));
+    background: var(--mood-bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    line-height: var(--leading-tight);
+    transition: background-color var(--dur-card) var(--ease-out-quiet),
+                color var(--dur-card) var(--ease-out-quiet);
+  }
+  tomodachi-demo [data-mood="happy"] { --mood-bg: var(--tomodachi-happy); --face: url(/lab/tomodachi/face_happy.png); }
+  tomodachi-demo [data-mood="bored"] { --mood-bg: var(--tomodachi-bored); --face: url(/lab/tomodachi/face_bored.png); }
+  tomodachi-demo [data-mood="sad"]   { --mood-bg: var(--tomodachi-sad);   --face: url(/lab/tomodachi/face_sad.png); }
+  tomodachi-demo [data-mood="angry"] { --mood-bg: var(--tomodachi-angry); --face: url(/lab/tomodachi/face_angry.png); }
+  tomodachi-demo :is([data-mood="sad"], [data-mood="angry"]) {
+    --ink: var(--tomodachi-ink-light);
+    --material: var(--tomodachi-material-dark);
+  }
+
+  tomodachi-demo button {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+  }
+  tomodachi-demo .tmd-screen :focus-visible { outline-color: var(--ink); }
+
+  tomodachi-demo .tmd-material {
+    background: var(--material);
+    backdrop-filter: blur(var(--space-sm));
+  }
+  tomodachi-demo .tmd-label {
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--ink) var(--tomodachi-ink-faint), transparent);
+  }
+  tomodachi-demo .tmd-dot {
+    width: var(--tomodachi-dot);
+    height: var(--tomodachi-dot);
+    border-radius: 50%;
+  }
+
+  /* ── Main screen ────────────────────────────────────────────────────── */
+  tomodachi-demo .tmd-main {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    padding: var(--space-xxl) var(--space-lg) var(--space-xl);
+  }
+  tomodachi-demo .tmd-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  tomodachi-demo .tmd-banner {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius-pill);
+    font-weight: 600;
+    color: color-mix(in srgb, var(--ink) var(--tomodachi-ink-soft), transparent);
+  }
+  tomodachi-demo .tmd-banner .tmd-dot { background: var(--tomodachi-connected); }
+  tomodachi-demo .tmd-round {
+    display: grid;
+    place-items: center;
+    padding: var(--space-sm);
+    border-radius: 50%;
+    color: color-mix(in srgb, var(--ink) var(--tomodachi-ink-soft), transparent);
+  }
+  tomodachi-demo .tmd-screen .tmd-round:focus-visible { border-radius: 50%; }
+
+  tomodachi-demo .tmd-mood {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-xs);
+    text-align: center;
+  }
+  tomodachi-demo .tmd-face {
+    width: var(--tomodachi-face-size);
+    aspect-ratio: 1;
+    margin-bottom: var(--space-sm);
+    background: var(--face) center / contain no-repeat;
+    image-rendering: pixelated;
+    filter: var(--tomodachi-face-shadow);
+  }
+  tomodachi-demo .tmd-mood-text { display: grid; gap: var(--space-xs); }
+  tomodachi-demo .tmd-mood-name {
+    font-size: var(--text-xl);
+    font-weight: 800;
+  }
+  tomodachi-demo .tmd-tagline {
+    font-size: var(--text-xs);
+    color: color-mix(in srgb, var(--ink) var(--tomodachi-ink-soft), transparent);
+  }
+  tomodachi-demo .tmd-pop { animation: tmd-settle var(--dur-text) var(--ease-out-quiet); }
+  @keyframes tmd-settle {
+    from { opacity: 0; transform: scale(var(--tomodachi-pop)); }
+  }
+
+  tomodachi-demo .tmd-admin {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    border-radius: var(--radius-card);
+    animation: tmd-settle var(--dur-text) var(--ease-out-quiet);
+  }
+  tomodachi-demo .tmd-admin[hidden] { display: none; }
+  tomodachi-demo .tmd-chips {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-xs);
+  }
+  tomodachi-demo .tmd-chip {
+    padding: var(--space-xs);
+    border-radius: var(--radius-pill);
+    border: var(--border);
+    border-color: transparent;
+    font-weight: 700;
+    background: color-mix(in srgb, var(--ink) var(--tomodachi-ink-wash), transparent);
+  }
+  tomodachi-demo .tmd-chip[aria-pressed="true"] {
+    border-color: color-mix(in srgb, var(--ink) var(--tomodachi-ink-faint), transparent);
+  }
+
+  tomodachi-demo .tmd-task {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-lg);
+    border-radius: var(--radius-card);
+  }
+  tomodachi-demo .tmd-task-name {
+    font-size: var(--text-md);
+    font-weight: 600;
+  }
+
+  tomodachi-demo .tmd-actions {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-sm);
+  }
+  tomodachi-demo .tmd-did {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--space-xs);
+    width: 100%;
+    padding: var(--space-md);
+    border-radius: var(--radius-card);
+    background: var(--ink);
+    color: var(--mood-bg);
+    font-size: var(--text-md);
+    font-weight: 700;
+    transition: background-color var(--dur-card) var(--ease-out-quiet),
+                color var(--dur-card) var(--ease-out-quiet);
+  }
+  tomodachi-demo .tmd-forgot {
+    font-size: var(--text-xs);
+    color: color-mix(in srgb, var(--ink) var(--tomodachi-ink-faint), transparent);
+  }
+
+  /* ── Calendar sheet ─────────────────────────────────────────────────── */
+  tomodachi-demo .tmd-sheet {
+    --ink: var(--tomodachi-ink);
+    position: absolute;
+    inset: var(--space-lg) 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-card) var(--radius-card) 0 0;
+    background: var(--tomodachi-bored);
+    color: var(--ink);
+    transform: translateY(100%);
+    transition: transform var(--dur-card) var(--ease-out-quiet);
+  }
+  tomodachi-demo [data-sheet-open] .tmd-sheet { transform: none; }
+  tomodachi-demo .tmd-sheet-top {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+  }
+  tomodachi-demo .tmd-grabber {
+    grid-column: 2;
+    width: var(--space-xl);
+    height: var(--space-xs);
+    border-radius: var(--radius-pill);
+    background: color-mix(in srgb, var(--ink) var(--tomodachi-ink-faint), transparent);
+  }
+  tomodachi-demo .tmd-sheet-top .tmd-icon-btn { justify-self: end; }
+  tomodachi-demo .tmd-icon-btn {
+    display: grid;
+    place-items: center;
+    padding: var(--space-xs);
+  }
+  tomodachi-demo .tmd-cal-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-sm);
+  }
+  tomodachi-demo .tmd-month {
+    font-size: var(--text-sm);
+    font-weight: 800;
+  }
+  tomodachi-demo .tmd-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: var(--space-xs);
+    text-align: center;
+  }
+  tomodachi-demo .tmd-weekdays {
+    font-weight: 700;
+    color: color-mix(in srgb, var(--ink) var(--tomodachi-ink-faint), transparent);
+  }
+  tomodachi-demo .tmd-day {
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: var(--space-xs);
+    height: var(--tomodachi-day-height);
+    border-radius: var(--radius-input);
+    color: color-mix(in srgb, var(--ink) var(--tomodachi-ink-soft), transparent);
+  }
+  tomodachi-demo .tmd-day[aria-current] {
+    font-weight: 800;
+    color: var(--ink);
+    background: color-mix(in srgb, var(--ink) var(--tomodachi-ink-wash), transparent);
+  }
+  tomodachi-demo [data-dot="happy"] { background: var(--tomodachi-happy); }
+  tomodachi-demo [data-dot="bored"] { background: var(--tomodachi-bored-dot); }
+  tomodachi-demo [data-dot="sad"]   { background: var(--tomodachi-sad); }
+  tomodachi-demo [data-dot="angry"] { background: var(--tomodachi-angry); }
+  tomodachi-demo .tmd-legend {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-md);
+    padding-top: var(--space-md);
+    color: color-mix(in srgb, var(--ink) var(--tomodachi-ink-soft), transparent);
+  }
+  tomodachi-demo .tmd-legend > span {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+  }
+
+  tomodachi-demo .tmd-hint {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--color-muted);
+    text-align: center;
+  }
+</style>

@@ -25,6 +25,14 @@ export const ICONS = {
     viewBox: '0 0 24 24',
     body: '<path fill="currentColor" d="M8 6h2v2h2v2H8v10H6V10H2V8h2V6h2V4h2v2Zm10 8h4v2h-2v2h-2v2h-2v-2h-2v-2h-2v-2h4V4h2v10Z"/>',
   },
+  calendar: {
+    viewBox: '0 0 18 18',
+    body: '<rect x="2.5" y="3.5" width="13" height="12" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M2.5 7.5h13M6 2v3M12 2v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>',
+  },
+  check: {
+    viewBox: '0 0 18 18',
+    body: '<path d="M3.5 9.5l3.5 3.5 7.5-8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>',
+  },
 
   // ── Navigation / chrome ─────────────────────────────────────────────────────
   hamburger: {

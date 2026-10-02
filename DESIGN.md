@@ -39,6 +39,8 @@ slightly medieval; a garden, not a dashboard.
 - Layout: `--width-content` 720, `--width-site` 1100, `--width-preview` (hover cards, tooltips), `--ratio-media` (media slots), `--nav-height` 56, `--radius-{card,lg,pill,input}`, `--border`, `--rule-thickness` (indicator bars, underlines).
 - Motion: `--ease-out-quiet` (the only easing: decelerating, no overshoot), `--dur-{card,text}`, `--delay-text`, `--stagger-tag` (offset between a card's title, subtitle and each tag as they arrive), `--scale-recede`, `--opacity-recede`, `--blur-recede`, `--pace-card` (scroll distance per card in a pinned sequence), `--opacity-soon` (how far a coming-soon link steps back).
 
+- Demos: `--tomodachi-*` is the Tomodachi app's own palette and phone-frame sizing for `<tomodachi-demo>` (`TomodachiDemo.astro`). It is content, like a screenshot, so it reads the same in both themes; only `--tomodachi-bezel` has a dark value.
+
 ## Growth taxonomy (`src/config/design.ts`)
 `dust` → scattered, not yet gathered · `spark` → taking shape · `star` → complete, fully itself.
 
