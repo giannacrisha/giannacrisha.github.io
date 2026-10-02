@@ -33,11 +33,11 @@ slightly medieval; a garden, not a dashboard.
 8. **Accessible by default.** Text ≥ 4.5:1 (`--color-muted` is tuned to exactly that in both themes). Keep the `:focus-visible` rings and the `prefers-reduced-motion` block in `global.css`.
 
 ## Token map (names, not values — values are in tokens.css)
-- Color: `--color-{bg,fg,heading,card,muted,accent,accent-light,border,pill-bg,pill-text,accent-border,danger,traffic-red}`, plus dark-only `--color-{title,surface}`, `--card-grad` (metallic gold gradient) and `--shadow-gold`.
+- Color: `--color-{bg,fg,heading,card,muted,accent,accent-light,border,pill-bg,pill-text,accent-border,danger,traffic-red}`, plus dark-only `--color-{title,surface}`, `--card-grad` (metallic gold gradient), `--shadow-gold` and `--glow-heart` (hero heart halo, a `filter` value).
 - Type: `--text-{xs,sm,base,md,lg,xl,xxl,section,hero}` (fluid, except `--text-base` = fixed 14px for tiny UI labels). Leading: `--leading-{tight,base,loose,poem}`.
 - Space: `--space-{xs,sm,md,lg,xl,xxl,section}` → fluid steps.
-- Layout: `--width-content` 720, `--width-site` 1100, `--measure-prose` (70ch reading measure), `--width-preview` (hover cards, tooltips), `--ratio-media` (media slots), `--nav-height` 56, `--radius-{card,lg,pill,input}`, `--border`, `--rule-thickness` (indicator bars, underlines).
-- Motion: `--ease-out-quiet` (the only easing: decelerating, no overshoot), `--dur-{card,text}`, `--delay-text`, `--scale-recede`, `--opacity-recede`, `--blur-recede`, `--pace-card` (scroll distance per card in a pinned sequence), `--{opacity,saturate}-soon` (how far a coming-soon card's image steps back).
+- Layout: `--width-content` 720, `--width-site` 1100, `--width-preview` (hover cards, tooltips), `--ratio-media` (media slots), `--nav-height` 56, `--radius-{card,lg,pill,input}`, `--border`, `--rule-thickness` (indicator bars, underlines).
+- Motion: `--ease-out-quiet` (the only easing: decelerating, no overshoot), `--dur-{card,text}`, `--delay-text`, `--scale-recede`, `--opacity-recede`, `--blur-recede`, `--pace-card` (scroll distance per card in a pinned sequence), `--opacity-soon` (how far a coming-soon link steps back).
 
 ## Growth taxonomy (`src/config/design.ts`)
 `dust` → scattered, not yet gathered · `spark` → taking shape · `star` → complete, fully itself.
