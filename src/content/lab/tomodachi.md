@@ -23,7 +23,7 @@ role: Design Engineer (end-to-end)
 timeline: Spring 2026
 team:
   - Gianna Saludo (protoype)
-  - Mai Al Shaban (presentation)
+  - Mai Al Shaaban (presentation)
 ---
 
 <!-- How to fill this page:
