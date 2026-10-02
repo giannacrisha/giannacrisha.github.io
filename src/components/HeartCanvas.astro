@@ -114,10 +114,6 @@ const { model = '/heart.glb' } = Astro.props;
   .ht-pct  { color: #cdd6f4; }
   .ht-blink { display: inline-block; animation: ht-blink 1s step-start infinite; }
   @keyframes ht-blink { 50% { opacity: 0; } }
-  @media (max-width: 768px) {
-    .heart-stage { width: clamp(220px, 64vw, 320px); }
-    .ht-body { padding: 20px; }
-  }
 </style>
 
 <script>
@@ -421,5 +417,8 @@ const { model = '/heart.glb' } = Astro.props;
     }
   }
 
-  document.querySelectorAll<HTMLElement>('.heart-stage').forEach(initHeart);
+  // skip the WebGL scene entirely when the page hides the heart (mobile)
+  document.querySelectorAll<HTMLElement>('.heart-stage').forEach((stage) => {
+    if (stage.offsetParent) initHeart(stage);
+  });
 </script>

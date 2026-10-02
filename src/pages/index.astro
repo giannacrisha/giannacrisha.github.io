@@ -353,12 +353,6 @@ import { site } from '../config/design';
   }
   .about-chip:hover .about-chip-img { opacity: 1; }
 
-  @media (max-width: 768px) {
-    .about-intro { grid-template-columns: 1fr; }
-    .about-text { max-width: none; }
-    .about-card-sizer { max-width: 360px; margin-inline: auto; }
-  }
-
   /* ── Community ────────────────────────────────────────────────────────── */
   .community-summary { padding-block: clamp(40px, 7vw, 96px); }
   .comm-title-row {
@@ -460,6 +454,12 @@ import { site } from '../config/design';
   @media (max-width: 820px) {
     .hero { flex-direction: column; text-align: center; }
     .hero-title { max-width: none; }
+  }
+  @media (max-width: 768px) {
+    .hero-heart { display: none; }
+    .about-intro { grid-template-columns: 1fr; }
+    .about-text { max-width: none; }
+    .about-card-sizer { max-width: 360px; margin-inline: auto; }
   }
 </style>
 
