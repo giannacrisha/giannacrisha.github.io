@@ -21,7 +21,7 @@ slightly medieval; a garden, not a dashboard.
 
 ## Rules
 1. **Never hardcode a value.** Always `var(--token)`. If no token fits, add one to `tokens.css` — don't inline a hex, px size, or radius.
-2. **Fonts, by role:** display = `--font-display` (Jacquard 12), code/labels = `--font-mono` (Iosevka), prose headings = `--font-serif` (Lora), body/UI = `--font-body` (Atkinson Hyperlegible Next).
+2. **Fonts, by role:** display = `--font-display` (Jacquard 12), code and terminal UI only = `--font-mono` (Iosevka), prose headings and labels = `--font-serif` (Lora), body/UI = `--font-body` (Atkinson Hyperlegible Next).
 3. **No emoji.** All indicators are SVG via `Icon.astro`.
 4. **Both themes.** Every color must be a token that has a `:root[data-theme="dark"]` value. Never define a color only inside a media/theme block.
 5. **DRY.** Repeated markup or values get centralized. Delete dead code, imports, and vars as part of the change — no leftovers.

@@ -137,9 +137,8 @@ const pager = i < 0 ? [] : [
   dt, .cs-label {
     font-size: var(--text-xs);
     color: var(--color-muted);
+    font-family: var(--font-serif);
   }
-  dt { font-family: var(--font-serif); }
-  .cs-label { font-family: var(--font-mono); }
   dd {
     font-family: var(--font-body);
     font-size: var(--text-sm);
@@ -164,7 +163,7 @@ const pager = i < 0 ? [] : [
   }
   .cs-body :global(.cs-media:empty)::before {
     content: attr(data-label);
-    font-family: var(--font-mono);
+    font-family: var(--font-serif);
     font-size: var(--text-xs);
     color: var(--color-muted);
   }
@@ -242,7 +241,7 @@ const pager = i < 0 ? [] : [
     object-fit: contain;
   }
   .cs-body :global(.cs-part-hint) {
-    font-family: var(--font-mono);
+    font-family: var(--font-serif);
     color: var(--color-muted);
   }
   .cs-body :global(.cs-part:not([href]) .cs-part-hint) { display: none; }
