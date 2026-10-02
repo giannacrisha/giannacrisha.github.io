@@ -1,13 +1,12 @@
 ---
 // src/pages/lab/[slug].astro
+// Case-study layout for every lab entry. Each row renders only when its
+// frontmatter is present.
 import Garden from '../../layouts/Garden.astro';
-import GrowthPill from '../../components/GrowthPill.astro';
-import Timestamps from '../../components/Timestamps.astro';
-import Recommended from '../../components/Recommended.astro';
 import ArticleBreadcrumb from '../../components/ArticleBreadcrumb.astro';
-import TableOfContents from '../../components/TableOfContents.astro';
-import ImageCarousel from '../../components/ImageCarousel.astro';
 import MuxVideo from '../../components/MuxVideo.astro';
+import Icon from '../../components/Icon.astro';
+import { caseStudies } from '../../data/case-studies';
 import { getCollection } from 'astro:content';
 
 export async function getStaticPaths() {
@@ -16,95 +15,287 @@ export async function getStaticPaths() {
 }
 
 const { entry } = Astro.props;
-const { Content, headings } = await entry.render();
-const { title, description, date_built, date_published, tools, cover_image, link, growth_stage, images, mux_video_id, topics } = entry.data;
-const published = date_published ?? date_built;
+const { Content } = await entry.render();
+const { title, description, cover_image, link, mux_video_id, challenge, role, timeline, team } = entry.data;
 
-const allEntries = await getCollection('lab');
-const related = allEntries
-  .filter(e => e.slug !== entry.slug)
-  .sort((a, b) => {
-    const dateA = a.data.date_published ?? a.data.date_built;
-    const dateB = b.data.date_published ?? b.data.date_built;
-    return new Date(dateB).getTime() - new Date(dateA).getTime();
-  })
-  .slice(0, 3);
+// `with` is a reserved word, so it is read off entry.data directly
+const meta: [string, string | string[] | undefined][] = [
+  ['with', entry.data.with],
+  ['role', role],
+  ['timeline', timeline],
+  ['team', team],
+];
+const metaRows = meta.filter(([, value]) => value?.length);
+
+// prev / next only for entries that are in the case-study list
+const i = caseStudies.findIndex(c => c.href === `/lab/${entry.slug}`);
+const pager = i < 0 ? [] : [
+  { dir: 'previous', item: caseStudies[i - 1] },
+  { dir: 'next',     item: caseStudies[i + 1] },
+].filter(p => p.item);
 ---
 <Garden title={title} description={description}>
-  <div class="content-with-sidebar">
+  <article class="page-wrapper case-study">
 
-    <div class="content-main">
-      <article class="article">
+    <ArticleBreadcrumb section="lab" title={title} />
 
-        <ArticleBreadcrumb section="lab" title={title} />
+    <h1 class="entry-title">{title}</h1>
 
-        <div class="entry-label-row">
-          <GrowthPill stage={growth_stage} />
-        </div>
-        <div class="entry-title-row">
-          <h1 class="entry-title">{title}</h1>
-        </div>
-        <div class="entry-meta-row">
-          <div class="entry-topics">
-            {topics && topics.map((t: string) => (
-              <a href={`/lab?topic=${encodeURIComponent(t)}`} class="topic-tag">{t}</a>
-            ))}
-          </div>
-          <Timestamps
-            primaryLabel="built"
-            primaryDate={date_built}
-            secondaryLabel="planted"
-            secondaryDate={published}
-          />
-        </div>
+    {challenge && (
+      <dl class="cs-row cs-challenge">
+        <dt>challenge</dt>
+        <dd>{challenge}</dd>
+      </dl>
+    )}
 
-        {tools && tools.length > 0 && (
-          <div class="entry-tools">
-            {tools.map((tool: string) => <span class="pill">{tool}</span>)}
-          </div>
-        )}
-
+    {(mux_video_id || cover_image) && (
+      <div class="cs-hero">
         {mux_video_id
           ? <MuxVideo playbackId={mux_video_id} title={title} />
-          : cover_image && (
-              <div class="image-full">
-                <img src={cover_image} alt={title} />
-              </div>
-            )
-        }
+          : <div class="image-full"><img src={cover_image} alt={title} /></div>}
+      </div>
+    )}
 
-        {description && <p class="entry-caption">{description}</p>}
-
-        <hr class="article-divider" />
-
-        {images && images.length > 0 && (
-          <div class="process-carousel">
-            <ImageCarousel images={images} label="process" title={title} />
+    {metaRows.length > 0 && (
+      <dl class="cs-row cs-meta">
+        {metaRows.map(([label, value]) => (
+          <div>
+            <dt>{label}</dt>
+            {[value].flat().map(line => <dd>{line}</dd>)}
           </div>
-        )}
+        ))}
+      </dl>
+    )}
 
-        <TableOfContents headings={headings} variant="inline" />
+    <hr class="article-divider" />
 
-        <div class="prose">
-          <Content />
-        </div>
-
-        {link && (
-          <a href={link} target="_blank" rel="noopener noreferrer" class="article-link">
-            view project
-            <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-              <path d="M2 10L10 2M10 2H5M10 2V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-            </svg>
-          </a>
-        )}
-
-      </article>
+    <div class="prose cs-body">
+      <Content />
     </div>
 
-    <div class="content-sidebar">
-      <TableOfContents headings={headings} variant="sidebar" />
-      <Recommended entries={related} />
-    </div>
+    {link && (
+      <a href={link} target="_blank" rel="noopener noreferrer" class="article-link">
+        view project <Icon name="external-link" size={10} />
+      </a>
+    )}
 
-  </div>
+    {pager.length > 0 && (
+      <nav class="cs-pager" aria-label="more case studies">
+        {pager.map(({ dir, item }) => {
+          const Tag = item.href ? 'a' : 'div';
+          return (
+            <Tag href={item.href} class:list={['cs-pager-item', dir]}>
+              <span class="cs-label">{dir}</span>
+              <span class="cs-pager-title">{item.title}</span>
+              {!item.href && <span class="cs-label">coming soon</span>}
+            </Tag>
+          );
+        })}
+      </nav>
+    )}
+
+    <template id="cs-part-card">
+      <span class="cs-part-card" aria-hidden="true">
+        <span class="cs-part-img"><img alt="" /></span>
+        <span class="cs-part-name"></span>
+        <span class="cs-part-hint">view on amazon</span>
+      </span>
+    </template>
+
+  </article>
 </Garden>
+
+<script>
+  // Part links: attach the preview card, open real links in a new tab, and
+  // turn placeholder (empty href) links into plain text that still previews.
+  const card = document.querySelector<HTMLTemplateElement>('#cs-part-card')!;
+  document.querySelectorAll<HTMLAnchorElement>('.cs-part').forEach(a => {
+    const preview = card.content.cloneNode(true) as DocumentFragment;
+    preview.querySelector('.cs-part-name')!.textContent = a.textContent;
+    const img = preview.querySelector('img')!;
+    if (a.dataset.img) img.src = a.dataset.img;
+    else img.remove();
+    if (a.getAttribute('href')) Object.assign(a, { target: '_blank', rel: 'noopener' });
+    else a.removeAttribute('href');
+    a.append(preview);
+  });
+  // tooltips and placeholder parts are not natively focusable
+  document.querySelectorAll<HTMLElement>('.cs-tip, .cs-part:not([href])').forEach(el => (el.tabIndex = 0));
+</script>
+
+<style>
+  /* full width with the site gutter (from .page-wrapper), no centered column */
+  .case-study {
+    max-width: none;
+    padding-block: var(--space-section);
+  }
+
+  /* ── Label / value rows ───────────────────────────────────────────────── */
+  .cs-row {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-xl);
+    margin-top: var(--space-xxl);
+  }
+  dt, .cs-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--color-muted);
+  }
+  dd {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-fg);
+  }
+  .cs-challenge { margin-top: var(--space-xl); row-gap: var(--space-xs); }
+  .cs-challenge dd {
+    grid-column: 2 / -1;
+    max-width: var(--measure-prose);
+    font-size: var(--text-md);
+    line-height: var(--leading-base);
+  }
+  .cs-meta dt { margin-bottom: var(--space-xs); }
+
+  .cs-hero { margin-top: var(--space-xxl); }
+
+  /* ── Body (rendered markdown, so selectors reach in with :global) ─────── */
+  .cs-body { max-width: none; }
+  .cs-body :global(:is(p, ul, ol, blockquote)) { max-width: var(--measure-prose); }
+  .cs-body :global(h3) { font-weight: 700; font-style: italic; }
+
+  .cs-body :global(.cs-split) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-section);
+    margin-block: var(--space-xxl);
+  }
+  .cs-body :global(.cs-split > * > :first-child) { margin-top: 0; }
+
+  /* media slot: labeled placeholder while empty, the media itself once filled */
+  .cs-body :global(.cs-media:empty) {
+    display: grid;
+    place-items: center;
+    aspect-ratio: var(--ratio-media);
+    background: var(--color-accent-light);
+    border: var(--border);
+    border-style: dashed;
+    border-radius: var(--radius-card);
+  }
+  .cs-body :global(.cs-media:empty)::before {
+    content: attr(data-label);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--color-muted);
+  }
+  .cs-body :global(.cs-media :is(img, video)) {
+    display: block;
+    width: 100%;
+    margin: 0;
+    border-radius: var(--radius-card);
+  }
+
+  /* tooltip + part preview share the dotted affordance and the popover */
+  .cs-body :global(:is(.cs-tip, .cs-part)) {
+    position: relative;
+    color: var(--color-fg);
+    text-decoration: underline dotted var(--color-accent);
+    text-underline-offset: var(--rule-thickness);
+  }
+  .cs-body :global(.cs-tip) { cursor: help; }
+
+  .cs-body :global(.cs-tip)::after,
+  .cs-body :global(.cs-part-card) {
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + var(--space-xs));
+    z-index: 1;
+    max-width: var(--width-preview);
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-input);
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    font-style: normal;
+    font-weight: normal;
+    line-height: var(--leading-tight);
+    pointer-events: none;
+    opacity: 0;
+    transform: translate(-50%, var(--space-xs));
+    transition: opacity var(--dur-text) var(--ease-out-quiet),
+                transform var(--dur-text) var(--ease-out-quiet);
+  }
+  .cs-body :global(.cs-tip:is(:hover, :focus-visible))::after,
+  .cs-body :global(.cs-part:is(:hover, :focus-visible) .cs-part-card) {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  .cs-body :global(.cs-tip)::after {
+    content: attr(data-tip);
+    width: max-content;
+    text-align: center;
+    background: var(--color-fg);
+    color: var(--color-bg);
+  }
+
+  .cs-body :global(.cs-part-card) {
+    display: grid;
+    gap: var(--space-xs);
+    width: var(--width-preview);
+    padding: var(--space-sm);
+    background: var(--color-card);
+    border: var(--border);
+    box-shadow: var(--shadow-gold);
+    color: var(--color-fg);
+  }
+  .cs-body :global(.cs-part-img) {
+    aspect-ratio: var(--ratio-media);
+    background: var(--color-accent-light);
+    border-radius: var(--radius-input);
+    overflow: hidden;
+  }
+  .cs-body :global(.cs-part-img img) {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    border-radius: 0;
+    object-fit: contain;
+  }
+  .cs-body :global(.cs-part-hint) {
+    font-family: var(--font-mono);
+    color: var(--color-muted);
+  }
+  .cs-body :global(.cs-part:not([href]) .cs-part-hint) { display: none; }
+
+  /* ── Prev / next ──────────────────────────────────────────────────────── */
+  .cs-pager {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-xl);
+    margin-top: var(--space-section);
+    padding-top: var(--space-xl);
+    border-top: var(--border);
+  }
+  .cs-pager-item {
+    display: grid;
+    gap: var(--space-xs);
+    text-decoration: none;
+  }
+  .cs-pager-item.next { grid-column: 2; text-align: right; }
+  .cs-pager-item:not([href]) { opacity: var(--opacity-soon); }
+  .cs-pager-title {
+    font-family: var(--font-serif);
+    font-size: var(--text-lg);
+    color: var(--color-heading);
+  }
+  a.cs-pager-item:hover .cs-pager-title { color: var(--color-fg); }
+
+  /* site breakpoints, as in global.css */
+  @media (max-width: 900px) {
+    .cs-meta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .cs-body :global(.cs-split) { grid-template-columns: minmax(0, 1fr); }
+  }
+  @media (max-width: 600px) {
+    .cs-row { grid-template-columns: minmax(0, 1fr); }
+    .cs-challenge dd { grid-column: auto; }
+  }
+</style>

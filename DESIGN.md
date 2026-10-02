@@ -36,8 +36,8 @@ slightly medieval; a garden, not a dashboard.
 - Color: `--color-{bg,fg,heading,card,muted,accent,accent-light,border,pill-bg,pill-text,accent-border,danger,traffic-red}`, plus dark-only `--color-{title,surface}`, `--card-grad` (metallic gold gradient) and `--shadow-gold`.
 - Type: `--text-{xs,sm,base,md,lg,xl,xxl,section,hero}` (fluid, except `--text-base` = fixed 14px for tiny UI labels). Leading: `--leading-{tight,base,loose,poem}`.
 - Space: `--space-{xs,sm,md,lg,xl,xxl,section}` → fluid steps.
-- Layout: `--width-content` 720, `--width-site` 1100, `--nav-height` 56, `--radius-{card,lg,pill,input}`, `--border`, `--rule-thickness` (indicator bars, underlines).
-- Motion: `--ease-out-quiet` (the only easing — decelerating, no overshoot), `--dur-{card,text}`, `--delay-text`, `--stagger-tag`, `--scale-recede`, `--opacity-recede`, `--blur-recede`, `--pace-card` (scroll distance per card in a pinned sequence).
+- Layout: `--width-content` 720, `--width-site` 1100, `--measure-prose` (70ch reading measure), `--width-preview` (hover cards, tooltips), `--ratio-media` (media slots), `--nav-height` 56, `--radius-{card,lg,pill,input}`, `--border`, `--rule-thickness` (indicator bars, underlines).
+- Motion: `--ease-out-quiet` (the only easing: decelerating, no overshoot), `--dur-{card,text}`, `--delay-text`, `--scale-recede`, `--opacity-recede`, `--blur-recede`, `--pace-card` (scroll distance per card in a pinned sequence), `--{opacity,saturate}-soon` (how far a coming-soon card's image steps back).
 
 ## Growth taxonomy (`src/config/design.ts`)
 `dust` → scattered, not yet gathered · `spark` → taking shape · `star` → complete, fully itself.

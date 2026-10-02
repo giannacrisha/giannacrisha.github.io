@@ -34,6 +34,12 @@ const lab = defineCollection({
     description:    z.string(),
     date_built:     z.date(),
     tools:          z.array(z.string()).optional(),
+    // case-study rows; each renders only when present
+    challenge:      z.string().optional(),
+    with:           z.string().optional(),
+    role:           z.string().optional(),
+    timeline:       z.string().optional(),
+    team:           z.array(z.string()).optional(),
   }),
 });
 

@@ -106,6 +106,9 @@
   --nav-height:    56px;   /* fixed top nav — sticky sections pad past it */
   --width-content: 720px;
   --width-site:    1100px;
+  --measure-prose: 70ch;   /* readable line length for paragraphs and lists */
+  --width-preview: 200px;  /* hover cards and tooltips */
+  --ratio-media:   16 / 9; /* media slots and their placeholders */
   --radius-card:   12px;
   --radius-lg:     30px;   /* large rounded cards (home sections, frames) */
   --radius-pill:   20px;
@@ -118,12 +121,13 @@
   /* Weighted and calm. Decelerating, never springy — no overshoot in the curve. */
   --ease-out-quiet:  cubic-bezier(0.22, 0.61, 0.36, 1);
   --dur-card:        650ms;  /* a card travelling into place        */
-  --dur-text:        420ms;  /* title / tags fading up             */
+  --dur-text:        420ms;  /* title fading up                    */
   --delay-text:      100ms;  /* card settles, then it speaks       */
-  --stagger-tag:     40ms;   /* per-tag offset within a tag row    */
   --scale-recede:    0.46;   /* card parked in a side slot          */
   --opacity-recede:  0.4;    /* ...dimmed                           */
   --blur-recede:     6px;    /* ...and thrown out of focus          */
+  --opacity-soon:    0.5;    /* coming-soon card image, dimmed      */
+  --saturate-soon:   0.2;    /* ...and drained of most of its color */
   /* scroll distance a pinned sequence spends moving from one card to the next.
      Raise it to slow the sequence down, lower it to speed it up. */
   --pace-card:       175svh;

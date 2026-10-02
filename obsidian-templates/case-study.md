@@ -1,41 +1,77 @@
 ---
-title: {{title}}
-subtitle: 
+title: "{{title}}"
 description: 
-role: 
-timeline: 
-team: 
+date_built: "{{date}}"
 tools: []
-cover_image: /images/lab/
-video_demo: 
-date_built: {{date}}
+topics: []
 growth_stage: dust
 featured: false
+frame_shape: 
+cover_image: /lab/
+mux_video_id: 
+challenge: 
+with: 
+role: 
+timeline: 
+team: []
 ---
 
-## problem
+<!-- The page renders title, challenge, hero video, and the With/Role/Timeline/Team
+     row from frontmatter, so the body starts at Summary/Concept.
+     Quote any frontmatter value that contains a colon.
+     Media slots: put an image inside the empty figure, e.g.
+       <figure class="cs-media" data-label="sketches"><img src="/lab/name.png" alt="sketches"></figure>
+     Part links: href = amazon url, data-img = the part's image path.
+     Keep the blank lines after each opening div and before each closing div,
+     or the markdown inside will not render. Delete these comments when done. -->
 
-<!-- what was broken, missing, or frustrating?
-     who was affected and how? why did it matter?
-     delete this comment and write here -->
+<div class="cs-split">
+<div>
 
-## research
+## Summary
 
-<!-- what did you learn before building?
-     user interviews, competitive analysis, desk research?
-     what surprised you?
-     delete this comment and write here -->
+<figure class="cs-media" data-label="summary"></figure>
 
-## solution
+</div>
+<div>
 
-<!-- what did you design or build?
-     why this approach over others?
-     add images with: ![description](/images/lab/filename.jpg)
-     delete this comment and write here -->
+## Concept
 
-## impact
+### Sketch
 
-<!-- what changed after this?
-     metrics if you have them, observations if you don't
-     what would you do differently?
-     delete this comment and write here -->
+<!-- how the idea started, early sketches and iterations -->
+
+<figure class="cs-media" data-label="sketches"></figure>
+
+### What do I need?
+
+<!-- requirements, then the parts list -->
+
+- <a class="cs-part" href="" data-img="">part</a>
+
+</div>
+</div>
+
+---
+
+## Design
+
+<!-- short intro to the build -->
+
+### Subsection
+
+<!-- one ### per design area (circuit, visual, app, case...), each with its text and a media slot -->
+
+<figure class="cs-media" data-label="label"></figure>
+
+---
+
+## Challenges
+
+1. <!-- what went wrong and how you got past it -->
+
+---
+
+## Conclusion
+
+<!-- what you learned, what you would make next -->

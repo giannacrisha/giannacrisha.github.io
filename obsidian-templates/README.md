@@ -10,7 +10,7 @@ then in obsidian:
 
 | template     | use for                                           |
 |--------------|---------------------------------------------------|
-| case-study   | design projects: problem/research/solution/impact |
+| case-study   | design projects: summary/concept/design/challenges/conclusion|
 | essay        | longer prose, arguments, reflections              |
 | poem         | poems, verse, lyric writing                       |
 | thought      | short observations, fragments, questions          |

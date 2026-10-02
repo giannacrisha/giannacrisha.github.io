@@ -1,12 +1,12 @@
 ---
 // src/components/CaseStudyRail.astro
 // Featured case studies. The section pins while the page scrolls past it and the
-// cards travel horizontally — card N exits left as card N+1 arrives.
+// cards travel horizontally: card N exits left as card N+1 arrives.
 //
 // Movement is a CSS scroll-driven animation (`animation-timeline`) where supported;
 // where it isn't, an IntersectionObserver sets data-state on each card and the same
 // transforms run as transitions. JS never touches scroll position except on an
-// explicit indicator click or focus jump — the page always scrolls natively.
+// explicit indicator click or focus jump: the page always scrolls natively.
 //
 // Card data: src/data/case-studies.ts
 import { caseStudies } from '../data/case-studies';
@@ -25,26 +25,23 @@ const n = caseStudies.length;
 
     <div class="rail-stage" data-stage data-active="0">
       <ol class="rail-cards" data-cards>
-        {caseStudies.map((study, i) => (
-          <li class="rail-card" style={`--i: ${i}`} data-card={i} data-state={i === 0 ? 'current' : 'next'} data-far={i > 1 ? '' : undefined}>
-            <a class="rail-card-link" href={study.href}>
-              <div class="rail-card-media">
-                <img class="rail-card-img" src={study.image} alt="" loading="lazy" />
-              </div>
-              <div class="rail-card-block">
-                <div class="rail-card-headline">
-                  <h3 class="rail-card-title">{study.title}</h3>
-                  <ul class="rail-tags">
-                    {study.skills.map((skill, t) => (
-                      <li class="rail-tag" style={`--t: ${t}`}>{skill}</li>
-                    ))}
-                  </ul>
+        {caseStudies.map((study, i) => {
+          // coming soon = no href: a plain block, so it can't be clicked or tabbed to
+          const Body = study.href ? 'a' : 'div';
+          return (
+            <li class="rail-card" style={`--i: ${i}`} data-card={i} data-state={i === 0 ? 'current' : 'next'} data-far={i > 1 ? '' : undefined} data-soon={study.href ? undefined : ''}>
+              <Body class="rail-card-body" href={study.href}>
+                <div class="rail-card-media">
+                  {study.image && <img class="rail-card-img" src={study.image} alt="" loading="lazy" />}
                 </div>
-                <p class="rail-card-desc">{study.description}</p>
-              </div>
-            </a>
-          </li>
-        ))}
+                <div class="rail-card-block">
+                  <h3 class="rail-card-title">{study.title}</h3>
+                  {!study.href && <span class="rail-card-soon">coming soon</span>}
+                </div>
+              </Body>
+            </li>
+          );
+        })}
       </ol>
 
       <nav class="rail-dots" aria-label="case study navigation">
@@ -92,7 +89,7 @@ const n = caseStudies.length;
     flex-direction: column;
     justify-content: center;
     gap: var(--space-xl);
-    /* clip, not hidden — hidden makes this a scroll container, and the browser
+    /* clip, not hidden: hidden makes this a scroll container, and the browser
        then scrolls it sideways to reveal a focused card, shifting the layout */
     overflow: clip;
     /* clear the fixed nav at the top and the minimize bar at the bottom */
@@ -125,9 +122,11 @@ const n = caseStudies.length;
   /* a card more than one slot away would stack on top of the one in the slot */
   .rail-card[data-far] { visibility: hidden; }
 
-  /* No card chrome — the image is the card. Only it is rounded, and the copy
+  /* No card chrome: the image is the card. Only it is rounded, and the copy
      sits directly on the page below it. */
-  .rail-card-link {
+  /* An <a> for a live study, a <div> for one coming soon. Only the link gets
+     hover feedback, so a coming-soon card reads as inert. */
+  .rail-card-body {
     display: block;
     position: relative;
     text-decoration: none;
@@ -141,29 +140,35 @@ const n = caseStudies.length;
     background: var(--color-accent-light);
     box-shadow: var(--shadow-gold);
   }
+  /* no image yet: a quiet empty slot instead of a gold-washed frame */
+  .rail-card-media:not(:has(img)) {
+    background: var(--color-card);
+    border: var(--border);
+    box-shadow: none;
+  }
+  /* coming soon: the frame steps back. On the media, not the card, so it
+     doesn't fight the card's own opacity and blur poses. */
+  .rail-card[data-soon] .rail-card-media {
+    opacity: var(--opacity-soon);
+    filter: saturate(var(--saturate-soon));
+  }
   .rail-card-img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     transition: transform var(--dur-card) var(--ease-out-quiet);
   }
-  .rail-card-link:hover .rail-card-img { transform: scale(1.02); }
+  .rail-card-body[href]:hover .rail-card-img { transform: scale(1.02); }
 
-  /* The title block hangs below the media rather than sitting inside the card
-     box, so the card's box IS the image — which is what the side slots scale
-     and centre against. */
+  /* The title hangs below the media rather than sitting inside the card box,
+     so the card's box IS the image, which is what the side slots scale and
+     centre against. Title left, coming-soon label right, on one baseline. */
   .rail-card-block {
     position: absolute;
     top: 100%;
     left: 0;
     right: 0;
     margin-top: var(--space-lg);
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-sm);
-  }
-  /* title left, skills right, on one baseline */
-  .rail-card-headline {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
@@ -176,26 +181,11 @@ const n = caseStudies.length;
     font-size: var(--text-lg);
     color: var(--color-heading);
     line-height: var(--leading-tight);
-    transition: opacity 0.15s ease;
+    transition: opacity var(--dur-text) var(--ease-out-quiet);
   }
-  .rail-card-link:hover .rail-card-title { opacity: 0.72; }
-  .rail-card-desc {
-    font-family: var(--font-body);
-    font-size: var(--text-sm);
-    color: var(--color-muted);
-    line-height: var(--leading-base);
-    max-width: var(--width-content);
-  }
-  /* quiet uppercase labels rather than bordered chips */
-  .rail-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-md);
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-  .rail-tag {
+  .rail-card-body[href]:hover .rail-card-title { opacity: 0.72; }
+  /* a quiet uppercase label rather than a bordered chip */
+  .rail-card-soon {
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     color: var(--color-muted);
@@ -205,30 +195,22 @@ const n = caseStudies.length;
 
   /* ── The card arrives, then it speaks ───────────────────────────────────
      Time-based (not scroll-based) so the delay after settling is real time. */
-  .rail-card-title,
-  .rail-card-desc,
-  .rail-tag {
+  .rail-card-block {
     opacity: 0;
     transform: translateY(var(--space-sm));
     transition:
       opacity   var(--dur-text) var(--ease-out-quiet),
       transform var(--dur-text) var(--ease-out-quiet);
   }
-  .rail-card[data-state='current'] .rail-card-title,
-  .rail-card[data-state='current'] .rail-card-desc,
-  .rail-card[data-state='current'] .rail-tag {
+  .rail-card[data-state='current'] .rail-card-block {
     opacity: 1;
     transform: none;
-  }
-  .rail-card[data-state='current'] .rail-card-title { transition-delay: var(--delay-text); }
-  .rail-card[data-state='current'] .rail-card-desc  { transition-delay: calc(var(--delay-text) + var(--stagger-tag)); }
-  .rail-card[data-state='current'] .rail-tag {
-    transition-delay: calc(var(--delay-text) + var(--stagger-tag) * (var(--t) + 2));
+    transition-delay: var(--delay-text);
   }
 
   /* ── Movement: scroll-driven where supported ────────────────────────────
      One keyframe set for every card. A card's range is shifted by its index so
-     that its midpoint — the in-place pose — lands on its own slot of the track.
+     that its midpoint (the in-place pose) lands on its own slot of the track.
      `both` fill holds the end poses outside the range. */
   @keyframes rail-slot {
     0% {
@@ -257,7 +239,7 @@ const n = caseStudies.length;
       animation-timing-function: var(--ease-out-quiet);
       animation-timeline: --rail;
       /* `contain` spans exactly the pinned stretch. Each card owns two slots:
-         one entering, one leaving — so the first and last reach past the ends. */
+         one entering, one leaving, so the first and last reach past the ends. */
       animation-range:
         contain calc((var(--i) - 1) / (var(--n) - 1) * 100%)
         contain calc((var(--i) + 1) / (var(--n) - 1) * 100%);
@@ -285,7 +267,7 @@ const n = caseStudies.length;
     filter: blur(var(--blur-recede));
   }
 
-  /* Only the fallback animates between the poses — with a scroll timeline the
+  /* Only the fallback animates between the poses: with a scroll timeline the
      animation supplies every frame and a transition would fight it. */
   @supports not (animation-timeline: view()) {
     .rail-card {
@@ -313,7 +295,7 @@ const n = caseStudies.length;
     padding: var(--space-xs);
     cursor: pointer;
   }
-  /* a short bar that lengthens when active — no borders, no arrows */
+  /* a short bar that lengthens when active: no borders, no arrows */
   .rail-dot-mark {
     display: block;
     width: var(--space-xl);
@@ -345,7 +327,7 @@ const n = caseStudies.length;
       gap: var(--space-lg);
       overflow-x: auto;
       scroll-snap-type: x mandatory;
-      /* start-aligned so the last card is actually reachable — centre alignment
+      /* start-aligned so the last card is actually reachable: centre alignment
          leaves it short of a snap point at the end of the scroller */
       scroll-padding-inline: var(--space-lg);
       padding-inline: var(--space-lg);
@@ -353,7 +335,7 @@ const n = caseStudies.length;
       scrollbar-width: none;
     }
     .rail-cards::-webkit-scrollbar { display: none; }
-    /* [data-state] so this beats the pose rules — the carousel does the moving now */
+    /* [data-state] so this beats the pose rules: the carousel does the moving now */
     .rail-card[data-state] {
       position: static;
       flex: 0 0 86%;
@@ -365,12 +347,11 @@ const n = caseStudies.length;
       visibility: visible;
       width: auto;
     }
-    .rail-card-link { display: flex; flex-direction: column; gap: var(--space-lg); }
-    .rail-card-block { position: static; margin-top: 0; }
-    /* copy is always readable in the carousel — nothing is waiting to arrive */
-    .rail-card .rail-card-title,
-    .rail-card .rail-card-desc,
-    .rail-card .rail-tag {
+    .rail-card-body { display: flex; flex-direction: column; gap: var(--space-lg); }
+    /* static, and always readable in the carousel: nothing is waiting to arrive */
+    .rail-card .rail-card-block {
+      position: static;
+      margin-top: 0;
       opacity: 1;
       transform: none;
       transition-delay: 0s;
@@ -403,11 +384,10 @@ const n = caseStudies.length;
       width: auto;
       transition: none;
     }
-    .rail-card-link { display: flex; flex-direction: column; gap: var(--space-lg); }
-    .rail-card-block { position: static; margin-top: 0; }
-    .rail-card .rail-card-title,
-    .rail-card .rail-card-desc,
-    .rail-card .rail-tag {
+    .rail-card-body { display: flex; flex-direction: column; gap: var(--space-lg); }
+    .rail-card .rail-card-block {
+      position: static;
+      margin-top: 0;
       opacity: 1;
       transform: none;
       transition: none;
@@ -443,11 +423,11 @@ const n = caseStudies.length;
     };
 
     // Scroll to a card. Horizontal in carousel mode, vertical through the pinned
-    // track otherwise — either way it's one smooth scroll, not a snap handler.
+    // track otherwise: either way it's one smooth scroll, not a snap handler.
     const goTo = (i: number) => {
       const target = Math.max(0, Math.min(cards.length - 1, i));
       if (mobile.matches || reduced.matches) {
-        // scroll the carousel itself — scrollIntoView would also jump the page
+        // scroll the carousel itself: scrollIntoView would also jump the page
         const pad = parseFloat(getComputedStyle(list).scrollPaddingInlineStart) || 0;
         const left = list.scrollLeft
           + cards[target].getBoundingClientRect().left
@@ -456,7 +436,7 @@ const n = caseStudies.length;
         list.scrollTo({ left, behavior: 'smooth' });
       } else {
         // the pinned stretch is the track minus one viewport, and card i sits in
-        // place at i/(n-1) along it — same split the animation ranges use
+        // place at i/(n-1) along it: same split the animation ranges use
         const span = track.offsetHeight - window.innerHeight;
         const step = cards.length > 1 ? span / (cards.length - 1) : 0;
         window.scrollTo({ top: track.offsetTop + target * step, behavior: 'smooth' });
@@ -470,8 +450,9 @@ const n = caseStudies.length;
 
     if (reduced.matches) return;  // plain stack: native focus scrolling is fine
 
-    // Tabbing into a card brings it into view — transforms put it off-screen, so
-    // the browser's own focus scrolling can't do this for us.
+    // Tabbing into a card brings it into view: transforms put it off-screen, so
+    // the browser's own focus scrolling can't do this for us. Only linked cards
+    // take focus; a coming-soon card is reached through its indicator.
     cards.forEach((card, i) => {
       card.addEventListener('focusin', () => { if (i !== active) goTo(i); });
     });
@@ -491,7 +472,7 @@ const n = caseStudies.length;
         },
         carousel
           ? { root: list, threshold: 0.6 }
-          // a band across the middle, not a zero-height line — a collapsed root
+          // a band across the middle, not a zero-height line: a collapsed root
           // never reports a non-empty intersection
           : { rootMargin: '-45% 0px -45% 0px', threshold: 0 },
       );

@@ -17,42 +17,99 @@ featured: true
 frame_shape: circle
 cover_image: /lab/tomodachi.png
 mux_video_id: xdu9rPbCOjatVb0201gxzmoIX3upeMtUA8KARhAGM6kgM
+challenge: Design a prototype solving a problem related to Macro-HCI.
+with: "COSI 125: Human Computer Interaction"
+role: Design Engineer (end-to-end)
+timeline: Spring 2026
+team:
+  - Gianna Saludo (protoype)
+  - Mai Al Shaban (presentation)
 ---
 
-## Problem
+<!-- How to fill this page:
+     Media slots: put an image inside the empty figure, e.g.
+       <figure class="cs-media" data-label="sketches"><img src="/lab/tomodachi-sketches.png" alt="sketches"></figure>
+     Part links: set href to the amazon url and data-img to the part's image path, e.g.
+       <a class="cs-part" href="https://www.amazon.com/..." data-img="/lab/round-display.png">round display</a> -->
 
-Most wellness apps fail. Not because they're poorly designed, but because they use the wrong motivational model — surveillance, streaks, and shame. They extract attention rather than serve wellbeing. You miss a day and a red broken streak tells you you've failed. You keep a streak and feel anxious about losing it.
+<div class="cs-split">
+<div>
 
-The behavior change literature (BJ Fogg, in particular) points to something different: small, immediate feedback loops tied to things you already care about work far better than punishment-based systems.
+## Summary
 
-## Process
+<figure class="cs-media" data-label="interactive app"></figure>
 
-The starting hypothesis was the **Tomodachi Effect**: people form genuine emotional bonds with digital creatures, and those bonds change their behavior. If you care about the pet, you care for yourself.
+</div>
+<div>
 
-Built as a macro-HCI prototype proposal with Mai Al Shaaban for Professor Dylan Cashman's HCI course at Brandeis.
+## Concept
 
-Hardware constraints shaped every design decision. The 240×240 circular display is beautiful but small — pixel art was the right visual language. Magnetic attachment meant no permanent commitment; you clip it somewhere that makes sense for your day.
+### Sketch
 
-The hardest lesson: unchecked assumptions cost hours. I assumed the GC9A01 display had capacitive touch built in. It didn't — the touch layer is a separate component (CST816S) that needed its own integration. Building hardware means working backwards from what the system is *actually* doing, with no error logs to guide you.
+I started out by sketching what the device would look like and i went through a bunch of iterations and CAD-ed two of my top choices.
 
-The enclosure went through three printed iterations — each one tighter against the manufacturer STEP files, each one smaller than the last.
+<figure class="cs-media" data-label="sketches"></figure>
 
-## Solution
+### What do I need?
 
-A clip-on wearable device featuring:
+I wanted it to be a circular keychain, so that I could carry it around. I also know I needed a microcontroller that had a type-C port. I want it to be as energy efficient as possible with a tiny battery. With all those information, I built my list:
 
-- **Circular 240×240 color touchscreen** — pixel-art pet and environment rendered via `TFT_eSPI`
-- **Touch input** — tap and swipe gestures via the CST816S gesture recognizer
-- **Haptic feedback** — ambient vibration reminders via the Adafruit DRV2605, without pulling you out of what you're doing
-- **Magnetic attachment** — N52 neodymium disc magnets snap to a clip, wristband, or bag strap
-- **500mAh LiPo + USB-C charging** — all-day battery, no proprietary cables
-- **3D-printed PLA enclosure** — ~35–40mm diameter, modeled in Blender
+- <a class="cs-part" href="" data-img="">round display</a>
+- <a class="cs-part" href="" data-img="">microcontroller</a>
+- <a class="cs-part" href="" data-img="">battery</a>
+- <a class="cs-part" href="" data-img="">case</a>
 
-**The Tomodachi Effect in practice:** when you log self-care (sleep, water, focus breaks), the pet thrives — its environment brightens, it moves differently. When you skip it, the pet shows it. No streaks, no shame. Just a creature you care about.
+</div>
+</div>
 
-## Links
+---
 
-- **Demo:** *(add video demo or showcase link)*
-- **GitHub:** *(available upon request)*
+## Design
 
-<!-- VISUALS: Device photos, UI design mockups, pixel-art character designs — available in Downloads folder -->
+It’s a prototype, so I wanted it to be really simple. After my parts came in, it was time to figure out how to build the device.
+
+### Circuit Design
+
+With the help of previous physics knowledge, i sketched the diagram and tried it out on my breadboard. I spent an hour or two, trying to figure this out. Once I finally got it working, I connected it all!
+
+<figure class="cs-media" data-label="picture"></figure>
+
+### Visual Design
+
+I was inspired by the Tamagotchi and its resurgence on the web, and I wanted to make something close to that so I thought of the word “*<span class="cs-tip" data-tip="友達 (ともだち) · friend">Tomodachi</span>.*” I also liked the show *Smiling Friends*, so I thought it would be a great idea to mesh the two and have the tomodachi switch faces when the user interacts (or doesn’t!) with the app. So, I animated four sprites with different colors and emotions for the display.
+
+<figure class="cs-media" data-label="sprites"></figure>
+
+### App Design
+
+<figure class="cs-media" data-label="figma board"></figure>
+
+### PCB Design
+
+This was the version I submitted for the project, however, I wanted to take it to the next level and design my own PCB, so I decided to learn KiCAD for this. After many youtube videos and articles, I designed my first PCB!
+
+<figure class="cs-media" data-label="schematic"></figure>
+
+### Case Design
+
+So, it was time to piece everything together and 3d print the case. This case is going to be a simple one, with a type-c hole. At first, I wanted it to look like the house from Smiling Friends, but I realized it was too bulky and I would not want to carry it like that. So, it took me five revisions until I was satisfied with how it looked like.
+
+<figure class="cs-media" data-label="revisions"></figure>
+
+And after I got the custom pcb, I needed to refine the case design again.
+
+<figure class="cs-media" data-label="revisions (custom pcb)"></figure>
+
+---
+
+## Challenges
+
+1. The colors were off at first and I was stuck for a while, and I implemented a fix in the arduino and it worked.
+2. Designing a case and working with the components was a challenge! Greg, my mentor and Head of the MakerLab, helped me out a lot and answered my questions.
+3. I ordered the wrong display without the touch layer. However, upon evaluation, having a companion app was better since the screen was small and I wanted it to be a keychain.
+
+---
+
+## Conclusion
+
+Tomodachi was a fun project that taught me how to design a product end to end. I’d definitely make other tomodachi’s in the future. For instance, a Claude and Codex tomodachi signals me whenever my agents needed input or permissions.
