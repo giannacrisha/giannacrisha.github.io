@@ -1,16 +1,8 @@
 ---
 // src/components/Footer.astro
 import Icon from './Icon.astro';
+import { navLinks } from '../config/design';
 const year = new Date().getFullYear();
-const sitemap = [
-  { label: 'the garden', href: '/'         },
-  { label: 'lab',        href: '/lab'      },
-  { label: 'archives',   href: '/archives' },
-  { label: 'gallery',    href: '/gallery'  },
-  { label: 'library',    href: '/library'  },
-  { label: 'now',        href: '/now'      },
-  { label: 'about',      href: '/about'    },
-];
 
 // Replace with your Buttondown username once you've signed up at buttondown.com
 const BUTTONDOWN_USERNAME = 'gianna_crisha';
@@ -74,7 +66,7 @@ const BUTTONDOWN_USERNAME = 'gianna_crisha';
 
       <!-- sitemap -->
       <nav class="footer-sitemap" aria-label="Sitemap">
-        {sitemap.map(l => (
+        {navLinks.map(l => (
           <a href={l.href} class="sitemap-link">{l.label}</a>
         ))}
       </nav>

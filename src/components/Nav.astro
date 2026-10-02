@@ -3,8 +3,10 @@
 import ThemeToggle from './ThemeToggle.astro';
 import Icon from './Icon.astro';
 import LogoCanvas from './LogoCanvas.astro';
+import { navLinks } from '../config/design';
 const current = Astro.url.pathname;
-const labActive = ['/garden', '/lab', '/archives', '/gallery', '/library'].some(p => current.startsWith(p));
+const isActive = (l: (typeof navLinks)[number]) =>
+  ('match' in l ? l.match : [l.href]).some(p => current.startsWith(p));
 ---
 <nav class="site-nav">
   <div class="nav-inner">
@@ -12,18 +14,9 @@ const labActive = ['/garden', '/lab', '/archives', '/gallery', '/library'].some(
 
     <!-- desktop -->
     <ul class="nav-links">
-      <li>
-        <a href="/garden" class:list={['nav-link', { active: labActive }]}>the lab</a>
-      </li>
-      <li>
-        <a href="/community" class:list={['nav-link', { active: current.startsWith('/community') }]}>community</a>
-      </li>
-      <li>
-        <a href="/about" class:list={['nav-link', { active: current.startsWith('/about') }]}>about</a>
-      </li>
-      <li>
-        <a href="/now" class:list={['nav-link', { active: current.startsWith('/now') }]}>now</a>
-      </li>
+      {navLinks.map(l => (
+        <li><a href={l.href} class:list={['nav-link', { active: isActive(l) }]}>{l.label}</a></li>
+      ))}
     </ul>
 
     <!-- search trigger -->
@@ -49,10 +42,7 @@ const labActive = ['/garden', '/lab', '/archives', '/gallery', '/library'].some(
     <button class="mobile-close" id="nav-close" aria-label="close menu">
       <Icon name="close" size={20} />
     </button>
-    <a href="/garden" class="mobile-link">the lab</a>
-    <a href="/community" class="mobile-link">community</a>
-    <a href="/about" class="mobile-link">about</a>
-    <a href="/now" class="mobile-link">now</a>
+    {navLinks.map(l => <a href={l.href} class="mobile-link">{l.label}</a>)}
     <div class="mobile-theme-wrap">
       <ThemeToggle id="theme-toggle-nav" />
     </div>

@@ -1,6 +1,6 @@
 // No emoji. All visual indicators use SVG. See src/components/icons/
 // src/config/design.ts
-// Non-CSS design data only (fonts for <link>, taxonomy, site meta).
+// Non-CSS design data only (fonts for <link>, taxonomy, site meta, nav links).
 // Visual tokens live in src/styles/tokens.css — do not duplicate them here.
 
 export const fonts = {
@@ -75,3 +75,12 @@ export const site = {
   ],
   rssTitle:    "gi's garden — archives",
 } as const;
+
+// Shared by Nav (desktop + mobile) and Footer. `match` lists the path
+// prefixes that mark a link active; it defaults to the link's own href.
+export const navLinks = [
+  { label: 'the lab',   href: '/garden', match: ['/garden', '/lab', '/archives', '/gallery', '/library'] },
+  { label: 'community', href: '/community' },
+  { label: 'about',     href: '/about'     },
+  { label: 'now',       href: '/now'       },
+] as const;
