@@ -37,7 +37,7 @@ slightly medieval; a garden, not a dashboard.
 - Type: `--text-{xs,sm,base,md,lg,xl,xxl,section,hero}` (fluid, except `--text-base` = fixed 14px for tiny UI labels). Leading: `--leading-{tight,base,loose,poem}`.
 - Space: `--space-{xs,sm,md,lg,xl,xxl,section}` → fluid steps.
 - Layout: `--width-content` 720, `--width-site` 1100, `--width-preview` (hover cards, tooltips), `--ratio-media` (media slots), `--nav-height` 56, `--radius-{card,lg,pill,input}`, `--border`, `--rule-thickness` (indicator bars, underlines).
-- Motion: `--ease-out-quiet` (the only easing: decelerating, no overshoot), `--dur-{card,text}`, `--delay-text`, `--scale-recede`, `--opacity-recede`, `--blur-recede`, `--pace-card` (scroll distance per card in a pinned sequence), `--opacity-soon` (how far a coming-soon link steps back).
+- Motion: `--ease-out-quiet` (the only easing: decelerating, no overshoot), `--dur-{card,text}`, `--delay-text`, `--stagger-tag` (offset between a card's title, subtitle and each tag as they arrive), `--scale-recede`, `--opacity-recede`, `--blur-recede`, `--pace-card` (scroll distance per card in a pinned sequence), `--opacity-soon` (how far a coming-soon link steps back).
 
 ## Growth taxonomy (`src/config/design.ts`)
 `dust` → scattered, not yet gathered · `spark` → taking shape · `star` → complete, fully itself.

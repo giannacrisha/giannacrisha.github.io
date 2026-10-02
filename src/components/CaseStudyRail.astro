@@ -37,6 +37,12 @@ const n = caseStudies.length;
                 </div>
                 <div class="rail-card-block">
                   <h3 class="rail-card-title">{study.title}</h3>
+                  {study.subtitle && <p class="rail-card-subtitle">{study.subtitle}</p>}
+                  {study.tags && (
+                    <ul class="rail-tags">
+                      {study.tags.map((tag, t) => <li class="pill rail-tag" style={`--t: ${t}`}>{tag}</li>)}
+                    </ul>
+                  )}
                 </div>
               </Body>
             </li>
@@ -160,6 +166,9 @@ const n = caseStudies.length;
     left: 0;
     right: 0;
     margin-top: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
   }
   .rail-card-title {
     font-family: var(--font-serif);
@@ -170,6 +179,21 @@ const n = caseStudies.length;
     transition: opacity var(--dur-text) var(--ease-out-quiet);
   }
   .rail-card-body[href]:hover .rail-card-title { opacity: 0.72; }
+  .rail-card-subtitle {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+    line-height: var(--leading-base);
+  }
+  /* the global .pill supplies the look; this is only the row */
+  .rail-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
   /* a quiet uppercase label centred over the placeholder, rather than a
      bordered chip. Page color on --color-heading clears 4.5:1 in both themes. */
   .rail-card-soon {
@@ -185,18 +209,25 @@ const n = caseStudies.length;
   }
 
   /* ── The card arrives, then it speaks ───────────────────────────────────
-     Time-based (not scroll-based) so the delay after settling is real time. */
-  .rail-card-block {
+     Time-based (not scroll-based) so the delay after settling is real time.
+     Title, then subtitle, then each tag in turn, --stagger-tag apart. */
+  .rail-card-title,
+  .rail-card-subtitle,
+  .rail-tag {
     opacity: 0;
     transform: translateY(var(--space-sm));
     transition:
       opacity   var(--dur-text) var(--ease-out-quiet),
       transform var(--dur-text) var(--ease-out-quiet);
   }
-  .rail-card[data-state='current'] .rail-card-block {
+  .rail-card[data-state='current'] :is(.rail-card-title, .rail-card-subtitle, .rail-tag) {
     opacity: 1;
     transform: none;
-    transition-delay: var(--delay-text);
+  }
+  .rail-card[data-state='current'] .rail-card-title    { transition-delay: var(--delay-text); }
+  .rail-card[data-state='current'] .rail-card-subtitle { transition-delay: calc(var(--delay-text) + var(--stagger-tag)); }
+  .rail-card[data-state='current'] .rail-tag {
+    transition-delay: calc(var(--delay-text) + var(--stagger-tag) * (var(--t) + 2));
   }
 
   /* ── Movement: scroll-driven where supported ────────────────────────────
@@ -340,9 +371,8 @@ const n = caseStudies.length;
     }
     .rail-card-body { display: flex; flex-direction: column; gap: var(--space-lg); }
     /* static, and always readable in the carousel: nothing is waiting to arrive */
-    .rail-card .rail-card-block {
-      position: static;
-      margin-top: 0;
+    .rail-card-block { position: static; margin-top: 0; }
+    .rail-card :is(.rail-card-title, .rail-card-subtitle, .rail-tag) {
       opacity: 1;
       transform: none;
       transition-delay: 0s;
@@ -376,9 +406,8 @@ const n = caseStudies.length;
       transition: none;
     }
     .rail-card-body { display: flex; flex-direction: column; gap: var(--space-lg); }
-    .rail-card .rail-card-block {
-      position: static;
-      margin-top: 0;
+    .rail-card-block { position: static; margin-top: 0; }
+    .rail-card :is(.rail-card-title, .rail-card-subtitle, .rail-tag) {
       opacity: 1;
       transform: none;
       transition: none;
